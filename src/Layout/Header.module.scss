@@ -1,0 +1,94 @@
+.header {
+    background-color: #fff;
+    padding: 0 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    width: 100vw;
+    z-index: 101;
+    line-height: 0px;
+  }
+  
+  .header-row {
+    height: 100%;
+  }
+  
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-img {
+    height: 46px;
+    width: 46px;
+    transition: filter 0.5s ease; /* Thêm transition cho hiệu ứng sáng ảnh */
+    
+    &:hover {
+      cursor: pointer;
+      filter: brightness(1.2); /* Làm ảnh sáng hơn khi hover */
+    }
+  }
+  
+  
+  .search-input {
+    border-radius: 20px;
+    width: 300px;
+    height: 40px;
+    background: #f0f2f5;
+    padding-left: 14px;
+  }
+  
+  .nav-items-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .icon-wrapper {
+    background-color: #e2e5e9;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 46px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .icon-selected {
+    background-color: #E8F0FE;
+  }
+  
+  .avatar-wrapper {
+    cursor: pointer;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    overflow: hidden;
+    &:hover {
+      filter: brightness(0.9);
+    }
+    &:active {
+      filter: brightness(0.7);
+    }
+  }
+  
+  .avatar {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }

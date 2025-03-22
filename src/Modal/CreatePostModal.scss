@@ -1,0 +1,253 @@
+.modal-title {
+  font-weight: bold;
+  align-self: center;
+}
+
+.modal-footer {
+  display: flex;
+  width: 100%;
+}
+
+.post-button {
+  width: 100%;
+  height: 36px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.user-details {
+  margin-left: 10px;
+}
+
+.user-name {
+  font-weight: bold;
+}
+
+.friends-button {
+  background: #f0f0f0;
+  border: none;
+}
+
+.post-textarea {
+  margin-bottom: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+
+.ant-upload.ant-upload-select {
+  width: -webkit-fill-available;
+  cursor: pointer;
+}
+
+.upload-area {
+  border: 1px dashed #d9d9d9;
+  padding: 16px;
+  text-align: center;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  position: relative;
+  width: 50vh;
+}
+
+.upload-hint {
+  color: #8c8c8c;
+  margin-top: 8px;
+}
+
+.card-container {
+  margin-top: 16px;
+  padding: 0px;
+}
+
+.add-post-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-post-text {
+  font-size: 16px;
+  font-weight: normal;
+
+  &:hover {
+    text-decoration: underline;
+    background-color: #0084ff !important;
+    color: #f0f0f0 !important;
+  }
+}
+
+.icon-container {
+  display: flex;
+  gap: 4px;
+}
+
+.icon {
+  font-size: 24px;
+  border-radius: 100px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-textarea-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex-direction: column;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fff;
+  gap: 16px;
+  transition: all 0.3s ease;
+  /* Hiệu ứng chuyển đổi mượt mà */
+}
+
+.custom-textarea-container.centered {
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  /* Chiều cao toàn modal */
+  width: 100%;
+  /* Chiều rộng toàn modal */
+  border-radius: 0;
+  /* Loại bỏ bo góc khi phóng to */
+  padding: 32px;
+}
+
+.custom-textarea {
+  border: none;
+  outline: none;
+  width: 100%;
+  resize: none;
+  font-size: 24px;
+  /* Tăng kích thước font */
+  text-align: center;
+  /* Canh giữa văn bản */
+  font-weight: bold;
+  background: transparent;
+  color: inherit;
+  /* Màu sắc kế thừa từ container */
+  transition: font-size 0.3s ease;
+  /* Hiệu ứng phóng to chữ */
+}
+
+.ant-input.css-dev-only-do-not-override-49qm.ant-input-outlined.custom-textarea {
+  background: transparent;
+  border: 0px;
+}
+
+
+.custom-textarea::placeholder {
+  color: #8c8c8c;
+}
+
+.emoji-icon {
+  position: absolute;
+  right: 12px;
+  color: #8c8c8c;
+  font-size: 20px;
+  cursor: pointer;
+  top: 20px;
+}
+
+.scrollable-modal .modal-content {
+  max-height: 650px;
+  /* Đặt chiều cao tối đa cho phần nội dung */
+  overflow-y: auto;
+  /* Bật cuộn dọc nếu nội dung quá dài */
+  padding: 16px;
+  /* Thêm khoảng cách cho nội dung */
+}
+
+/* Giữ cho modal không ảnh hưởng đến trang */
+.ant-modal-body {
+  overflow: hidden;
+  /* Đảm bảo cuộn chỉ áp dụng bên trong modal */
+}
+
+.close-upload-button {
+  position: absolute;
+  top: 8px;
+  /* Vị trí gần góc trên bên phải */
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #8c8c8c;
+}
+
+.close-upload-button:hover {
+  color: #000;
+}
+
+.themes-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.theme-button {
+  border: none;
+  color: white;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-button.active {
+  border: 2px solid #000;
+  transform: scale(1.1);
+}
+
+.theme-button:hover {
+  filter: brightness(1.2);
+  transform: scale(1.05);
+}
+
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* Bao phủ toàn modal */
+  text-align: center;
+}
+
+.custom-textarea.ant-input:focus {
+  border: none !important;
+  /* Loại bỏ border */
+  box-shadow: none !important;
+  /* Loại bỏ shadow */
+  outline: none !important;
+  /* Loại bỏ outline mặc định */
+}
+
+.selected-gif-container {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.selected-gif {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.selected-gif:hover {
+  transform: scale(1.05);
+}

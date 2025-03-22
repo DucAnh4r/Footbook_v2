@@ -1,0 +1,132 @@
+.container {
+    width: 100vw;
+    height: 100%;
+    background-color: black;
+    position: relative;
+}
+
+.round-button-container {
+    background: rgba(0, 0, 0, 0.6); /* Màu đen, độ trong suốt 80% */
+    position: absolute;
+    top: 80px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    &:hover {
+      filter: brightness(0.8);
+    }
+  }
+  
+  .cancel-button-container{
+    width: 44px;
+    height: 44px;
+    left: 20px;
+    font-size: 26px;
+    font-weight: 400;
+    align-items: center;
+    justify-content: center;
+    font-style: unset;
+    color: white;
+  }
+
+  .image-container {
+    width: 370px;
+    height: 657px;
+    background: beige;
+    position: absolute;
+    left: calc((100vw - 370px) / 2);
+    top: 72px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .image {
+    width: auto;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    position: absolute;
+    top: 82px;
+    left: calc((100vw - 370px) / 2 + 16px);
+  }
+  
+  .avatar {
+    margin-right: 8px;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); 
+
+    &:hover {
+      cursor: pointer;
+      filter: brightness(0.9);
+    }
+  }
+  
+  .userInfo {
+    display: flex;
+    flex-direction: column;
+    color: white;
+  }
+  
+  .userName {
+    font-weight: 700;
+    font-size: 16px;
+    transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+  
+    &:hover {
+      text-decoration: underline; /* Gạch chân khi hover */
+      cursor: pointer;
+    }
+  }
+  
+  .numberCount {
+    font-weight: 700;
+    font-size: 16px;
+    color: white;
+    margin-bottom: 8px;
+    position: absolute;
+    top: 82px;
+    right: calc((100vw - 370px) / 2 + 16px);
+
+  }
+
+  .time {
+    font-size: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+  
+    &:hover {
+      text-decoration: underline; /* Gạch chân khi hover */
+      cursor: pointer;
+    }
+  }
+
+  .left-button-container{
+    top: calc((100vh - 64px) / 2);
+    left: calc((100vw - 370px) / 2 + -84px);
+    background: #f8f8f8;
+    color: #3d3e41;
+  }
+
+  .right-button-container{
+    top: calc((100vh - 64px) / 2);
+    right: calc((100vw - 370px) / 2 + -84px);
+    background: #f8f8f8;
+    color: #3d3e41;
+  }

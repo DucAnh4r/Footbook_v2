@@ -1,0 +1,26 @@
+.avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50px;
+    max-width: 70px;
+    max-height: 70px;
+    margin-right: 10px;
+  }
+
+  .userName {
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .userItem {
+    display: flex !important;
+    align-items: center !important;
+    transition: all 0.2s ease;
+    padding: 10px;
+    border-radius: 10px;
+  &:hover {
+    background-color: #d1d1d1;
+    cursor: pointer;
+    transform: scale(1.01);
+  }
+  }

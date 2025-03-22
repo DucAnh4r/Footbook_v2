@@ -1,0 +1,106 @@
+
+.container{
+    width: 100%;
+    padding-bottom: 50px;    
+}
+
+// .friend-request-container{
+//     // background: beige;
+// }
+
+.flex-between {
+    display: flex;
+    justify-content: space-between; /* Căn đều hai phần tử, đưa một cái sang trái và một cái sang phải */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    padding: 8px 12px;
+}
+
+.content {
+    width: 100%;
+    height: 86px;
+    overflow: hidden;
+    border-radius: 8px;
+    position: relative; /* Cần để định vị phần tử after */
+
+    &:hover {
+        cursor: pointer;
+        background: #d8d8d8;
+    }
+
+    /* Sử dụng ::after để thêm đường kẻ ngang */
+    &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 0.8px; /* Độ dày của đường kẻ */
+        background-color: #ccc; /* Màu của đường kẻ */
+    }
+}
+
+
+.image-container{
+    width: 60px;
+    height: 60px;
+    border-radius: 40px;
+    overflow: hidden;
+    margin-left: 16px;
+    margin-top: 10px;
+}
+
+.image{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.button{
+    width: 124px;
+    height: 36px;
+    border-radius: 7px;
+    border: none;
+    background: #0866FF;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+
+    &:hover{
+        cursor: pointer;
+        background: #357cf0;
+    }
+}
+
+.delete-button{
+    background: #E2E5E9;
+    color: rgb(25, 24, 24);
+
+    &:hover{
+        background: #d2d7dd;
+    }
+}
+
+.icon{
+    font-size: 20px;
+    padding: 0 4px;
+    color: #65686c;
+    border-radius: 30px;
+    padding: 8px;
+
+    &:hover{
+        cursor: pointer;
+        background: #d8d8d8;
+        
+    }
+}
+
+.friend-list-container{
+    padding-bottom: 40px;
+}
+
+.friend-container{
+    border-radius: 10px;
+    &:hover{
+        background: #d8d8d8;
+    }
+}

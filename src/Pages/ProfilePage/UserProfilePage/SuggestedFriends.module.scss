@@ -1,0 +1,101 @@
+.suggestedFriends {
+  width: 100%;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px auto;
+  border: 1px solid #ddd;
+  h2 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+  }
+}
+
+
+.slick-slide {
+  margin: 10px !important; /* Thêm margin với !important để đảm bảo nó không bị ghi đè */
+}
+
+.friendCard {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  text-align: center;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.friendImage {
+  position: relative;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.closeButton {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: rgba(169, 169, 169, 0.5); /* Màu xám với độ trong suốt (50%) */
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 4px;
+  font-weight: bold;
+  color: whitesmoke;
+
+  &:hover {
+    filter: brightness(0.8);
+  }
+}
+
+.friendInfo {
+  padding: 10px;
+
+  h3 {
+    font-size: 16px;
+    margin: 5px 0;
+    color: #333;
+  }
+
+  p {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+  }
+}
+
+.addFriendButton {
+  margin-top: 6px;
+  min-width: 120px;
+  height: 36px;
+  border-radius: 7px;
+  border: none;
+  background: #ebf5ff;
+  color: #0064d1;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0 10px;
+  &:hover {
+    cursor: pointer;
+    filter: brightness(0.95);
+
+  }
+}
+
+
+
+

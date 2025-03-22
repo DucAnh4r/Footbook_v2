@@ -1,0 +1,198 @@
+:global {
+  .form-control:focus {
+    box-shadow: none;
+    z-index: 0;
+  }
+}
+
+.searchContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 0;
+  position: relative;
+  height: 46px;
+}
+
+.searchLabelContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.inputGroup {
+  width: 100%;
+  max-width: 1000px;
+  height: 100%;
+  border-radius: 50px;
+  position: relative;
+}
+
+.inputGroupText {
+  background-color: white;
+  padding: 0 15px;
+  font-size: 21px;
+}
+
+.formControl {
+  box-shadow: none;
+  font-size: 16px;
+  border-radius: 50px;
+  width: 300px;
+  height: 100%;
+  background-color: #f0f2f5;
+  padding-left: 14px;
+
+  
+}
+
+
+
+.clearButton {
+  padding-top: 15px;
+  padding-right: 6px;
+  cursor: pointer;
+  position: absolute;
+  right: 30px;
+  top: -4px;
+  z-index: 2;
+}
+
+.searchButton {
+  border: none;
+  background-color: #1976d2;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 2;
+  height: 40px;
+  border-radius: unset;
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  &:hover {
+    background-color: #ffbeba !important;
+  }
+  &:active {
+    background-color: #d6392b !important;
+  }
+}
+
+.resultsContainer {
+  width: calc(140%);
+  max-width: 300px;
+  position: absolute;
+  top: 109%;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  background-color: white;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  border-radius: 20px;
+  padding: 10px;
+  // display: none;
+}
+
+
+.productItem {
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  transition: background-color 0.3s ease, box-shadow 0.1s ease;
+
+  &:hover {
+    cursor: pointer;
+    background-color: #f0f0f0; // Nền xám nhẹ khi hover
+  }
+
+  &:active {
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2); // Hiệu ứng nháy khi click
+    background-color: #e0e0e0; // Thay đổi nhẹ màu nền khi click
+  }
+}
+
+.productImage {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  margin-right: 10px;
+  border-radius: 8px;
+}
+
+.moreButton {
+  display: block;
+  margin: 10px auto; // Căn giữa nút
+  color: #007bff; // Màu chữ
+  font-weight: 500; // Đậm vừa
+  text-decoration: none; // Xóa gạch chân
+  font-size: 16px; // Cỡ chữ
+  background: transparent;
+  border: none;
+  transition: color 0.3s ease;
+  padding: 0;
+
+  &:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.noResultsMessage {
+  text-align: center;
+  font-size: 16px;
+  color: #777;
+  padding: 10px;
+  font-style: italic;
+  margin-bottom: 0;
+}
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px; 
+  width: 100%; 
+  background-color: transparent; 
+  z-index: 1; 
+}
+
+.loadingContainer span {
+  margin-left: 10px;
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  &:hover {
+    background-color: #d1d1d1;
+    cursor: pointer;
+    transform: scale(1.05);
+  }
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+  min-width: 50px;
+  min-height: 50px;
+  max-width: 50px;
+  max-height: 50px;
+  margin-right: 10px;
+}

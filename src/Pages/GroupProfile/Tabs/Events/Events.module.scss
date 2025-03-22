@@ -1,0 +1,75 @@
+.eventsContainer {
+    width: 80%;
+    /* Chiều rộng cố định */
+    margin: 0 auto;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+
+        h2 {
+            font-size: 1rem;
+            font-weight: bold;
+            margin: 0;
+            color: #333;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 8px;
+
+            button {
+                font-size: 0.85rem;
+                padding: 8px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+                border: none;
+                font-weight: bold;
+
+                &.searchEvent {
+                    background-color: #f0f2f5;
+                    color: #333;
+
+                    &:hover {
+                        background-color: #e2e4e7;
+                    }
+                }
+
+                &.createEvent {
+                    background-color: #1877f2;
+                    color: #fff;
+
+                    &:hover {
+                        background-color: #165dc1;
+                    }
+                }
+            }
+        }
+    }
+
+    .content {
+        text-align: center;
+        color: #666;
+
+        .icon {
+            margin: 20px 0;
+
+            svg {
+                color: #888;
+            }
+        }
+
+        p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+    }
+}

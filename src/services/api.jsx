@@ -1,0 +1,1 @@
+export const domain = `http://localhost:8080`; // Replace with your API URL

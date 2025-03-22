@@ -1,0 +1,234 @@
+.postContainer {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+  padding: 16px;
+  padding-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.optionContainer {
+  width: 40px;
+  height: 40px;
+  /* background: blue; */
+  position: absolute;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  border-radius: 50px;
+  color: #65686c;
+
+  &:hover {
+    background-color: #f8f8f8;
+    cursor: pointer;
+  }
+}
+
+.avatar {
+  margin-right: 8px;
+  width: 40px;
+  height: 40px;
+
+  &:hover {
+    cursor: pointer;
+    filter: brightness(0.9);
+  }
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 700;
+  font-size: 16px;
+  transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+
+  &:hover {
+    text-decoration: underline; /* Gạch chân khi hover */
+    cursor: pointer;
+  }
+}
+
+.time {
+  font-size: 12px;
+  color: #65686c;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+
+  &:hover {
+    text-decoration: underline; /* Gạch chân khi hover */
+    cursor: pointer;
+  }
+}
+
+.content {
+  margin-top: 8px;
+  font-size: 16px;
+}
+
+.mainImage {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 8px;
+  cursor: pointer; // Thêm hiệu ứng trỏ chuột
+}
+
+.viewMoreButton{
+  min-width: 200px;
+  width: 100%;
+  height: 36px;
+  border-radius: 7px;
+  border: none;
+  background: #e6e6e6;
+  color: black;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0 10px;
+  margin-top: 4px;
+  &:hover{
+    cursor: pointer;
+    background: #f8f8f8;
+  }
+}
+
+.linkContainer {
+  text-align: center;
+  margin-top: 8px;
+  background-color: #f0f2f5;
+  padding: 4px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  overflow-wrap: break-word;
+}
+
+.reactionsContainer {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  border-bottom: 1px solid #f0f2f5;
+  padding-bottom: 8px;
+  font-size: 14px;
+  position: relative;
+}
+
+.reactions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon {
+  width: 28px; /* Chiều rộng ảnh */
+  height: auto; /* Giữ tỷ lệ gốc của ảnh */
+  border-radius: 8px; /* Nếu cần bo góc */
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.icon-1 {
+  position: absolute; /* Đặt vị trí tuyệt đối cho ảnh bên trái */
+  left: 0; /* Đặt ảnh bên trái ở vị trí bắt đầu */
+  z-index: 5; /* Đảm bảo ảnh này luôn ở trên ảnh bên phải */
+}
+
+.icon-2 {
+  position: absolute; /* Đặt vị trí tuyệt đối cho ảnh bên phải */
+  left: 16px; /* Đẩy ảnh bên phải sang phải một chút */
+  z-index: 4; /* Đảm bảo ảnh bên phải nằm dưới ảnh bên trái */
+}
+.icon-3 {
+  position: absolute; /* Đặt vị trí tuyệt đối cho ảnh bên phải */
+  left: 32px; /* Đẩy ảnh bên phải sang phải một chút */
+  z-index: 3; /* Đảm bảo ảnh bên phải nằm dưới ảnh bên trái */
+}
+.icon-4 {
+  position: absolute; /* Đặt vị trí tuyệt đối cho ảnh bên phải */
+  left: 48px; /* Đẩy ảnh bên phải sang phải một chút */
+  z-index: 2; /* Đảm bảo ảnh bên phải nằm dưới ảnh bên trái */
+}
+.icon-5 {
+  width: 20px;
+  position: absolute;
+  left: 67px;
+  z-index: 1;
+}
+
+.reactionCount {
+  font-size: 14px;
+  color: #606770;
+  margin-left: 46px;
+  transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+
+  &:hover {
+    text-decoration: underline; /* Gạch chân khi hover */
+    cursor: pointer;
+  }
+}
+
+.rightFooter {
+  position: absolute;
+  right: 14px;
+}
+
+.shareCount,
+.cmtCount {
+  font-size: 14px;
+  color: #606770;
+
+  transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+
+  &:hover {
+    text-decoration: underline; /* Gạch chân khi hover */
+    cursor: pointer;
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.footer button {
+  font-size: 16px;
+  color: #65686c;
+  font-weight: 600;
+  min-width: 100px;
+  width: 30%;
+  height: 36px;
+  &:hover {
+    color: #65686c;
+  }
+}
+
+.linkText {
+  color: #000;
+  text-decoration: none;
+}
+
+

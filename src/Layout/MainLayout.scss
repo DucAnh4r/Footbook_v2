@@ -1,0 +1,58 @@
+// * {
+//     margin: 0;
+//     padding: 0;
+//     box-sizing: border-box;
+// }
+
+body{margin: 0;}
+
+.scroll-on-hover {
+    overflow: hidden !important;
+    transition: overflow 0.3s ease;
+}
+
+.scroll-on-hover:hover {
+    overflow-y: auto !important;
+}
+
+/* Tùy chọn thiết kế thanh cuộn (nếu cần) */
+.scroll-on-hover::-webkit-scrollbar,
+.page-content::-webkit-scrollbar {
+    width: 8px;/* src/components/CustomLayout.css */
+
+.scroll-on-hover {
+    position: relative; /* Đảm bảo các phần tử không bị đẩy đi khi thanh cuộn xuất hiện */
+    overflow: hidden; /* Ẩn thanh cuộn mặc định */
+    transition: overflow 0.3s ease; /* Hiệu ứng chuyển trạng thái khi hover */
+}
+
+.scroll-on-hover:hover {
+    overflow-y: auto; /* Hiển thị thanh cuộn khi hover */
+}
+
+.page-content {
+    overflow: hidden; /* Giữ thanh cuộn ẩn khi không hover */
+}
+
+/* Tùy chọn thiết kế thanh cuộn (nếu cần) */
+.scroll-on-hover::-webkit-scrollbar,
+.page-content::-webkit-scrollbar {
+    width: 8px; /* Chiều rộng thanh cuộn */
+}
+
+.scroll-on-hover::-webkit-scrollbar-thumb,
+.page-content::-webkit-scrollbar-thumb {
+    background-color: #ccc; /* Màu thanh cuộn */
+    border-radius: 4px; /* Bo góc thanh cuộn */
+}
+
+}
+
+.scroll-on-hover::-webkit-scrollbar-thumb,
+.page-content::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+
+  

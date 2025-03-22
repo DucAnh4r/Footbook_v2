@@ -1,0 +1,165 @@
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: visible !important;
+  /* Đảm bảo container chính không cắt Tooltip */
+  position: relative;
+  /* Giữ vị trí tương đối cho các phần tử con */
+
+  .chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 4px;
+    color: #fff;
+
+    .chat-header-left {
+      display: flex;
+      align-items: center;
+
+      .chat-title {
+        margin-left: 10px;
+        font-weight: bold;
+        font-size: 14px;
+      }
+    }
+
+    .chat-header-right button {
+      margin-left: 5px;
+    }
+  }
+
+  .chat-footer {
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+  }
+
+  .textarea-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 300px; // Độ rộng của container
+
+    .custom-textarea {
+      width: 100%;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      padding-right: 36px; // Để chừa khoảng trống cho icon
+    }
+
+    .textarea-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: #007bff;
+      cursor: pointer;
+    }
+  }
+}
+
+.chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column-reverse; // Nội dung được hiển thị từ dưới lên
+  gap: 8px; // Khoảng cách giữa các tin nhắn
+}
+
+.chat-message {
+  max-width: 70%; // Đảm bảo tin nhắn không vượt quá 70% chiều rộng khung chat
+  padding: 8px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  display: inline-block;
+}
+
+.ant-tooltip {
+  position: absolute;
+  z-index: 1050 !important;
+  /* Đảm bảo Tooltip luôn hiển thị phía trên */
+}
+
+.ant-popover-inner {
+  z-index: 1050 !important;
+  /* Đảm bảo Tooltip luôn hiển thị phía trên */
+}
+
+
+.chat-message.sender {
+  color: white;
+  align-self: flex-end; // Canh phải
+  text-align: left;
+
+  &.text-message {
+    background: #0051ff;
+    color: #ffffff;
+  }
+
+  &.gif-message {
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    padding: 0px;
+
+    img {
+      border-radius: 8px;
+    }
+  }
+
+  &.sticker-message {
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    padding: 0px;
+
+    img {
+      border-radius: 8px;
+    }
+  }
+
+  &.file-messagee {
+    padding: 0px;
+    display: flex;
+  }
+
+  &.audio-message {
+    padding: 0px;
+    display: flex;
+  }
+}
+
+.chat-message.receiver {
+  background-color: #f1f0f0; // Màu xám nhạt cho người nhận
+  color: #000;
+  align-self: flex-start; // Canh trái
+  text-align: left;
+}
+
+.chat-avatar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-avatar img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.chat-setting-container {
+  padding: 4px;
+
+  &:hover {
+    background: #f2f2f2; // Màu nền khi hover
+    border-radius: 10px;
+  }
+}

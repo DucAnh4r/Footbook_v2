@@ -1,0 +1,186 @@
+.container {
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    padding: 0 10%;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+}
+
+.logo-img {
+    width: 20vh;
+}
+
+.leftContent {
+    flex: 1;
+    text-align: left;
+}
+
+.leftTitle {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.leftSubtitle {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+}
+
+.rightContent {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    text-align: center;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.animate {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.subtitle {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.inputGroup {
+    text-align: left;
+}
+
+.inputGroup label {
+    font-size: 0.75rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.inputGroup input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.forgotPassword {
+    font-size: 0.75rem;
+    color: #007bff;
+    text-decoration: none;
+    float: right;
+    margin-top: 0.5rem;
+}
+
+.rememberMe {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.signInButton {
+    background-color: #007bff;
+    color: white;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.signInButton:hover {
+    background-color: #0056b3;
+}
+
+.register {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+}
+
+.register a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.social {
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+}
+
+.social span {
+    display: block;
+    margin-bottom: 1rem;
+    color: #666;
+}
+
+.icons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.icons a {
+    color: #555;
+    font-size: 1.25rem;
+    text-decoration: none;
+}
+
+.icons a:hover {
+    color: #007bff;
+}
+
+.toggle {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+}
+
+.toggle a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.toggle a:hover {
+    text-decoration: underline;
+}
+
+/* Animation cho khi chuyển đổi */
+.card.animate {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.card.animate+.card {
+    opacity: 1;
+    transform: translateY(0);
+}

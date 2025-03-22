@@ -1,0 +1,158 @@
+.commentModal {
+  .postContainer {
+    flex: 0 0 auto;
+    background-color: #fff;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    padding: 16px;
+    padding-bottom: 8px;
+    box-sizing: border-box;
+    max-height: 722px;
+    /* Đặt chiều cao tối đa */
+    overflow-y: auto;
+    /* Bật cuộn khi vượt quá chiều cao */
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .avatar {
+    margin-right: 8px;
+    width: 40px;
+    height: 40px;
+
+    &:hover {
+      cursor: pointer;
+      filter: brightness(0.9);
+    }
+  }
+
+  .userInfo {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .userName {
+    font-weight: 700;
+    font-size: 16px;
+    transition: text-decoration 0.2s ease;
+
+    &:hover {
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+
+  .time {
+    font-size: 12px;
+    color: #65686c;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    transition: text-decoration 0.2s ease;
+
+    &:hover {
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+
+  .content {
+    margin-top: 8px;
+    font-size: 16px;
+  }
+
+  .mainImage {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-top: 8px;
+    cursor: pointer;
+  }
+
+  .footer {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .footer button {
+    font-size: 16px;
+    color: #65686c;
+    font-weight: 600;
+    min-width: 100px;
+    width: 30%;
+    height: 36px;
+
+    &:hover {
+      color: #65686c;
+    }
+  }
+}
+
+.commentInput {
+  flex-shrink: 0;
+  display: flex;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f2f5;
+  background: white;
+}
+
+.commentsSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .commentsList {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+
+    .comment {
+      display: flex;
+      margin-bottom: 10px;
+
+      .commentAvatar {
+        margin-right: 10px;
+      }
+
+      .commentContent {
+        .commentUser {
+          font-weight: bold;
+        }
+
+        p {
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+.ant-modal-content {
+  max-height: 870px;
+  /* Đặt chiều cao tối đa cho modal */
+  display: flex;
+  flex-direction: column;
+  top: 50%;
+  margin-top: -50px;
+}
+
+.ant-modal-body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ant-modal-title {
+  text-align: center;
+}

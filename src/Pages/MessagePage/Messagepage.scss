@@ -1,0 +1,129 @@
+.messagesContainer {
+  width: 100%;
+  /* Sử dụng không có dấu nháy để tránh lỗi cú pháp */
+  margin: 0 auto;
+  display: flex;
+  /* Đảm bảo sử dụng flex để hỗ trợ align-self */
+  flex-direction: column;
+  /* Đặt chiều dọc cho các tin nhắn */
+  height: inherit;
+  /* Kế thừa chiều cao từ phần tử cha */
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+  /* Ẩn phần tử tràn ra ngoài */
+  gap: 2px;
+  scrollbar-width: none;
+  /* Cho Firefox */
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  /* Nội dung và thời gian theo chiều dọc */
+  max-width: 70%;
+  /* Giới hạn chiều rộng tin nhắn */
+  padding: 10px;
+  word-wrap: break-word;
+  /* Ngắt từ nếu cần */
+  margin-right: 4px;
+  margin-top: 4px;
+  font-weight: 400;
+
+  &.sender {
+    align-self: flex-end;
+    /* Canh phải cho tin nhắn của bạn */
+    background-color: #0084ff;
+    color: #ffffff;
+    font-weight: 450;
+
+    .message-content {
+      text-align: left;
+      /* Nội dung căn trái */
+    }
+  }
+
+  &.receiver {
+    align-self: flex-start;
+    /* Canh trái cho tin nhắn của người khác */
+    background-color: #f1f1f1;
+    color: #000;
+    font-weight: 450;
+
+    .message-content {
+      text-align: left;
+      /* Nội dung căn trái */
+    }
+  }
+
+  .message-content {
+    margin-bottom: 4px;
+    /* Khoảng cách giữa nội dung và thời gian */
+  }
+
+  .message-time {
+    font-size: 12px;
+    color: #888;
+    text-align: right;
+    /* Hiển thị thời gian căn phải */
+  }
+}
+
+.audio-message {
+  display: flex;
+  align-items: center;
+  /* Canh giữa theo chiều dọc */
+  justify-content: space-between;
+  /* Khoảng cách giữa các phần tử */
+  padding: 10px 15px;
+  background: linear-gradient(90deg, #d8b6ff, #a48fff);
+  /* Màu gradient tím */
+  color: #ffffff;
+  border-radius: 20px;
+  /* Góc bo tròn */
+  max-width: 300px;
+  /* Chiều rộng tối đa */
+  min-width: 200px;
+  /* Chiều rộng tối thiểu */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  /* Hiệu ứng đổ bóng */
+  font-size: 14px;
+  font-weight: bold;
+  word-wrap: break-word;
+  /* Ngắt dòng khi quá dài */
+}
+
+.audio-message .audio-play-button {
+  background: #fff;
+  border: none;
+  color: #a48fff;
+  font-size: 18px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.audio-message .audio-play-button:hover {
+  background: #e8dbff;
+}
+
+.audio-message .audio-visualizer {
+  flex: 1;
+  height: 20px;
+  margin: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  color: white;
+}
+
+.audio-message .audio-time {
+  font-size: 14px;
+  color: #fff;
+}

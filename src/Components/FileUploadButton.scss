@@ -1,0 +1,48 @@
+.file-message {
+    display: flex;
+    flex-direction: column;
+    background: #f5f5f5; // Màu nền
+    border-radius: 8px;
+    padding: 10px;
+    max-width: 250px; // Giới hạn chiều rộng
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Hiệu ứng đổ bóng
+    text-decoration: none; // Loại bỏ gạch dưới
+    color: #000; // Màu chữ
+
+    &:hover {
+        background: #eaeaea; // Màu nền khi hover
+    }
+
+    .file-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        svg {
+            width: 24px;
+            height: 24px;
+            color: #555;
+            flex-shrink: 0; // Giữ kích thước icon cố định
+        }
+
+        .file-info {
+            display: flex;
+            flex-direction: column;
+
+            .file-name {
+                font-size: 14px;
+                font-weight: 600;
+                color: #000; // Màu chữ tên file
+                white-space: normal; // Cho phép xuống dòng
+                word-wrap: break-word; // Xuống dòng khi gặp từ quá dài
+                word-break: break-word; // Xuống dòng khi không thể cắt từ
+            }
+
+            .file-size {
+                font-size: 12px;
+                color: #555; // Màu chữ kích thước file
+                margin-top: 2px;
+            }
+        }
+    }
+}

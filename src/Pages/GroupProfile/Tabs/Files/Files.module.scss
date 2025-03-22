@@ -1,0 +1,108 @@
+.filesContainer {
+    width: 100%;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+
+        h2 {
+            font-size: 1rem;
+            font-weight: bold;
+            margin: 0;
+            color: #1c1e21;
+        }
+
+        .searchUpload {
+            display: flex;
+            gap: 10px;
+
+            .searchInput {
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 20px;
+                font-size: 0.85rem;
+                width: 200px;
+                background-color: #f9f9f9;
+
+                &:focus {
+                    border-color: #1877f2;
+                    outline: none;
+                }
+            }
+
+            .uploadButton {
+                padding: 8px 12px;
+                background-color: #ffffff;
+                /* Màu nền xám nhạt */
+                color: #1877f2;
+                /* Màu chữ xanh */
+                border: 0;
+                /* Viền nhạt */
+                border-radius: 6px;
+                font-size: 0.85rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+
+                &:hover {
+                    background-color: #e4e6e9;
+                    /* Màu xám đậm hơn khi hover */
+                }
+            }
+
+        }
+    }
+
+    .fileTable {
+        .tableHeader {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+
+            .columnButton {
+                flex: 1;
+                text-align: center;
+                font-weight: bold;
+                font-size: 0.85rem;
+                color: #1c1e21;
+                background-color: #f5f5f5;
+                padding: 8px 0;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+
+                &:hover {
+                    background-color: #e4e6e9;
+                }
+
+                span {
+                    font-size: 0.75rem;
+                    color: #1c1e21;
+                    margin-left: 4px;
+                }
+            }
+        }
+    }
+}
+
+.divider {
+    margin: 20px auto;
+    /* Tạo khoảng cách giữa các phần */
+    width: calc(100% - 40px);
+    /* Độ rộng của dòng kẻ */
+    height: 1px;
+    background-color: #d9d9d9;
+    /* Màu sắc của dòng kẻ */
+    border: none;
+}

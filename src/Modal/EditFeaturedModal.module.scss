@@ -1,0 +1,135 @@
+.modalContainer {
+  .collectionTitle {
+    font-weight: bold;
+  }
+
+  .collectionItems,
+  .collectionTime {
+    color: #888;
+    margin: 4px 0;
+  }
+
+  .addNewSection {
+    text-align: center;
+    margin-top: 16px;
+
+    .addButton {
+      color: #1890ff;
+      font-weight: bold;
+    }
+  }
+}
+
+.featuredItem {
+  padding: 16px;
+  border-radius: 8px;
+  min-height: 100px;
+  display: flex;
+  flex-wrap: wrap;
+  /* Cho phép các thẻ linh hoạt trong không gian */
+  gap: 20px;
+
+  /* Khoảng cách giữa các thẻ */
+  :hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.addNewSection {
+  text-align: center;
+  margin-top: 20px;
+
+  .addButton {
+    color: #1890ff;
+    font-weight: bold;
+    font-size: 16px;
+  }
+}
+
+.collectionCard {
+  border-radius: 8px;
+  display: flex !important;
+  flex: 0 0 40%;
+  box-sizing: border-box;
+
+}
+
+
+.uploadSection {
+  background-color: #eaf4ff;
+  border-radius: 6px;
+  font-weight: bold;
+  color: #1890ff;
+  margin-top: 10px;
+}
+
+.uploadButton {
+  padding: 12px;
+}
+
+.imagePreviewContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.imageWrapper {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.imageWrapper:hover {
+  transform: scale(1.05); // Phóng to khi hover
+}
+
+.selectedImage {
+  border: 2px solid green; // Đánh dấu ảnh được chọn
+}
+
+.checkIcon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: white;
+  border-radius: 50%;
+  padding: 4px;
+}
+
+.addMoreBox {
+  width: 150px;
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f2f5;
+  cursor: pointer;
+  border: 1px dashed #d9d9d9;
+  border-radius: 8px;
+  color: #888;
+  font-weight: bold;
+}
+
+.editFeature {
+  margin-left: 20px;
+  width: 135px;
+  padding: 5px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  align-content: center;
+}
+
+.editFeatureIMG {
+  max-height: 200px;
+  object-fit: cover;
+  width: 100px;
+}
+
+.collectionTitle,
+.collectionItems,
+.collectionTime {
+  display: block;
+  /* Đảm bảo mỗi thẻ chiếm một dòng */
+}

@@ -1,0 +1,48 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 36px;
+    left: 0;
+    background-color: #f8f8f8;
+    z-index: 100;
+    border-radius: 50px;
+    border: 1px solid #ccc; 
+}
+
+.content {
+    overflow: visible;
+}
+
+.emoji {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-color: gray;
+    border-radius: 50px;
+}
+
+.emoji img {
+    display: block;
+    width: 60px;
+    transition: all 0.4s;
+    cursor: pointer;
+    object-fit: cover;
+}
+
+.hello {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.emoji img:hover {
+    display: block;
+    transition: all 0.4s;
+    cursor: pointer;
+    transform: scale(1.4);
+}

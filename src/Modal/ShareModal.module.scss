@@ -1,0 +1,382 @@
+.shareModal {
+  .shareContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .userInfo {
+        display: flex;
+        flex-direction: column;
+
+        .userName {
+          font-weight: bold;
+          font-size: 16px;
+        }
+
+        .privacy {
+          font-size: 12px;
+          color: #65676b;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+      }
+    }
+
+    .textArea {
+      border: none;
+      outline: none;
+      width: 100%;
+      resize: none;
+      font-size: 20px;
+      /* Tăng kích thước font */
+      background: transparent;
+      transition: font-size 0.3s ease;
+      /* Hiệu ứng phóng to chữ */
+    }
+
+    .shareButton {
+      background-color: #1877f2;
+      color: white;
+      font-weight: bold;
+      border-radius: 6px;
+      height: 40px;
+      width: 155px;
+      align-self: end;
+
+      &:hover {
+        background-color: #155dc0;
+        color: white;
+      }
+    }
+
+    .messengerSection {
+      display: flex;
+      flex-direction: column;
+
+      h4 {
+        font-size: 14px;
+        font-weight: bold;
+        color: #65676b;
+        margin-bottom: 10px;
+      }
+
+      .messengerUsers {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+
+        .ant-avatar {
+          width: 40px;
+          height: 40px;
+          cursor: pointer;
+
+          &:hover {
+            filter: brightness(0.9);
+          }
+        }
+
+        .moreButton {
+          width: 40px;
+          height: 40px;
+          border: 1px solid #d8dadf;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: white;
+
+          &:hover {
+            background-color: #f0f2f5;
+          }
+        }
+      }
+    }
+
+    .shareOptions {
+      display: flex;
+      flex-direction: column;
+
+      h4 {
+        font-size: 14px;
+        font-weight: bold;
+        color: #65676b;
+        margin-bottom: 10px;
+      }
+
+      .options {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        .option {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 5px;
+          cursor: pointer;
+
+          .iconWrapper {
+            width: 50px;
+            height: 50px;
+            background-color: #f0f2f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+
+            img {
+              width: 24px;
+              height: 24px;
+            }
+          }
+
+          span {
+            font-size: 12px;
+            color: #606770;
+            text-align: center;
+          }
+
+          &:hover {
+            .iconWrapper {
+              background-color: #e4e6eb;
+            }
+
+            span {
+              color: #1877f2;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // CSS toàn cục cần thêm lớp parent để tránh xung đột
+  :global {
+    .ant-modal-header {
+      border-bottom: 1px solid !important;
+      padding: 10px !important;
+      margin-bottom: 0px !important;
+    }
+
+    .ant-modal-content {
+      padding: 0px !important;
+    }
+
+    .textArea.ant-input:focus {
+      box-shadow: none !important;
+      outline: none !important;
+    }
+
+    .friends-button {
+      background: #f0f0f0;
+      border: none;
+    }
+  }
+}
+
+.content {
+  padding: 10px;
+  border-bottom: 1px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shareTo {
+  padding: 10px;
+}
+
+.underName {
+  display: flex;
+  gap: 4px;
+}
+
+.sendToModal {
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+
+
+  .userList {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .userItem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+
+      span {
+        flex: 1;
+        margin-left: 10px;
+        font-weight: 500;
+      }
+
+      .ant-avatar {
+        width: 40px;
+        height: 40px;
+      }
+    }
+  }
+
+  .messageInput {
+    width: 100%;
+    height: 80px;
+    border: 1px solid #d8dadf;
+    border-radius: 6px;
+    padding: 8px;
+  }
+
+  .ant-btn {
+    margin-top: 10px;
+    background-color: #1877f2;
+    color: white;
+
+    &:hover {
+      background-color: #155dc0;
+    }
+
+    &:disabled {
+      background-color: #d8dadf;
+      color: #a0a0a0;
+    }
+  }
+}
+
+
+.sendToContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+
+
+
+  h2 {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+    color: #333;
+  }
+
+  .searchInput {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      border-color: #1890ff;
+      outline: none;
+      box-shadow: 0 0 4px rgba(24, 144, 255, 0.5);
+    }
+  }
+
+  .userList {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+    background-color: #fafafa;
+
+    .userItem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background-color: #f5f5f5;
+      }
+
+      .ant-avatar {
+        flex-shrink: 0;
+      }
+
+      span {
+        flex: 1;
+        margin-left: 10px;
+        font-size: 14px;
+        color: #333;
+      }
+
+      .ant-checkbox-wrapper {
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .messageInput {
+    margin-top: 8px;
+    border: none;
+    border-radius: 50px;
+    padding: 8px 12px;
+    font-size: 14px;
+    background: #f2f4f7;
+
+    &:focus {
+      border-color: #1890ff;
+      outline: none;
+      box-shadow: 0 0 4px rgba(24, 144, 255, 0.5);
+    }
+  }
+
+  .ant-btn-primary {
+    background-color: #1890ff;
+    border-color: #1890ff;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 12px;
+
+    &:disabled {
+      background-color: #d9d9d9;
+      border-color: #d9d9d9;
+      cursor: not-allowed;
+    }
+
+    &:hover {
+      background-color: #40a9ff;
+      border-color: #40a9ff;
+    }
+  }
+
+  .searchInput {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 50px;
+    background: #f2f4f7;
+  }
+  .backButton {
+    position: absolute;
+    top: 8px;
+  }
+}

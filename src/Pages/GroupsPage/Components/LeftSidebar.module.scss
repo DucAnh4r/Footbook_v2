@@ -1,0 +1,196 @@
+.container {
+    width: 100%;
+    max-height: 95vh;
+    /* Chiều cao của sidebar = 100% chiều cao màn hình */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    /* Cho phép cuộn nội dung khi vượt quá chiều cao */
+    padding-right: 12px;
+    /* Đệm bên phải */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+    /* Thêm bóng mờ nhẹ nếu cần */
+    background-color: #ffffff;
+}
+
+/* Danh sách các mục trong sidebar */
+.list-container {
+    list-style: none;
+    padding: 0;
+    margin-left: 10px;
+}
+
+.list-item {
+    width: 100%;
+    height: 52px;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.list-item:hover {
+    background-color: rgb(218, 218, 218);
+    cursor: pointer;
+}
+
+/* Cấu trúc từng phần tử trong danh sách */
+.element-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 52px;
+    padding-left: 16px;
+}
+
+.image-container {
+    width: 36px;
+    height: 36px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.icon {
+    width: 90%;
+    height: 90%;
+}
+
+/* Văn bản hiển thị kèm icon */
+.text {
+    margin-left: 14px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Nút tạo nhóm mới */
+.editHighlightButton {
+    display: block;
+    background-color: #ebf5ff;
+    border: none;
+    width: 95%;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    margin: 0 20px;
+    color: #3786dc;
+    transition: filter 0.3s ease;
+}
+
+.editHighlightButton:hover {
+    filter: brightness(0.95);
+}
+
+/* Thông tin các nhóm đã tham gia */
+.group-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.group-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #ffffff;
+    transition: background-color 0.3s ease;
+}
+
+.group-item:hover {
+    background-color: #e6f7ff;
+}
+
+.group-element-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.group-image-container {
+    min-width: 50px;
+    min-height: 50px;
+    border-radius: 50%;
+    background-color: #d9d9d9;
+    margin-right: 10px;
+}
+
+.group-info-container {
+    display: flex;
+    /* Đặt layout flexbox */
+    flex-direction: column;
+    /* Xếp các thành phần theo chiều dọc */
+    align-items: flex-start;
+    /* Canh trái */
+    margin-left: 10px;
+    /* Thêm khoảng cách với hình ảnh nếu cần */
+}
+
+.group-name {
+    font-size: 16px;
+    /* Kích thước chữ của tên nhóm */
+    font-weight: bold;
+    /* Làm đậm tên nhóm */
+    color: #000;
+    /* Màu chữ */
+    margin-bottom: 4px;
+    /* Thêm khoảng cách giữa hai dòng */
+}
+
+.last-active {
+    font-size: 14px;
+    color: #65676b;
+}
+
+
+.pinned {
+    font-size: 18px;
+    color: #ff9900;
+}
+
+.joined-groups-section {
+    margin-bottom: 50px;
+}
+
+.divider {
+    margin: 20px auto;
+    /* Tạo khoảng cách giữa các phần */
+    width: calc(100% - 40px);
+    /* Độ rộng của dòng kẻ */
+    height: 1px;
+    background-color: #d9d9d9;
+    /* Màu sắc của dòng kẻ */
+    border: none;
+}
+
+.view-all-button {
+    background: none;
+    border: none;
+    color: #3786dc;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.view-all-button:hover {
+    text-decoration: underline;
+    /* Thêm gạch dưới khi hover */
+}
+
+.group-name h2 {
+    margin-left: 20px;
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+.group-name {
+    display: flex;
+    justify-content: space-between;
+}

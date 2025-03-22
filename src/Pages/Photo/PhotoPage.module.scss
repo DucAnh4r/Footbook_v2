@@ -1,0 +1,384 @@
+.container {
+  // background-color: blue;
+  width: 100vw;
+  margin-top: 64px;
+}
+
+.image-row {
+  background-color: black;
+  width: 70vw;
+  height: calc(100vh - 64px);
+  position: relative;
+}
+
+.fullscreenContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  transition: all 0.3s ease;
+  width: 100vw;
+  height: 100vh;
+}
+
+.right-row {
+  width: 25vw;
+  // padding: 16px;
+  padding-bottom: 0;
+  max-height: calc(100vh - 64px); /* Hoặc giá trị cụ thể nếu cần */
+  overflow-y: auto; /* Thêm scroll dọc */
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+
+  /* Tùy chỉnh thanh cuộn */
+  &::-webkit-scrollbar {
+    width: 8px; // Chiều rộng thanh cuộn
+    border-radius: 50px; // Làm tròn các cạnh
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #e6e5e5; // Màu nền của track
+    border-radius: 50px; // Làm tròn track
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #9b9b9b; // Màu thanh cuộn
+    border-radius: 50px; // Làm tròn thanh cuộn
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #6d6d6d; // Màu khi hover
+  }
+}
+
+.messenger-bubble-row {
+  width: 5vw;
+}
+
+.round-button-container {
+  background: rgba(0, 0, 0, 0.6); /* Màu đen, độ trong suốt 80% */
+  position: absolute;
+  top: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  &:hover {
+    filter: brightness(0.8);
+  }
+}
+
+.cancel-button-container{
+  width: 44px;
+  height: 44px;
+  left: 20px;
+  font-size: 26px;
+  font-weight: 400;
+  align-items: center;
+  justify-content: center;
+  font-style: unset;
+  color: white;
+}
+
+.zoomin-button-container {
+  right: 104px;
+  color: white;
+  font-size: 24px;
+}
+
+.zoomout-button-container {
+  right: 60px;
+  color: white;
+  font-size: 24px;
+}
+
+.full-button-container {
+  right: 16px;
+  color: white;
+  font-size: 24px;
+}
+
+.left-button-container {
+  left: 10px;
+  top: 50%;
+  color: white;
+  font-size: 24px;
+}
+
+.right-button-container {
+  right: 10px;
+  top: 50%;
+  color: white;
+  font-size: 24px;
+}
+
+.image-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; 
+  z-index: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.avatar {
+  margin-right: 8px;
+  width: 40px;
+  height: 40px;
+
+  &:hover {
+    cursor: pointer;
+    filter: brightness(0.9);
+  }
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 700;
+  font-size: 16px;
+  transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+
+  &:hover {
+    text-decoration: underline; /* Gạch chân khi hover */
+    cursor: pointer;
+  }
+}
+
+.time {
+  font-size: 12px;
+  color: #65686c;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+
+  &:hover {
+    text-decoration: underline; /* Gạch chân khi hover */
+    cursor: pointer;
+  }
+}
+
+
+.reactionsContainer {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  border-bottom: 1px solid #f0f2f5;
+  padding-bottom: 8px;
+  font-size: 14px;
+  position: relative;
+}
+
+.reactions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon {
+  width: 28px; /* Chiều rộng ảnh */
+  height: auto; /* Giữ tỷ lệ gốc của ảnh */
+  border-radius: 8px; /* Nếu cần bo góc */
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.icon-left {
+  position: absolute; /* Đặt vị trí tuyệt đối cho ảnh bên trái */
+  left: 0; /* Đặt ảnh bên trái ở vị trí bắt đầu */
+  z-index: 1; /* Đảm bảo ảnh này luôn ở trên ảnh bên phải */
+}
+
+.icon-right {
+  position: absolute; /* Đặt vị trí tuyệt đối cho ảnh bên phải */
+  left: 16px; /* Đẩy ảnh bên phải sang phải một chút */
+  z-index: 0; /* Đảm bảo ảnh bên phải nằm dưới ảnh bên trái */
+}
+
+.reactionCount {
+  font-size: 14px;
+  color: #606770;
+  margin-left: 46px;
+  transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+
+  &:hover {
+    text-decoration: underline; /* Gạch chân khi hover */
+    cursor: pointer;
+  }
+}
+
+.rightFooter {
+  position: absolute;
+  right: 14px;
+}
+
+.shareCount,
+.cmtCount {
+  font-size: 14px;
+  color: #606770;
+
+  transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+
+  &:hover {
+    text-decoration: underline; /* Gạch chân khi hover */
+    cursor: pointer;
+  }
+}
+
+
+.footer {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 0;
+    width: 100%;
+    height: 0.8px; /* Độ dày của đường kẻ */
+    background-color: #ccc; /* Màu của đường kẻ */
+  }
+
+  /* Sử dụng ::after để thêm đường kẻ ngang */
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 100%;
+    height: 0.8px; /* Độ dày của đường kẻ */
+    background-color: #ccc; /* Màu của đường kẻ */
+  }
+}
+
+.footer button {
+  font-size: 16px;
+  color: #65686c;
+  font-weight: 600;
+  min-width: 100px;
+  width: 30%;
+  height: 36px;
+  &:hover {
+    color: #65686c;
+  }
+}
+
+.content {
+  margin-bottom: 20px;
+}
+
+.commentSection {
+  padding: 16px 8px 0;
+}
+
+.seeMoreSection {
+  display: flex;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.seeMoreBtn {
+  font-size: 15px;
+    color: #65686c;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    transition: text-decoration 0.2s ease; /* Thêm hiệu ứng chuyển đổi gạch chân */
+    margin: 0;
+    margin-top: 2px;
+    margin-bottom: 8px;
+
+    &:hover {
+        text-decoration: underline; /* Gạch chân khi hover */
+        cursor: pointer;
+    }
+}
+
+.writeCommentSection {
+  min-height: 100px;
+  background-color: #f5f5f5;
+  width: 100%;
+  position: sticky;
+  bottom: 0;
+  padding-top: 12px;
+  padding-bottom: 12px; 
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.2); /* Bóng đổ phía trên */
+}
+
+.writeCommentContainer {
+  width: 100%;
+  min-height: 70px;
+  border-radius: 20px;
+  background-color: #e1e1e1;
+  padding: 8px 0 8px 16px;
+}
+
+.writeCommentContainer textarea {
+  border: none; /* Loại bỏ màu viền */
+  outline: none; /* Loại bỏ highlight viền khi active */
+  background-color: #e1e1e1;
+  width: 100%;
+  max-width: 100%;
+  font-size: 16px; /* Tăng kích thước chữ */
+  overflow-wrap: break-word; /* Tự động xuống dòng khi vượt chiều rộng */
+  word-break: break-word; /* Hỗ trợ xuống dòng */
+  font-family: 'Arial', sans-serif;
+  resize: none; /* Ngăn chỉnh kích thước bằng tay */
+  height: 22px;
+  transition: all 0.3s ease; /* Thêm hiệu ứng chuyển động */
+
+  &:focus {
+    height: 80px; /* Thay đổi chiều cao khi active */
+  }
+}
+
+
+.actionCommentContainer {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  padding: 0 10px;
+}
+
+.sendCommentButton {
+  font-size: 18px;
+  cursor: pointer;
+}
+

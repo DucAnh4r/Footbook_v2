@@ -1,0 +1,66 @@
+.friendRequestsContainer {
+  padding: 0px;
+  width: 100%;
+}
+
+.ant-card-body {
+  padding: 0 !important; /* Xóa padding mặc định */
+}
+
+.friendRequestsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.friendRequestCard {
+  width: 220px;
+  height: 371px;
+  // padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.friendImage {
+  width: 209px;
+  height: 209px;
+  object-fit: cover;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.friendDetails {
+  text-align: left;
+  padding: 10px;
+}
+
+.name {
+  margin: 0 !important;
+  font-size: 18px;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 88px;
+}
+
+.buttons button {
+  width: 100%;
+  height: 36px;
+}
+
+.see-more-btn {
+  margin-top: 10px;
+  height: 40px;
+  width: 100%;
+  font-size: 16px;
+  font-weight: bold;
+
+  &:hover {
+    background-color: #d2d2d2 !important;
+  }
+}

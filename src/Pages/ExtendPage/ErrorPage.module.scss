@@ -1,0 +1,57 @@
+.errorPage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+    /* Màu nền sáng giống Facebook */
+    color: #1c1e21;
+    /* Màu chữ tối */
+
+    .content {
+        max-width: 500px;
+        padding: 40px;
+        background: #ffffff;
+        /* Màu nền trắng */
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+
+        h1 {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 0;
+            color: #1877f2;
+            /* Màu xanh Facebook */
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 20px 0;
+            color: #606770;
+            /* Màu chữ phụ giống Facebook */
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #ffffff;
+            background: #1877f2;
+            /* Màu xanh Facebook */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+
+            &:hover {
+                background: #145dbf;
+                /* Màu xanh đậm khi hover */
+            }
+
+            &:active {
+                background: #0d4a94;
+                /* Màu xanh khi nhấn */
+            }
+        }
+    }
+}
