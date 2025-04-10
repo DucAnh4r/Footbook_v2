@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import AboutSection from './AboutSection';
 import { Col, Row, Space } from 'antd';
@@ -19,8 +20,8 @@ const Posts = ({ friendId }) => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await getPostByUserIdService(user_id);
-      setPosts(response?.data?.data?.postResponses || []);
+      const response = await getPostByUserIdService(user_id, 1000);
+      setPosts(response?.data?.posts || []);
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
@@ -43,7 +44,6 @@ const Posts = ({ friendId }) => {
       </Col>
       <Col style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} span={14}>
         <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-          <StatusInput />
           <PostFilter />
           {loading ? (
             <p>Đang tải bài viết...</p>
@@ -62,11 +62,11 @@ const Posts = ({ friendId }) => {
                 />
               ) : (
                 <Post
-                  key={post.post_id}
-                  postId={post.post_id}
+                  key={post.id}
+                  postId={post.id}
                   content={post.content}
-                  createdAt={post.create_at}
-                  userId={post.user_id}
+                  createdAt={post.created_at}
+                  userId={post.user.id}
                   images={post.images}
                   isModalOpen={false}
                 />

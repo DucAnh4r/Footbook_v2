@@ -16,7 +16,7 @@ const Comment = ({ content, createdAt, userId, childComments = [], commentId, po
   const fetchUser = async () => {
     try {
       const response = await userFindByIdService(userId);
-      setUserInfo(response?.data?.data || {});
+      setUserInfo(response?.data?.user || {});
     } catch (error) {
       console.error("Error fetching user:", error);
     } finally {
@@ -54,11 +54,11 @@ const Comment = ({ content, createdAt, userId, childComments = [], commentId, po
       {/* Comment chính */}
       <Row className={styles["container"]}>
         <Col className={styles["avatar-col"]} span={4}>
-          <Avatar src={userInfo.profilePictureUrl} className={styles.avatar} />
+          <Avatar src={userInfo.avatar_url} className={styles.avatar} />
         </Col>
         <Col span={18}>
           <div className={styles["comment-box"]}>
-            <p className={styles["name"]}>{userInfo.fullName}</p>
+            <p className={styles["name"]}>{userInfo.name}</p>
             <p>{content}</p>
           </div>
           <div className={styles["option-box"]}>

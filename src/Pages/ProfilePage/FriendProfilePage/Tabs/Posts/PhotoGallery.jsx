@@ -15,8 +15,10 @@ const PhotoGallery = ({ user_Id }) => {
   const fetchUserImages = async () => {
     try {
       setLoading(true);
-      const response = await getImageByUserIdService(user_Id); // Sử dụng userId từ props
-      setImages(response?.data?.data || []);
+      const response = await getImageByUserIdService(user_Id, 9, 0); // Sử dụng userId từ props
+      setImages(response?.data?.images || []);
+      console.log("ẢNHHHH CỦA USER",response);
+      
     } catch (error) {
       console.error('Error fetching images:', error);
     } finally {
@@ -30,7 +32,7 @@ const PhotoGallery = ({ user_Id }) => {
   };
 
   useEffect(() => {
-    if (user_Id) fetchUserImages();
+   fetchUserImages();
   }, [user_Id]); // Gọi lại khi userId thay đổi
 
   return (
@@ -52,11 +54,14 @@ const PhotoGallery = ({ user_Id }) => {
         <Row gutter={[8, 8]}>
           {images.slice(0, 9).map((photo) => (
             <Col span={8} key={photo.imageId}>
-              <div className={styles.photo} onClick={() => handleImageClick(photo.postId)}>
+              <div className={styles.photo} onClick={() => handleImageClick(photo.post_id)}>
                 <img
-                  src={photo.imageUrl}
-                  alt={`Photo ${photo.imageId}`}
-                  onError={(e) => (e.target.src = 'https://via.placeholder.com/150')} // Fallback ảnh lỗi
+                  src={photo.image_url}
+                  alt={`Photo ${photo.image_id}`}
+                  onError={(e) => (e.target.src = 'https://via.placeholder.com/150')} 
+                  style={{
+                    cursor: "pointer"
+                  }}
                 />
               </div>
             </Col>

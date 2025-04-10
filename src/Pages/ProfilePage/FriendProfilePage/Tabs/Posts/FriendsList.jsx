@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import { Card, Col, Row, Typography, Spin } from 'antd';
 import styles from './FriendsList.module.scss';
@@ -15,8 +16,8 @@ const FriendsList = ({ user_Id }) => {
     try {
       setLoading(true);
       const response = await userListFriendService(user_Id); // Lấy dữ liệu từ API
-      const friendsData = response?.data?.data?.friends || []; // Lấy danh sách bạn bè
-      console.log("API trả về:", friendsData); // Log dữ liệu từ API
+      const friendsData = response?.data?.friends || []; // Lấy danh sách bạn bè
+      console.log("API bạn bè trả về:", friendsData); // Log dữ liệu từ API
       setFriends(friendsData); // Cập nhật state
     } catch (error) {
       console.error("Error fetching friends:", error);
@@ -50,7 +51,7 @@ const FriendsList = ({ user_Id }) => {
         {friends.length === 0
           ? 'Chưa có bạn bè'
           : friends.length === 1
-          ? '1 bạn'
+          ? '1 người bạn'
           : `${friends.length} người bạn`}
       </Text>
 
@@ -69,10 +70,10 @@ const FriendsList = ({ user_Id }) => {
             <Col span={8} key={friend.id}>
               <div className={styles.friend}>
                 <div className={styles.avatar}>
-                  {friend.avatarUrl ? (
+                  {friend.avatar_url ? (
                     <img
-                      src={friend.avatarUrl}
-                      alt={friend.fullName}
+                      src={friend.avatar_url}
+                      alt={friend.name}
                       onClick={() => handleImageClick(friend.id)} // Truyền hàm đúng cách
                       style={{ cursor: 'pointer' }}
                     />
@@ -84,7 +85,7 @@ const FriendsList = ({ user_Id }) => {
                     />
                   )}
                 </div>
-                <Text className={styles.name}>{friend.fullName}</Text>
+                <Text className={styles.name}>{friend.name}</Text>
               </div>
             </Col>
           ))}

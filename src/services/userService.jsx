@@ -64,11 +64,14 @@ export const updateCoverService = (Data, user_id) => {
 };
 
 export const userFindByIdService = (user_id) => {
-  return axiosCreate.get(`${domain}/api/v1/users/${user_id}`, {
+  return axiosCreate.get(`${domain}/user/${user_id}`, {
   });
 };
 
 export const userListFriendService = (user_id) => {
-  return axiosCreate.get(`${domain}/api/v1/users/${user_id}/friends`, {
+  return axiosCreate.get(`${domain}/relationships/friends`, {
+    params: {
+      user_id: user_id
+    },
   });
 };

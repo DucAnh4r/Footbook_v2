@@ -11,30 +11,35 @@ export const addCommentService = (Data) => {
 };
 
 export const getCommentService = (postId) => {
-    return axiosCreate.get(`${domain}/api/v1/comments/post/${postId}`, {
-    });
+  return axiosCreate.get(`${domain}/comments/post`, {
+    params: {
+      post_id: postId,
+    },
+  });
 };
 
 export const countCommentService = (postId) => {
-    return axiosCreate.get(`${domain}/api/v1/comments/count/${postId}`, {
-    });
+  return axiosCreate.get(`${domain}/comments/count`, {
+    params: {
+      post_id: postId,
+    },
+  });
 };
 
 export const eidtCommentService = (Data) => {
-    return axiosCreate.put(`${domain}/api/v1/comments/edit`, {
-      commentId: Data.commentId,
-      userId: Data.userId,
-      newContent: Data.newContent,
-    });
-  };
+  return axiosCreate.put(`${domain}/api/v1/comments/edit`, {
+    commentId: Data.commentId,
+    userId: Data.userId,
+    newContent: Data.newContent,
+  });
+};
 
-  export const deleteCommentService = (Data) => {
-    const { commentId, userId } = Data; 
-    return axiosCreate.delete(`${domain}/api/v1/comments/delete`, {
-      params: { 
-        commentId,
-        userId,
-      },
-    });
-  };
-  
+export const deleteCommentService = (Data) => {
+  const { commentId, userId } = Data;
+  return axiosCreate.delete(`${domain}/api/v1/comments/delete`, {
+    params: {
+      commentId,
+      userId,
+    },
+  });
+};

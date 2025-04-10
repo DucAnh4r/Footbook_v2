@@ -15,7 +15,7 @@ import ReactionIconsBox from "./ReactionIconsBox";
 import ShareModal from "../Modal/ShareModal";
 import { BsThreeDots } from "react-icons/bs";
 import Toastify from "../assets/Toastify";
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
 import { userFindByIdService } from "../services/userService";
 import {
   countPostReactionService,
@@ -76,7 +76,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
     try {
       setLoading(true);
       const response = await userFindByIdService(userId);
-      setUserInfo(response?.data?.data || []); // Lưu dữ liệu trả về
+      setUserInfo(response?.data?.user || []); // Lưu dữ liệu trả về
     } catch (error) {
       console.error("Error fetching user:", error);
     } finally {
@@ -100,7 +100,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
     try {
       setLoading(true);
       const response = await countCommentService(postId);
-      setCommentCount(response?.data?.data || 0);
+      setCommentCount(response?.data?.comment_count || 0);
     } catch (error) {
       console.error("Error count reaction:", error);
     } finally {
@@ -124,7 +124,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
       const userReaction = reactions.find(
         (reaction) => reaction.userId === userId1
       );
-      
+
       // Nếu tìm thấy userReaction, set selectedReaction bằng reactionType, nếu không, set là "NONE"
       setSelectedReaction(userReaction ? userReaction.reactionType : "NONE");
     } catch (error) {
@@ -136,11 +136,10 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
   const handleDeletePost = async (postId) => {
     try {
       const response = await DeletePostByIdService(postId);
-  
+
       if (response?.data?.success) {
         console.log(response.data.message); // Hiển thị thông báo thành công
         Toastify("Xóa bài viết thành công!", "success");
-
       } else {
         console.error("Không thể xóa bài viết. Vui lòng thử lại.");
       }
@@ -165,7 +164,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
     countReaction();
     fetchUserReaction();
     getAllReactions();
-    console.log("cảm xúc đang chọn: ", selectedReaction)
+    console.log("cảm xúc đang chọn: ", selectedReaction);
   }, [isCommentModalOpen]); //đóng mở modal thì xem lại đang chọn cảm xúc gì
 
   const handleReactionAdded = async (reactionType) => {
@@ -250,12 +249,12 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
 
   return (
     <>
-      <ToastContainer /> 
+      <ToastContainer />
       <div className={styles.postContainer}>
         <div className={styles.header}>
-          <Avatar src={userInfo.profilePictureUrl} className={styles.avatar} />
+          <Avatar src={userInfo.avatar_url} className={styles.avatar} />
           <div className={styles.userInfo}>
-            <span className={styles.userName}>{userInfo.fullName}</span>
+            <span className={styles.userName}>{userInfo.name}</span>
             <span className={styles.time}>
               {new Date(createdAt).toLocaleString()} ·{" "}
               <FaEarthAmericas style={{ marginLeft: "4px" }} />
@@ -270,7 +269,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
                   </Menu.Item>
                 </Menu>
               }
-              trigger={['click']}
+              trigger={["click"]}
             >
               <div className={styles.optionContainer}>
                 <BsThreeDots />
@@ -280,26 +279,27 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
             <div className={styles.optionContainer}>
               <BsThreeDots />
             </div>
-          )}  
+          )}
         </div>
 
         <div className={styles.content}>
-          <p style={{margin: '0'}}>{content}</p>
+          <p style={{ margin: "0" }}>{content}</p>
+
           {/* Hiển thị ảnh */}
-          {images.length > 0 &&
-            images
-              .slice(0, 2)
-              .map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`post-image-${index}`}
-                  className={styles.mainImage}
-                  onClick={() => handleImageClick(postId)}
-                />
-              ))}
-          {/* Hiển thị nút "Xem tất cả" nếu có từ 3 ảnh trở lên */}
-          {images.length >= 3 && (
+          <div className={styles.imageGrid}>
+            {(isModalOpen ? images : images.slice(0, 2)).map((image, index) => (
+              <img
+                key={index}
+                src={image.image_url}
+                alt={`post-image-${index}`}
+                className={styles.mainImage}
+                onClick={() => handleImageClick(postId)}
+              />
+            ))}
+          </div>
+
+          {/* Hiển thị nút "Xem tất cả" nếu có từ 3 ảnh trở lên và chưa mở modal */}
+          {!isModalOpen && images.length >= 3 && (
             <button
               onClick={() => setIsCommentModalOpen(true)}
               className={styles.viewMoreButton}
@@ -419,7 +419,6 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
             icon={<FaRegComment />}
             type="text"
             onClick={() => {
-              
               if (!isModalOpen) {
                 fetchUserReaction();
                 setIsCommentModalOpen(true); // Chỉ mở modal nếu nó chưa được mở
@@ -452,18 +451,17 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
         addComment={addComment}
         createdAt={createdAt}
         onReactionChange={(reaction) => setSelectedReaction(reaction)} // Callback
-        
       />
       {/* Modal chia sẻ */}
-      {isShareModalOpen &&(
-      <ShareModal
-        isModalOpen={isShareModalOpen}
-        onCancel={() => setIsShareModalOpen(false)}
-        postId = {postId}
-        userInfo = {userInfo}
-        onClose={closeModal}
-      />
-    )}
+      {isShareModalOpen && (
+        <ShareModal
+          isModalOpen={isShareModalOpen}
+          onCancel={() => setIsShareModalOpen(false)}
+          postId={postId}
+          userInfo={userInfo}
+          onClose={closeModal}
+        />
+      )}
     </>
   );
 };

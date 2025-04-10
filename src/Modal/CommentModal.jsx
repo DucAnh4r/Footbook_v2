@@ -32,8 +32,8 @@ const CommentModal = ({
         getCommentService(postId),
         countCommentService(postId),
       ]);
-      setComments(commentResponse?.data?.data || []);
-      setCommentCount(countResponse?.data?.data || 0);
+      setComments(commentResponse?.data?.comments || []);
+      setCommentCount(countResponse?.data?.comment_count || 0);
     } catch (error) {
       console.error("Error fetching comments or count:", error);
     } finally {
@@ -71,7 +71,7 @@ const CommentModal = ({
       onCancel={onCancel}
       footer={null}
       width="700px"
-      title={`${userInfo?.fullName || "Người dùng"}'s post`}
+      title={`${userInfo?.name || "Người dùng"}'s post`}
       className={styles.commentModal}
     >
       {/* Render bài post */}
@@ -114,11 +114,11 @@ const CommentModal = ({
         ) : comments.length > 0 ? (
           comments.map((comment) => (
             <Comment
-              key={comment.commentId}
-              commentId={comment.commentId}
+              key={comment.id}
+              commentId={comment.id}
               content={comment.content}
-              createdAt={comment.createdAt}
-              userId={comment.userId}
+              createdAt={comment.created_at}
+              userId={comment.user.id}
               childComments={comment.childComments}
               postId={postId}
             />

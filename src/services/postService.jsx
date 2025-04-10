@@ -3,12 +3,12 @@ import { domain } from "./api";
 
 
 export const getPostByIdService = (post_id) => {
-    return axiosCreate.get(`http://localhost:8080/api/v1/post/${post_id}`, {
+    return axiosCreate.get(`${domain}/post/${post_id}`, {
     });
 };
 
-export const getPostByUserIdService = (user_id) => {
-    return axiosCreate.get(`http://localhost:8080/api/v1/post/user/${user_id}/posts`, {
+export const getPostByUserIdService = (user_id, limit) => {
+    return axiosCreate.get(`${domain}/post/user/posts?user_id=${user_id}&limit=${limit}`, {
     });
 };
 
@@ -17,8 +17,13 @@ export const getPostListFriendService = (user_id) => {
     });
 };
 
-export const getImageByUserIdService = (user_id) => {
-    return axiosCreate.get(`http://localhost:8080/api/v1/post/ImageUser/${user_id}`, {
+export const getImageByUserIdService = (user_id, limit, offset) => {
+    return axiosCreate.get(`${domain}/post/user/images`, {
+        params: {
+            user_id: user_id,
+            limit: limit,
+            offset: offset
+          },
     });
 };
 

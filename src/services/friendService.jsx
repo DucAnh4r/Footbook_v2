@@ -58,6 +58,6 @@ export const getFriendshipRequestService = (Data) => {//hien thi danh sach pendi
 //sender
 
 export const countFriendService = (userId) => {//dem so ban
-    return axiosCreate.get(`${domain}/api/v1/friendship/count/${userId}`, {
+    return axiosCreate.get(`${domain}/relationships/count?user_id=${userId}`, {
     });
 };
