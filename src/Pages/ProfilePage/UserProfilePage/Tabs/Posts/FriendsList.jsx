@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Col, Row, Typography, Spin } from 'antd';
-import styles from './FriendsList.module.scss';
-import { userListFriendService } from '../../../../../services/userService';
-import { getUserIdFromLocalStorage } from '../../../../../utils/authUtils';
-import { useNavigate } from 'react-router-dom';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from "react";
+import { Card, Col, Row, Typography, Spin } from "antd";
+import styles from "./FriendsList.module.scss";
+import { userListFriendService } from "../../../../../services/userService";
+import { getUserIdFromLocalStorage } from "../../../../../utils/authUtils";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Link, Text } = Typography;
 
@@ -18,9 +19,9 @@ const FriendsList = () => {
     try {
       setLoading(true);
       const response = await userListFriendService(user_id);
-      setFriends(response?.data?.data?.friends || []); // Lưu danh sách bạn bè
+      setFriends(response?.data?.friends || []); // Lưu danh sách bạn bè
     } catch (error) {
-      console.error('Error fetching friends:', error);
+      console.error("Error fetching friends:", error);
     } finally {
       setLoading(false);
     }
@@ -44,36 +45,40 @@ const FriendsList = () => {
           Xem tất cả bạn bè
         </Link>
       </div>
-      <Text className={styles.friendCount}>{friends.length} người bạn</Text>
+      <Text className={styles.friendCount}>
+        {friends.length === 0
+          ? "Chưa có bạn bè"
+          : friends.length === 1
+          ? "1 người bạn"
+          : `${friends.length} người bạn`}
+      </Text>
 
       {/* Loading State */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '20px' }}>
+        <div style={{ textAlign: "center", padding: "20px" }}>
           <Spin size="large" />
         </div>
       ) : (
         <Row gutter={[16, 16]}>
           {friends.map((friend) => (
             <Col span={8} key={friend.id}>
-              <div className={styles.friend}>
+              <div
+                className={styles.friend}
+                onClick={() => handleImageClick(friend.id)} // Truyền hàm đúng cách
+                style={{ cursor: "pointer" }}
+              >
                 <div className={styles.avatar}>
                   {friend.avatarUrl ? (
-                    <img
-                      src={friend.avatarUrl}
-                      alt={friend.fullName}
-                      onClick={() => handleImageClick(friend.id)} // Truyền hàm đúng cách
-                      style={{ cursor: 'pointer' }}
-                    />
+                    <img src={friend.avatar_url} alt={friend.name} />
                   ) : (
-                    <div 
+                    <div
                       onClick={() => handleImageClick(friend.id)} // Truyền hàm đúng cách
-                      style={{ cursor: 'pointer' }}
-                      className={styles.placeholderAvatar}>
-                      
-                    </div>
+                      style={{ cursor: "pointer" }}
+                      className={styles.placeholderAvatar}
+                    ></div>
                   )}
                 </div>
-                <Text className={styles.name}>{friend.fullName}</Text>
+                <Text className={styles.name}>{friend.name}</Text>
               </div>
             </Col>
           ))}

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import { Card, Col, Row, Typography, Spin } from 'antd';
 import styles from './PhotoGallery.module.scss';
@@ -17,8 +18,6 @@ const PhotoGallery = ({ user_Id }) => {
       setLoading(true);
       const response = await getImageByUserIdService(user_Id, 9, 0); // Sử dụng userId từ props
       setImages(response?.data?.images || []);
-      console.log("ẢNHHHH CỦA USER",response);
-      
     } catch (error) {
       console.error('Error fetching images:', error);
     } finally {
@@ -53,12 +52,11 @@ const PhotoGallery = ({ user_Id }) => {
       ) : images.length > 0 ? (
         <Row gutter={[8, 8]}>
           {images.slice(0, 9).map((photo) => (
-            <Col span={8} key={photo.imageId}>
+            <Col span={8} key={photo.image_id}>
               <div className={styles.photo} onClick={() => handleImageClick(photo.post_id)}>
                 <img
                   src={photo.image_url}
                   alt={`Photo ${photo.image_id}`}
-                  onError={(e) => (e.target.src = 'https://via.placeholder.com/150')} 
                   style={{
                     cursor: "pointer"
                   }}

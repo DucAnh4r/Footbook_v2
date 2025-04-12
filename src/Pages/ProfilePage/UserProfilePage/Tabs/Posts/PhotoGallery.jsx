@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import { Card, Col, Row, Typography, Spin } from 'antd';
 import styles from './PhotoGallery.module.scss';
@@ -17,8 +18,8 @@ const PhotoGallery = () => {
   const fetchUserImages = async () => {
     try {
       setLoading(true);
-      const response = await getImageByUserIdService(user_id);
-      setImages(response?.data?.data || []);
+      const response = await getImageByUserIdService(user_id, 9, 0);
+      setImages(response?.data?.images || []);
     } catch (error) {
       console.error('Error fetching images:', error);
     } finally {
@@ -53,12 +54,14 @@ const PhotoGallery = () => {
       ) : images.length > 0 ? (
         <Row gutter={[8, 8]}>
           {images.slice(0, 9).map((photo) => (
-            <Col span={8} key={photo.imageId}>
-              <div className={styles.photo} onClick={() => handleImageClick(photo.postId)}>
+            <Col span={8} key={photo.image_id}>
+              <div className={styles.photo} onClick={() => handleImageClick(photo.post_id)}>
                 <img
-                  src={photo.imageUrl}
-                  alt={`Photo ${photo.imageId}`}
-                  onError={(e) => (e.target.src = 'https://via.placeholder.com/150')} // Fallback ảnh lỗi
+                  src={photo.image_url}
+                  alt={`Photo ${photo.image_id}`}
+                  style={{
+                    cursor: "pointer"
+                  }}
                 />
               </div>
             </Col>

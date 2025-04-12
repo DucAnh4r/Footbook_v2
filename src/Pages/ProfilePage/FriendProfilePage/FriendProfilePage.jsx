@@ -15,7 +15,7 @@ import {
   deleteFriendshipService,
   acceptFriendshipService,
 } from "../../../services/friendService.jsx";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getUserIdFromLocalStorage } from "../../../utils/authUtils.jsx";
 import { userFindByIdService } from "../../../services/userService.jsx";
 import Posts from "./Tabs/Posts/Posts.jsx";
@@ -24,10 +24,16 @@ import { useChat } from "../../../utils/ChatContext.jsx";
 
 const FriendProfilePage = ({ userId2: propUserId2, type }) => {
   useAuthCheck();
+  const userId1 = getUserIdFromLocalStorage(); // Lấy userId1 từ localStorage
 
   // Lấy userId2 từ param nếu type là 'param', nếu không lấy từ prop
   const { userId2: paramUserId2 } = useParams();
   const userId2 = type === "prop" ? propUserId2 : paramUserId2;
+  const navigate = useNavigate(); // Dùng để điều hướng
+
+  if(userId1==userId2) {
+    navigate(`/profile`);
+  }
 
   const [headerWidth, setHeaderWidth] = useState("70%");
   const containerRef = useRef(null);
@@ -42,7 +48,6 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
   const [isLoading, setIsLoading] = useState(true); // Trạng thái tải dữ liệu
   const { addChat } = useChat();
 
-  const userId1 = getUserIdFromLocalStorage(); // Lấy userId1 từ localStorage
 
   const fetchFriendProfile = async () => {
     try {
@@ -307,7 +312,7 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
                   Nhắn tin
                 </button>
                 <button
-                  style={{ alignItems: "center", padding: "0 16px" }}
+                  style={{ alignItems: "center", padding: "0 16px", marginTop: "8px" }}
                   className={styles["small-button"]}
                   onClick={toggleFriendSuggestion}
                 >

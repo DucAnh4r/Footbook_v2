@@ -40,7 +40,7 @@ const ProfilePage = () => {
     try {
       setIsLoading(true);
       const response = await userFindByIdService(userId);
-      setUserInfo(response?.data?.data || []);
+      setUserInfo(response?.data?.user || []);
     } catch (error) {
       console.error("Error fetching user:", error);
     } finally {
@@ -52,7 +52,7 @@ const ProfilePage = () => {
     try {
       setIsLoading(true);
       const response = await countFriendService(userId);
-      setFriendCount(response?.data?.data || 0);
+      setFriendCount(response?.data?.friends_count || 0);
     } catch (error) {
       console.error("Error count friend:", error);
     } finally {
@@ -108,7 +108,7 @@ const ProfilePage = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "1":
-        return <Posts userName={userInfo.fullName} />;
+        return <Posts userName={userInfo.name} />;
       case "2":
         return <Introduction />;
       case "3":
@@ -197,11 +197,8 @@ const ProfilePage = () => {
           >
             <img
               className={styles["wallpaper-img"]}
-              src={
-                userInfo.coverPictureUrl ||
-                "https://via.placeholder.com/1200x400"
-              }
-              alt="Cover"
+              src={userInfo.cover_photo_url}
+              alt=""
             />
             <input
               type="file"
@@ -226,8 +223,7 @@ const ProfilePage = () => {
                 <img
                   className={styles["avatar-img"]}
                   src={
-                    userInfo.profilePictureUrl ||
-                    "https://via.placeholder.com/150"
+                    userInfo.avatar_url
                   }
                   alt="Avatar"
                 />
@@ -250,7 +246,7 @@ const ProfilePage = () => {
               <span
                 style={{ fontSize: "30px", fontWeight: 700, marginTop: "24px" }}
               >
-                {userInfo.fullName}
+                {userInfo.name}
               </span>
               <a
                 style={{
