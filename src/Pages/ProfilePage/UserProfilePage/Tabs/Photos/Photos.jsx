@@ -5,20 +5,19 @@ import { getImageByUserIdService } from '../../../../../services/postService';
 import { getUserIdFromLocalStorage } from '../../../../../utils/authUtils';
 import { useNavigate } from 'react-router-dom';
 
-
 const { TabPane } = Tabs;
 
 const Photos = () => {
   const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const user_id = getUserIdFromLocalStorage();
   const navigate = useNavigate();
 
   const fetchUserImages = async () => {
     try {
       setLoading(true);
-      const response = await getImageByUserIdService(user_id);
-      setImages(response?.data?.data || []);
+      const response = await getImageByUserIdService(user_id, 20, 0);
+      setImages(response?.data?.images || []);
 
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -28,7 +27,7 @@ const Photos = () => {
   };
 
   const handleImageClick = (postId) => {
-    navigate(`/photo${postId}`);
+    navigate(`/photo/${postId}`);
   }
 
   useEffect(() => {
@@ -49,10 +48,10 @@ const Photos = () => {
     >
       <img
         alt="example"
-        src={photo.imageURL}
+        src={photo.image_url}
         onError={(e) => e.target.src = "https://via.placeholder.com/150"} 
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        onClick={() => handleImageClick(photo.postId)}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+        onClick={() => handleImageClick(photo.post_id)}
       />
 
       {photo.editable && (

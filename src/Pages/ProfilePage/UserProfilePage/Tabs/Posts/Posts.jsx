@@ -11,7 +11,7 @@ import { getUserIdFromLocalStorage } from "../../../../../utils/authUtils";
 import { getPostByUserIdService } from "../../../../../services/postService";
 import SharedPost from "../../../../../Components/SharedPost";
 
-const Posts = ({ userName }) => {
+const Posts = ({ userInfo, userName, avatar }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const user_id = getUserIdFromLocalStorage();
@@ -35,7 +35,7 @@ const Posts = ({ userName }) => {
     <Row gutter={16}>
       <Col span={10} className={styles.leftCol}>
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          <AboutSection />
+          <AboutSection userInfo={userInfo} />
           <PhotoGallery />
           <FriendsList />
         </Space>
@@ -49,7 +49,7 @@ const Posts = ({ userName }) => {
         span={14}
       >
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          <StatusInput userName={userName} onPostCreated={fetchPosts} />
+          <StatusInput userName={userName} avatar={avatar} onPostCreated={fetchPosts} />
           <PostFilter />
           {loading ? (
             <p>Đang tải bài viết...</p>

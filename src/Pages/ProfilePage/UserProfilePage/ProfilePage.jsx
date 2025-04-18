@@ -108,9 +108,9 @@ const ProfilePage = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "1":
-        return <Posts userName={userInfo.name} />;
+        return <Posts userInfo={userInfo} userName={userInfo.name} avatar={userInfo.avatar_url} />;
       case "2":
-        return <Introduction />;
+        return <Introduction userInfo={userInfo} onProfileUpdated={fetchUser} />;
       case "3":
         return <Friends />;
       case "4":

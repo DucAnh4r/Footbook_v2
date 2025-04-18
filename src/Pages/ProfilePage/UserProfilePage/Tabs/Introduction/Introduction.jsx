@@ -4,7 +4,7 @@ import ProfileContent from './ProfileContent';
 
 const { TabPane } = Tabs;
 
-const Introduction = () => {
+const Introduction = ({ userInfo, onProfileUpdated }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const handleTabChange = (key) => {
@@ -26,7 +26,7 @@ const Introduction = () => {
         <TabPane tab="Chi tiết về bạn" key="details" />
         <TabPane tab="Sự kiện trong đời" key="events" />
       </Tabs>
-      <ProfileContent activeTab={activeTab} />
+      <ProfileContent userInfo={userInfo} activeTab={activeTab} onProfileUpdated={onProfileUpdated} />
     </div>
   );
 };

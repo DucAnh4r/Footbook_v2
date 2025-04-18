@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useContext, useEffect, useState } from "react";
 import { Layout, Input, Avatar, Row, Col, Tooltip, Popover } from "antd";
 import { GoSearch } from "react-icons/go";
@@ -44,7 +45,7 @@ const Header = ({ onMessageClick }) => {
     try {
       setLoading(true);
       const response = await userFindByIdService(user_id);
-      setUserInfo(response?.data?.data || []); 
+      setUserInfo(response?.data?.user || []); 
     } catch (error) {
       console.error("Error fetching user:", error);
     } finally {
@@ -186,8 +187,8 @@ const Header = ({ onMessageClick }) => {
             >
               <Popover
                 content={<ProfileContent 
-                  userName={userInfo?.fullName}
-                  UserAvatar={userInfo?.profilePictureUrl}
+                  userName={userInfo?.name}
+                  UserAvatar={userInfo?.avatar_url}
                 />}
                 trigger="click"
                 placement="bottomRight"
@@ -201,7 +202,7 @@ const Header = ({ onMessageClick }) => {
                 <div className={styles["avatar-wrapper"]}>
                   <img
                     className={styles["avatar"]}
-                    src={userInfo?.profilePictureUrl}
+                    src={userInfo?.avatar_url}
                     alt=""
                   />
                 </div>

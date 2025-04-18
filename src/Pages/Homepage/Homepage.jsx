@@ -28,7 +28,7 @@ const Homepage = () => {
     try {
       setLoading(true);
       const response = await userFindByIdService(user_id);
-      setUserInfo(response?.data?.data || []);
+      setUserInfo(response?.data?.user || []);
     } catch (error) {
       console.error("Error fetching user:", error);
     } finally {
@@ -40,7 +40,7 @@ const Homepage = () => {
     try {
       setLoading(true);
       const response = await getPostListFriendService(user_id);
-      setPosts(response?.data?.data?.postResponses || []); // Lưu dữ liệu trả về
+      setPosts(response?.data?.posts || []); // Lưu dữ liệu trả về
     } catch (error) {
       console.error("Error fetching posts:", error);
     } finally {
@@ -76,10 +76,7 @@ const Homepage = () => {
         style={{ padding: "70px 370px", minHeight: "100vh", overflow: "unset" }}
       >
         <div className="page-content" style={{ padding: "16px 30px" }}>
-          <StatusInput
-            userName={userInfo?.fullName}
-            onPostCreated={fetchPosts}
-          />
+          <StatusInput userName={userInfo?.name} avatar={userInfo?.avatar_url} onPostCreated={fetchPosts} />
 
           {loading ? (
             <p>Đang tải bài viết...</p>
@@ -99,11 +96,11 @@ const Homepage = () => {
                   />
                 ) : (
                   <Post
-                    key={post.post_id}
-                    postId={post.post_id}
+                    key={post.id}
+                    postId={post.id}
                     content={post.content}
-                    createdAt={post.create_at}
-                    userId={post.user_id}
+                    createdAt={post.created_at}
+                    userId={post.user.id}
                     images={post.images}
                     isModalOpen={false}
                   />

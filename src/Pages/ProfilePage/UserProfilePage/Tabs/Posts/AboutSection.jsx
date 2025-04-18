@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import styles from './AboutSection.module.scss';
 import { IoSchool, IoHome, IoEarth } from 'react-icons/io5';
+import { FaBirthdayCake } from "react-icons/fa";
+import { MdWork } from "react-icons/md";
 import EditFeaturedModal from '../../../../../Modal/EditFeaturedModal';
 import { getUserIdFromLocalStorage } from '../../../../../utils/authUtils';
 
-const AboutSection = () => {
+const AboutSection = ({ userInfo }) => {
   // Mảng chứa các đối tượng với URL hình ảnh và tên bộ sưu tập
   const galleryImages = [
     // {
@@ -61,20 +63,16 @@ const AboutSection = () => {
       <div className={styles.infoList}>
         <button className={styles.editQuoteButton}>Thêm tiểu sử</button>
         <div className={styles.infoItem}>
-          <IoSchool size={20} className={styles.icon} />
-          <span>Học Công Nghệ Thông Tin tại <strong>Trường Đại học Xây dựng Hà Nội</strong> - Hanoi University of Civil Engineering</span>
+          <FaBirthdayCake size={20} className={styles.icon} />
+          <span>Sinh năm <strong>{userInfo.birth_year}</strong></span>
         </div>
         <div className={styles.infoItem}>
-          <IoSchool size={20} className={styles.icon} />
-          <span>Đã học tại <strong>THPT Lý Thường Kiệt</strong></span>
+          <MdWork size={20} className={styles.icon} />
+          <span><strong>{userInfo.profession}</strong></span>
         </div>
         <div className={styles.infoItem}>
           <IoHome size={20} className={styles.icon} />
-          <span>Sống tại <strong>Hà Nội</strong></span>
-        </div>
-        <div className={styles.infoItem}>
-          <IoEarth size={20} className={styles.icon} />
-          <span>Có <strong>171 người</strong> theo dõi</span>
+          <span>Sống tại <strong>{userInfo.address}</strong></span>
         </div>
       </div>
       <button className={styles.editDetailButton}>Chỉnh sửa chi tiết</button>

@@ -15,7 +15,7 @@ const LeftSidebar = () => {
         try {
             setLoading(true);
             const response = await userFindByIdService(user_id);
-            setUserInfo(response?.data?.data || {});
+            setUserInfo(response?.data?.user || {});
         } catch (error) {
             console.error("Error fetching user:", error);
         } finally {
@@ -54,11 +54,11 @@ const LeftSidebar = () => {
                             <div className={styles['image-container']}>
                                 <img
                                     className={styles['image']}
-                                    src={userInfo?.profilePictureUrl}
+                                    src={userInfo?.avatar_url}
                                     alt=""
                                 />
                             </div>
-                            <span className={styles['text']}>{userInfo?.fullName || 'Người dùng'}</span>
+                            <span className={styles['text']}>{userInfo?.name || 'Người dùng'}</span>
                         </div>
                     </li>
                     <li className={styles['list-item']} onClick={handleFriendsClick}>

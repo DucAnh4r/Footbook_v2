@@ -32,15 +32,15 @@ const AllFriends = ({ onSelectUser }) => {
     const fetchListFriend = async () => {
       try {
         const response = await userListFriendService(user_id);
-        if (response.data.success) {
+        if (response.data) {
           setUsers(
-            Array.isArray(response.data.data.friends)
-              ? response.data.data.friends
+            Array.isArray(response.data.friends)
+              ? response.data.friends
               : []
           );
           setFilteredUsers(
-            Array.isArray(response.data.data.friends)
-              ? response.data.data.friends
+            Array.isArray(response.data.friends)
+              ? response.data.friends
               : []
           );
         } else {
@@ -68,8 +68,8 @@ const AllFriends = ({ onSelectUser }) => {
         users.filter(
           (user) =>
             user && // Đảm bảo `user` không phải là null hoặc undefined
-            user?.fullName && // Đảm bảo `allName` tồn tại
-            user?.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+            user?.name && // Đảm bảo `allName` tồn tại
+            user?.name.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
     }

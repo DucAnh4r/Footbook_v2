@@ -3,7 +3,7 @@ import styles from "./FriendItem.module.scss";
 import { Row, Col } from "antd";
 
 const FriendItem = ({ user, onSelectUser, isSelected }) => {
-  const { id, fullName, avatarUrl } = user; // Sử dụng avatarUrl thay vì profilePictureUrl
+  const { id, name, avatar_url } = user;
 
   const handleClick = () => {
     if (onSelectUser) {
@@ -22,8 +22,8 @@ const FriendItem = ({ user, onSelectUser, isSelected }) => {
           <div className={styles["image-container"]}>
             <img
               className={styles["image"]}
-              src={avatarUrl || "default-avatar-url"} // Nếu avatarUrl là null, hiển thị ảnh mặc định
-              alt={fullName}
+              src={avatar_url || "default-avatar-url"} // Nếu avatarUrl là null, hiển thị ảnh mặc định
+              alt={name}
             />
           </div>
         </Col>
@@ -32,7 +32,7 @@ const FriendItem = ({ user, onSelectUser, isSelected }) => {
         <Col span={19}>
           <Row className={styles["flex-between"]}>
             <span style={{ fontSize: "16px", marginTop: '8px', fontWeight: 500, color: "black" }}>
-              {fullName}
+              {name}
             </span>
           </Row>
         </Col>

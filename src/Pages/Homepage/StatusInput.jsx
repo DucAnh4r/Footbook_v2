@@ -4,7 +4,7 @@ import { FaImages, FaSmile } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import CreatePostModal from '../../Modal/CreatePostModal';
 
-const StatusInput = ( { userName, onPostCreated} ) => {
+const StatusInput = ( { userName, avatar, onPostCreated} ) => {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -37,8 +37,8 @@ const StatusInput = ( { userName, onPostCreated} ) => {
           style={{ cursor: 'pointer' }}
           icon={
             <img
-              src="https://via.placeholder.com/150"
-              alt="user avatar"
+              src={avatar}
+              alt="User avatar"
               onClick={handleIconClick}
             />
           }
@@ -52,7 +52,7 @@ const StatusInput = ( { userName, onPostCreated} ) => {
           }}
           onClick={showModal} // Mở modal khi bấm
         >
-          {userName} oi, bạn đang nghĩ gì thế?
+          {userName} ơi, bạn đang nghĩ gì thế?
         </Button>
       </div>
       <div

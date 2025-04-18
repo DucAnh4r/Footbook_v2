@@ -68,7 +68,7 @@ const FriendsList = () => {
                 style={{ cursor: "pointer" }}
               >
                 <div className={styles.avatar}>
-                  {friend.avatarUrl ? (
+                  {friend.avatar_url ? (
                     <img src={friend.avatar_url} alt={friend.name} />
                   ) : (
                     <div

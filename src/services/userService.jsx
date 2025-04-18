@@ -39,17 +39,15 @@ export const updateBioService = (Data, user_id) => {
   });
 };
 
-export const updateProfileService = (Data, user_id) => {
-  const formData = new FormData();
-  formData.append("profilePicture", Data.profilePicture);
-  return axiosCreate.patch(`${domain}/api/v1/users/${user_id}/update-profile-picture`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+export const updateProfileService = (data, user_id) => {
+  const payload = {
+    user_id,
+    ...data, // có thể chứa birth_year, profession, address
+  };
+
+  return axiosCreate.post(`${domain}/update-profile`, payload);
 };
+
 
 export const updateCoverService = (Data, user_id) => {
   const formData = new FormData();
