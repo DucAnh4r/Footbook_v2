@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from "react";
 import Haha from "../assets/image/ReactionIcons/Haha.gif";
 import Like from "../assets/image/ReactionIcons/Like.gif";

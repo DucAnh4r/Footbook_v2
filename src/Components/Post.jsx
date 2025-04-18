@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { Avatar, Button, Dropdown, Menu, Tooltip } from "antd";
 import { FaRegComment } from "react-icons/fa";
@@ -59,14 +61,14 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
 
   const getLikedUsers = () => {
     return reactions
-      .filter((reaction) => reaction.reactionType === "LIKE")
-      .map((reaction) => reaction.fullName)
+      .filter((reaction) => reaction.type === "LIKE")
+      .map((reaction) => reaction.user.name)
       .join("<br />");
   };
 
   const getAllReactions = () => {
     return reactions
-      .map((reaction) => reaction.fullName + " (" + reaction.reactionType + ")")
+      .map((reaction) => reaction.user.name + " (" + reaction.type + ")")
       .join("<br />"); // Thay thế '\n' bằng '<br />'
   };
 
@@ -87,8 +89,8 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
   const countReaction = async () => {
     try {
       setLoading(true);
-      const response = await countPostReactionService(postId);
-      setPostReactionCount(response?.data?.data || 0);
+      const response = await getPostReactionService(postId);
+      setPostReactionCount(response?.data?.counts.total || 0);
     } catch (error) {
       console.error("Error count reaction:", error);
     } finally {
@@ -100,7 +102,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
     try {
       setLoading(true);
       const response = await countCommentService(postId);
-      setCommentCount(response?.data?.comment_count || 0);
+      setCommentCount(response || 0);
     } catch (error) {
       console.error("Error count reaction:", error);
     } finally {
@@ -111,7 +113,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
   const fetchReactions = async () => {
     try {
       const response = await getPostReactionService(postId);
-      setReactions(response?.data?.data || []); // Lưu dữ liệu phản ứng
+      setReactions(response?.data?.reactions || []); // Lưu dữ liệu phản ứng
     } catch (error) {
       console.error("Error fetching reactions:", error);
     }
@@ -120,13 +122,14 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
   const fetchUserReaction = async () => {
     try {
       const response = await getPostReactionService(postId);
-      const reactions = response?.data?.data || [];
+      const reactions = response?.data?.reactions || [];
       const userReaction = reactions.find(
-        (reaction) => reaction.userId === userId1
+        (reaction) => String(reaction.user_id) === String(userId1)
       );
-
+      console.log("fetchUserReaction: ", userReaction);
+      
       // Nếu tìm thấy userReaction, set selectedReaction bằng reactionType, nếu không, set là "NONE"
-      setSelectedReaction(userReaction ? userReaction.reactionType : "NONE");
+      setSelectedReaction(userReaction ? userReaction.type : "NONE");
     } catch (error) {
       console.error("Error fetching user reactions:", error);
       setSelectedReaction("NONE"); // Đảm bảo selectedReaction là "NONE" trong trường hợp lỗi
@@ -175,7 +178,10 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
       // Nếu người dùng bỏ chọn cảm xúc hoặc chọn lại cùng cảm xúc đã chọn
       if (reactionType === "NONE" || reactionType === selectedReaction) {
         console.log("Xóa cảm xúc hiện tại...");
-        await deletePostReactionService(postId, userId1);
+        await deletePostReactionService({
+          post_id: postId,
+          user_id: userId1,
+        });
         setSelectedReaction("NONE");
         console.log("Cảm xúc đã bị xóa");
       }
@@ -185,7 +191,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
         await addPostReactionService({
           post_id: postId,
           user_id: userId1,
-          reaction_type: reactionType,
+          type: reactionType,
         });
         setSelectedReaction(reactionType);
         console.log("Cảm xúc mới đã được thêm:", reactionType);
@@ -193,11 +199,14 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
       // Nếu bài viết đã có cảm xúc, cập nhật sang cảm xúc khác
       else {
         console.log("Cập nhật cảm xúc...");
-        await deletePostReactionService(postId, userId1); // Xóa cảm xúc cũ
+        await deletePostReactionService({
+          post_id: postId,
+          user_id: userId1,
+        }); // Xóa cảm xúc cũ
         await addPostReactionService({
           post_id: postId,
           user_id: userId1,
-          reaction_type: reactionType,
+          type: reactionType,
         }); // Thêm cảm xúc mới
         setSelectedReaction(reactionType);
         console.log("Cảm xúc đã được cập nhật thành:", reactionType);
@@ -218,7 +227,10 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
     if (selectedReaction !== "NONE") {
       // Nếu đang có cảm xúc LIKE, xóa nó đi
       console.log("Xóa cảm xúc ĐANG CÓ...");
-      await deletePostReactionService(postId, userId1);
+      await deletePostReactionService({
+        post_id: postId,
+        user_id: userId1,
+      });
       setSelectedReaction("NONE");
       console.log("đã xóa cảm xúc ĐANG CÓ");
     } else {
@@ -227,7 +239,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
       await addPostReactionService({
         post_id: postId,
         user_id: userId1,
-        reaction_type: "LIKE",
+        type: "LIKE",
       });
       setSelectedReaction("LIKE");
       console.log("Đã thêm cảm xúc LIKE");

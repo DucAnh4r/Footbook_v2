@@ -98,7 +98,7 @@ const PhotoPage = () => {
     try {
       setLoading(true);
       const response = await userFindByIdService(myId);
-      setUserCommentInfo(response?.data?.data || []);
+      setUserCommentInfo(response?.data?.user || []);
     } catch (error) {
       console.error("Error fetching user:", error);
     } finally {
@@ -110,7 +110,7 @@ const PhotoPage = () => {
     try {
       setLoading(true);
       const response = await countPostReactionService(postId);
-      setPostReactionCount(response?.data?.data || 0);
+      setPostReactionCount(response?.data?.counts.total|| 0);
     } catch (error) {
       console.error("Error count reaction:", error);
     } finally {
@@ -362,7 +362,7 @@ const PhotoPage = () => {
             <Row>
               <Col span={4}>
                 <Avatar
-                  src={userCommentInfo.profilePictureUrl}
+                  src={userCommentInfo.avatar_url}
                   className={styles.avatar}
                   style={{ margin: "6px 0 0 6px" }}
                 />

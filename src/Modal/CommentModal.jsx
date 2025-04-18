@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { Modal, Avatar, Input, Row, Col, Skeleton } from "antd";
 import styles from "./CommentModal.module.scss"; // Import SCSS module
@@ -33,7 +34,7 @@ const CommentModal = ({
         countCommentService(postId),
       ]);
       setComments(commentResponse?.data?.comments || []);
-      setCommentCount(countResponse?.data?.comment_count || 0);
+      setCommentCount(countResponse || 0);
     } catch (error) {
       console.error("Error fetching comments or count:", error);
     } finally {
@@ -133,7 +134,7 @@ const CommentModal = ({
         <Row>
           <Col span={2}>
             <Avatar
-              src={userInfo?.profilePictureUrl || "https://via.placeholder.com/40"}
+              src={userInfo?.avatar_url || "https://via.placeholder.com/40"}
               className={styles.avatar}
             />
           </Col>
