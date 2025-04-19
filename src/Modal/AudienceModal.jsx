@@ -3,11 +3,11 @@ import { Modal, Button, Radio, Space, Checkbox, Input } from "antd";
 import "./AudienceModal.scss";
 
 const audienceOptions = [
-    { id: 1, value: "Public", description: "Anyone on or off Facebook" },
-    { id: 2, value: "Friends", description: "Your friends on Facebook" },
+    { id: 1, value: "public", description: "Anyone on or off Facebook" },
+    { id: 2, value: "friends", description: "Your friends on Facebook" },
     { id: 3, value: "Friends except...", description: "Don't show to some friends" },
     { id: 4, value: "Specific friends", description: "Only show to some friends" },
-    { id: 5, value: "Only me", description: "Only you can see your post" },
+    { id: 5, value: "secret", description: "Only you can see your post" },
 ];
 
 const friendsList = [

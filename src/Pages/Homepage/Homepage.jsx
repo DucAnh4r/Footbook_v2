@@ -11,7 +11,7 @@ import SuggestedFriends from "../ProfilePage/UserProfilePage/SuggestedFriends";
 import GroupPost from "../../Components/GroupPost";
 import { useAuthCheck } from "../../utils/checkAuth";
 import { getUserIdFromLocalStorage } from "../../utils/authUtils";
-import { getPostListFriendService } from "../../services/postService";
+import { getFeedPostsService } from "../../services/postService";
 import SharedPost from "../../Components/SharedPost";
 import { userFindByIdService } from "../../services/userService";
 
@@ -39,7 +39,7 @@ const Homepage = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await getPostListFriendService(user_id);
+      const response = await getFeedPostsService(user_id);
       setPosts(response?.data?.posts || []); // Lưu dữ liệu trả về
     } catch (error) {
       console.error("Error fetching posts:", error);
