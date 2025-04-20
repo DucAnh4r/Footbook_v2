@@ -14,6 +14,7 @@ import {
   getFriendshipStatusService,
   deleteFriendshipService,
   acceptFriendshipService,
+  declineFriendshipService,
 } from "../../../services/friendService.jsx";
 import { useNavigate, useParams } from "react-router-dom";
 import { getUserIdFromLocalStorage } from "../../../utils/authUtils.jsx";
@@ -21,6 +22,7 @@ import { userFindByIdService } from "../../../services/userService.jsx";
 import Posts from "./Tabs/Posts/Posts.jsx";
 import Photos from "./Tabs/Photos/Photos.jsx";
 import { useChat } from "../../../utils/ChatContext.jsx";
+import { FaComment, FaUserFriends } from "react-icons/fa";
 
 const FriendProfilePage = ({ userId2: propUserId2, type }) => {
   useAuthCheck();
@@ -31,7 +33,7 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
   const userId2 = type === "prop" ? propUserId2 : paramUserId2;
   const navigate = useNavigate(); // Dùng để điều hướng
 
-  if(userId1==userId2) {
+  if (userId1 == userId2) {
     navigate(`/profile`);
   }
 
@@ -43,11 +45,10 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
   const [isFriendSuggestionVisible, setFriendSuggestionVisible] =
     useState(false);
   const [friendshipStatus, setFriendshipStatus] = useState(null); // Lưu trạng thái kết bạn
-  const [sender, setSender] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [friendsCount, setFriendsCount] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Trạng thái tải dữ liệu
   const { addChat } = useChat();
-
 
   const fetchFriendProfile = async () => {
     try {
@@ -63,11 +64,25 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
 
   const fetchFriendshipStatus = async () => {
     try {
-      const response = await getFriendshipStatusService({ userId1, userId2 });
-      setFriendshipStatus(response?.data?.data?.status || null);
-      setSender(response?.data?.data?.usent);
+      setIsLoading(true);
+      const response = await getFriendshipStatusService({
+        user_id: userId1,
+        other_user_id: userId2,
+      });
+
+      setFriendshipStatus(response?.data?.relationship.status || null);
+      setUserRole(response?.data?.user_role);
+
+      // Cập nhật số lượng bạn bè sau khi trạng thái thay đổi
+      if (response?.data?.relationship.status === "accepted") {
+        countFriend();
+      }
     } catch (error) {
       console.error("Lỗi khi lấy trạng thái bạn bè:", error);
+      setFriendshipStatus(null);
+      setUserRole(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -85,9 +100,13 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
 
   const handleAddFriend = async () => {
     try {
-      await createFriendshipService({ userId1, userId2 });
-
-      fetchFriendshipStatus(); // Cập nhật trạng thái
+      setIsLoading(true);
+      await createFriendshipService({
+        requester_id: userId1,
+        addressee_id: userId2,
+      });
+      // Sau khi thêm, cập nhật lại trạng thái và userRole
+      fetchFriendshipStatus();
     } catch (error) {
       console.error("Lỗi khi gửi lời mời kết bạn:", error);
     }
@@ -95,20 +114,33 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
 
   const handleAcceptFriend = async () => {
     try {
-      await acceptFriendshipService({ userId1: userId2, userId2: userId1 });
+      setIsLoading(true);
+      await acceptFriendshipService({
+        requester_id: userId2,
+        addressee_id: userId1,
+      });
+      // Sau khi chấp nhận, cập nhật lại trạng thái và đếm lại bạn bè
+      fetchFriendshipStatus();
+    } catch (error) {
+      console.error("Lỗi khi chấp nhận lời mời kết bạn:", error);
+    }
+  };
+
+  const handleDeclineFriend = async () => {
+    try {
+      await declineFriendshipService({
+        requester_id: userId2,
+        addressee_id: userId1,
+      });
       fetchFriendshipStatus(); // Cập nhật trạng thái
     } catch (error) {
-      console.error("Lỗi khi gửi lời mời kết bạn:", error);
+      console.error("Lỗi khi từ chối lời mời kết bạn:", error);
     }
   };
 
   const handleDeleteFriend = async () => {
     try {
-      const data = {
-        userId1: userId1, // ID của bạn
-        userId2: userId2, // ID của người bạn muốn xóa
-      };
-      await deleteFriendshipService(data); // Gọi API
+      await deleteFriendshipService({ user_id: userId1, friend_id: userId2 }); // Gọi API
       setFriendshipStatus(null); // Cập nhật trạng thái thành không phải bạn bè
       countFriend(); // Cập nhật số lượng bạn bè
     } catch (error) {
@@ -135,23 +167,25 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
   };
 
   const renderButton = () => {
-    if (friendshipStatus === "PENDING") {
-      if (userId1 !== sender) {
-        return (
-          <>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                flexDirection: "column",
-                marginBottom: "10px",
-              }}
-            >
-              <div style={{ fontSize: "20px", fontWeight: "600" }}>
-                {friendInfo.name} sent you a friend request
+    // Đang tải dữ liệu
+    if (isLoading) {
+      return (
+        <button className={styles["blue-button"]} disabled>
+          Loading...
+        </button>
+      );
+    }
+
+    // Xử lý theo trạng thái
+    switch (friendshipStatus) {
+      case "pending":
+        if (userRole === "addressee") {
+          return (
+            <div className={styles["friend-request-container"]}>
+              <div className={styles["friend-request-message"]}>
+                {friendInfo.name} đã gửi cho bạn một lời mời kết bạn
               </div>
-              <div>
+              <div className={styles["friend-request-actions"]}>
                 <button
                   className={styles["blue-button"]}
                   onClick={handleAcceptFriend}
@@ -160,53 +194,56 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
                 </button>
                 <button
                   className={styles["white-button"]}
-                  onClick={handleDeleteFriend}
+                  onClick={handleDeclineFriend}
                 >
                   Từ chối
                 </button>
               </div>
             </div>
-          </>
-        );
-      } else {
+          );
+        } else {
+          return (
+            <Dropdown
+              overlay={
+                <Menu>
+                  <Menu.Item key="1" onClick={handleDeleteFriend}>
+                    Hủy lời mời
+                  </Menu.Item>
+                </Menu>
+              }
+              trigger={["click"]}
+            >
+              <button className={styles["blue-button"]}>
+                Đã gửi lời mời kết bạn
+              </button>
+            </Dropdown>
+          );
+        }
+
+      case "accepted":
         return (
           <Dropdown
             overlay={
               <Menu>
                 <Menu.Item key="1" onClick={handleDeleteFriend}>
-                  Hủy lời mời
+                  Hủy kết bạn
                 </Menu.Item>
               </Menu>
             }
             trigger={["click"]}
           >
             <button className={styles["blue-button"]}>
-              Đã gửi lời mời kết bạn
+              <FaUserFriends /> Bạn bè
             </button>
           </Dropdown>
         );
-      }
-    } else if (friendshipStatus === "ACCEPTED") {
-      return (
-        <Dropdown
-          overlay={
-            <Menu>
-              <Menu.Item key="1" onClick={handleDeleteFriend}>
-                Hủy kết bạn
-              </Menu.Item>
-            </Menu>
-          }
-          trigger={["click"]}
-        >
-          <button className={styles["blue-button"]}>Bạn bè</button>
-        </Dropdown>
-      );
-    } else {
-      return (
-        <button className={styles["blue-button"]} onClick={handleAddFriend}>
-          <IoMdAdd /> Thêm bạn bè
-        </button>
-      );
+
+      default: // strangers hoặc null
+        return (
+          <button className={styles["blue-button"]} onClick={handleAddFriend}>
+            <IoMdAdd /> Thêm bạn bè
+          </button>
+        );
     }
   };
 
@@ -236,10 +273,13 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
   };
 
   useEffect(() => {
-    fetchFriendProfile();
-    fetchFriendshipStatus();
-    countFriend();
-  }, [userId2]);
+    // Kiểm tra nếu userId1 và userId2 hợp lệ
+    if (userId1 && userId2) {
+      fetchFriendProfile();
+      fetchFriendshipStatus();
+      countFriend();
+    }
+  }, [userId1, userId2]);
 
   useEffect(() => {
     // Hàm kiểm tra chiều rộng của container
@@ -312,7 +352,11 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
                   Nhắn tin
                 </button>
                 <button
-                  style={{ alignItems: "center", padding: "0 16px", marginTop: "8px" }}
+                  style={{
+                    alignItems: "center",
+                    padding: "0 16px",
+                    marginTop: "8px",
+                  }}
                   className={styles["small-button"]}
                   onClick={toggleFriendSuggestion}
                 >
