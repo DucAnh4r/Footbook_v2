@@ -54,10 +54,10 @@ export const getFriendshipStatusService = (Data) => {
 
 export const getFriendshipRequestService = (Data) => {
   //hien thi danh sach pendin
-  const { userId2 } = Data;
-  return axiosCreate.get(`${domain}/api/v1/friendship/received-requests`, {
+  const { user_id } = Data;
+  return axiosCreate.get(`${domain}/relationships/received-requests`, {
     params: {
-      userId2, //là mình
+      user_id, 
     },
   });
 };

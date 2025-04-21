@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { Avatar, Badge, List, Typography, Spin, Input } from 'antd';
 import { SearchOutlined, MoreOutlined } from '@ant-design/icons';
@@ -5,6 +6,7 @@ import styles from './RightSidebar.module.scss';
 import { getUserMessageListService } from '../../../services/privateMessageService';
 import { getUserIdFromLocalStorage } from '../../../utils/authUtils';
 import ChatWindow from "../../../Pages/Homepage/ChatWindow";
+import { userListFriendService } from '../../../services/userService';
 
 const { Text } = Typography;
 
@@ -16,8 +18,8 @@ const RightSidebar = () => {
   const fetchFriends = async () => {
     try {
       setLoading(true);
-      const response = await getUserMessageListService(userId.toString());
-      setFriends(response?.data?.data || []);
+      const response = await userListFriendService(userId.toString());
+      setFriends(response?.data?.friends || []);
     } catch (error) {
       console.error('Error fetching friends:', error);
     } finally {
@@ -124,8 +126,8 @@ const RightSidebar = () => {
                 onClick={() => handleMessageClick(friend)}
               >
                 <List.Item.Meta
-                  avatar={<Avatar src={friend.profilePictureUrl || 'https://via.placeholder.com/40'} />}
-                  title={<Text strong>{friend.fullName}</Text>}
+                  avatar={<Avatar src={friend.avatar_url || 'https://via.placeholder.com/40'} />}
+                  title={<Text strong>{friend.name}</Text>}
                   description={
                     <Text type="secondary" style={{ fontSize: '12px' }}>
                       {friend.lastMessageTime || 'Không có tin nhắn mới'}

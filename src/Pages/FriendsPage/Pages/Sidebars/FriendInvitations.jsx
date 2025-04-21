@@ -8,11 +8,11 @@ import { getFriendshipRequestService } from "../../../../services/friendService"
 import { getUserIdFromLocalStorage } from "../../../../utils/authUtils";
 
 const FriendInvitations = ({ onSelectUser }) => {
-  const [users, setUsers] = useState([]); // Lưu danh sách lời mời kết bạn
-  const [selectedUserId, setSelectedUserId] = useState(null); // State để lưu id người dùng được chọn
-  const [loading, setLoading] = useState(true); // Hiển thị trạng thái loading
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  
+
   const userId2 = getUserIdFromLocalStorage();
 
   const handleBack = () => {
@@ -20,30 +20,41 @@ const FriendInvitations = ({ onSelectUser }) => {
   };
 
   const handleSelectUser = (senderId) => {
-    // Cập nhật selectedUserId khi thẻ FriendRequestItem được chọn
     setSelectedUserId(senderId);
     if (onSelectUser) {
-      onSelectUser(senderId); // Gọi callback từ cha nếu có
+      onSelectUser(senderId);
+    }
+  };
+
+  const fetchFriendRequests = async () => {
+    try {
+      const response = await getFriendshipRequestService({
+        user_id: userId2,
+      });
+      if (response.data?.received_requests) {
+        const formattedData = response.data.received_requests.map((item) => ({
+          senderId: item.requester.id,
+          fullName: item.requester.name,
+          profilePictureUrl: item.requester.avatar_url,
+          coverPhotoUrl: item.requester.cover_photo_url,
+          birthYear: item.requester.birth_year,
+          profession: item.requester.profession,
+          address: item.requester.address,
+          status: item.status,
+          sentAt: new Date(item.requester.created_at).toLocaleDateString(
+            "vi-VN"
+          ), // định dạng ngày
+        }));
+        setUsers(formattedData);
+      }
+    } catch (error) {
+      console.error("Error fetching friend requests:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    const fetchFriendRequests = async () => {
-      try {
-        const response = await getFriendshipRequestService({ userId2 });
-        if (response.data.success) {
-          // Lưu dữ liệu vào state
-          setUsers(response.data.data);
-        } else {
-          console.error(response.data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching friend requests:", error);
-      } finally {
-        setLoading(false); // Tắt trạng thái loading
-      }
-    };
-
     fetchFriendRequests();
   }, []);
 
@@ -74,11 +85,12 @@ const FriendInvitations = ({ onSelectUser }) => {
         ) : (
           users.map((user) => (
             <FriendRequestItem
+              userId={userId2}
               key={user.senderId}
-              userId={user.senderId}
-              user={user} // Truyền thêm dữ liệu người dùng
+              user={user}
               onSelectUser={handleSelectUser}
-              isSelected={user.senderId === selectedUserId} // Truyền prop để biết thẻ nào được chọn
+              isSelected={user.senderId === selectedUserId}
+              fetchFriendRequests={fetchFriendRequests}
             />
           ))
         )}
