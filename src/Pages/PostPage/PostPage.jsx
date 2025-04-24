@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import styles from "./PostPage.module.scss";
-import { useParams, useNavigate } from 'react-router-dom';
-import { getPostByIdService } from '../../services/postService';
-import SharedPost from '../../Components/SharedPost';
-import Post from '../../Components/Post';
+import { useParams, useNavigate } from "react-router-dom";
+import { getPostByIdService } from "../../services/postService";
+import SharedPost from "../../Components/SharedPost";
+import Post from "../../Components/Post";
 
 const PostPage = () => {
   const { postId } = useParams();
@@ -16,12 +16,12 @@ const PostPage = () => {
       setLoading(true);
       const response = await getPostByIdService(postId);
 
-      if (response?.data?.data?.postResponse) {
-        const fetchedPost = response.data.data.postResponse;
+      if (response?.data?.post) {
+        const fetchedPost = response.data.post;
 
         // Kiểm tra biến isDeleted, nếu true chuyển hướng sang /error
         if (fetchedPost.isDeleted) {
-          navigate('/error');
+          navigate("/error");
           return;
         }
 
@@ -39,7 +39,7 @@ const PostPage = () => {
   };
 
   useEffect(() => {
-    console.log("aaaaaaaaaaaaa",postId);
+    console.log("aaaaaaaaaaaaa", postId);
     getPost();
   }, [postId]);
 
@@ -52,23 +52,24 @@ const PostPage = () => {
   }
 
   return (
-    <div className={styles['container']}>
-      <div className={styles['post-container']}> 
-        {post.share ? (
+    <div className={styles["container"]}>
+      <div className={styles["post-container"]}>
+        {post.shareId!=0 ? (
           <SharedPost
-            postId={post.post_id}
+            postId={post.id}
             content={post.content}
-            createdAt={post.create_at}
+            createdAt={post.created_at}
             userId={post.user_id}
             images={post.images}
-            shareId={post.share}
+            shareId={post.shareId}
           />
         ) : (
           <Post
-            postId={post.post_id}
+            key={post.id}
+            postId={post.id}
             content={post.content}
-            createdAt={post.create_at}
-            userId={post.user_id}
+            createdAt={post.created_at}
+            userId={post.user.id}
             images={post.images}
             isModalOpen={false}
           />

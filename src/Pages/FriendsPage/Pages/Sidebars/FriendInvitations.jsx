@@ -6,11 +6,13 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import FriendRequestItem from "../../Components/FriendRequestItem";
 import { getFriendshipRequestService } from "../../../../services/friendService";
 import { getUserIdFromLocalStorage } from "../../../../utils/authUtils";
+import SentFriendRequestsModal from "../../Components/SentFriendRequestsModal";
 
 const FriendInvitations = ({ onSelectUser }) => {
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showSentModal, setShowSentModal] = useState(false);
   const navigate = useNavigate();
 
   const userId2 = getUserIdFromLocalStorage();
@@ -77,7 +79,7 @@ const FriendInvitations = ({ onSelectUser }) => {
         <span>{users.length} lời mời kết bạn</span>
       </Row>
       <Row style={{ padding: "0 16px" }} className={styles.actionRow}>
-        <span>Xem lời mời đã gửi</span>
+        <span onClick={() => setShowSentModal(true)}>Xem lời mời đã gửi</span>
       </Row>
       <Row style={{ marginTop: "16px" }}>
         {loading ? (
@@ -95,6 +97,11 @@ const FriendInvitations = ({ onSelectUser }) => {
           ))
         )}
       </Row>
+
+      <SentFriendRequestsModal
+        visible={showSentModal}
+        onClose={() => setShowSentModal(false)}
+      />
     </>
   );
 };

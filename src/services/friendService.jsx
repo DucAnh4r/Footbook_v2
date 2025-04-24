@@ -61,7 +61,16 @@ export const getFriendshipRequestService = (Data) => {
     },
   });
 };
-//sender
+
+export const getSentFriendRequestsService = (Data) => {
+  //hien thi danh sach pendin
+  const { user_id } = Data;
+  return axiosCreate.get(`${domain}/relationships/sent-requests`, {
+    params: {
+      user_id, 
+    },
+  });
+};
 
 export const countFriendService = (userId) => {
   //dem so ban

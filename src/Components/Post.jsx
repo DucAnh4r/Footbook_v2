@@ -31,7 +31,7 @@ import { countCommentService } from "../services/commentService";
 import { getUserIdFromLocalStorage } from "../utils/authUtils";
 
 import { reactionConfig } from "../assets/Config";
-import { DeletePostByIdService } from "../services/postService";
+import { DeletePostByIdService, getShareCount } from "../services/postService";
 import { useNavigate } from "react-router-dom";
 
 const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
@@ -44,6 +44,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
   const [userInfo, setUserInfo] = useState([]);
   const [postReactionCount, setPostReactionCount] = useState([]);
   const [CommentCount, setCommentCount] = useState([]);
+  const [ShareCount, setShareCount] = useState([]);
   const [reactions, setReactions] = useState([]);
   const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -110,6 +111,18 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
     }
   };
 
+    const countShare = async () => {
+      try {
+        setLoading(true);
+        const response = await getShareCount(postId);
+        setShareCount(response.data || 0);
+      } catch (error) {
+        console.error("Error count share:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
   const fetchReactions = async () => {
     try {
       const response = await getPostReactionService(postId);
@@ -161,13 +174,16 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
     fetchUserReaction(); // Gọi thêm hàm kiểm tra cảm xúc
     fetchReactions();
     countComment();
+    countShare();
   }, [postId]); // Gọi lại khi postId thay đổi
 
   useEffect(() => {
     countReaction();
     fetchUserReaction();
     getAllReactions();
-    console.log("cảm xúc đang chọn: ", selectedReaction);
+    fetchReactions();
+    countComment();
+    countShare();
   }, [isCommentModalOpen]); //đóng mở modal thì xem lại đang chọn cảm xúc gì
 
   const handleReactionAdded = async (reactionType) => {
@@ -390,7 +406,7 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
             <span className={styles.cmtCount} style={{ marginRight: "10px" }}>
               {CommentCount} bình luận
             </span>
-            <span className={styles.shareCount}>1 lượt chia sẻ</span>
+            <span className={styles.shareCount}>{ShareCount.share_count} lượt chia sẻ</span>
           </div>
         </div>
 

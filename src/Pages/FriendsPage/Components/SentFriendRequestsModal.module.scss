@@ -1,0 +1,29 @@
+.sentModal {
+    .ant-modal-content {
+      background: #1c1c1c;
+      color: white;
+    }
+    .requestItem {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #333;
+    }
+    .leftInfo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .mutual {
+      color: gray;
+      font-size: 12px;
+    }
+  }
+  

@@ -49,21 +49,24 @@ const Posts = ({ userInfo, userName, avatar }) => {
         span={14}
       >
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          <StatusInput userName={userName} avatar={avatar} onPostCreated={fetchPosts} />
+          <StatusInput
+            userName={userName}
+            avatar={avatar}
+            onPostCreated={fetchPosts}
+          />
           <PostFilter />
           {loading ? (
             <p>Đang tải bài viết...</p>
           ) : posts.length > 0 ? (
             posts.map((post) =>
-              post.share ? (
+              post.shareId != 0 ? (
                 <SharedPost
-                  key={post.post_id}
-                  postId={post.post_id}
+                  postId={post.id}
                   content={post.content}
-                  createdAt={post.create_at}
+                  createdAt={post.created_at}
                   userId={post.user_id}
                   images={post.images}
-                  shareId={post.share}
+                  shareId={post.shareId}
                 />
               ) : (
                 <Post

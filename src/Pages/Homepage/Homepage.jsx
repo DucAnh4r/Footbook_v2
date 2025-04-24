@@ -76,7 +76,11 @@ const Homepage = () => {
         style={{ padding: "70px 370px", minHeight: "100vh", overflow: "unset" }}
       >
         <div className="page-content" style={{ padding: "16px 30px" }}>
-          <StatusInput userName={userInfo?.name} avatar={userInfo?.avatar_url} onPostCreated={fetchPosts} />
+          <StatusInput
+            userName={userInfo?.name}
+            avatar={userInfo?.avatar_url}
+            onPostCreated={fetchPosts}
+          />
 
           {loading ? (
             <p>Đang tải bài viết...</p>
@@ -84,15 +88,14 @@ const Homepage = () => {
             posts
               .filter((post) => !post.isDeleted)
               .map((post) =>
-                post.share ? (
+                post.shareId!=0 ? (
                   <SharedPost
-                    key={post.post_id}
-                    postId={post.post_id}
+                    postId={post.id}
                     content={post.content}
-                    createdAt={post.create_at}
+                    createdAt={post.created_at}
                     userId={post.user_id}
                     images={post.images}
-                    shareId={post.share}
+                    shareId={post.shareId}
                   />
                 ) : (
                   <Post

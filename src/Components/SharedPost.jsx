@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { Avatar, Button, Tooltip, Menu, Dropdown } from "antd";
 import { FaRegComment } from "react-icons/fa";
@@ -29,7 +31,7 @@ import { countCommentService } from "../services/commentService";
 import { getUserIdFromLocalStorage } from "../utils/authUtils";
 
 import { reactionConfig } from "../assets/Config";
-import { getPostByIdService } from "../services/postService";
+import { getPostByIdService, getShareCount, getSharedPostByIdService } from "../services/postService";
 import { DeletePostByIdService } from "../services/postService";
 import { useNavigate } from "react-router-dom";
 
@@ -65,10 +67,11 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
   const getSharedPost = async () => {
     try {
       setLoading(true);
-      const response = await getPostByIdService(shareId);
+      const response = await getSharedPostByIdService(postId);
 
-      if (response?.data?.data?.postResponse) {
-        setSharedPost(response.data.data.postResponse); // Lưu bài chia sẻ nếu có dữ liệu
+      if (response?.data?.post) {
+        setSharedPost(response.data.post); // Lưu bài chia sẻ nếu có dữ liệu
+        setMainUserInfo(response?.data?.post.originalPost.user || []);
       } else {
         console.warn("Shared post is null or undefined");
         setSharedPost(null); // Đặt giá trị null nếu không có dữ liệu
@@ -81,17 +84,6 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
     }
   };
 
-  const fetchMainUser = async () => {
-    try {
-      setLoading(true);
-      const response = await userFindByIdService(sharedPost.user_id);
-      setMainUserInfo(response?.data?.data || []); // Lưu dữ liệu trả về
-    } catch (error) {
-      console.error("Error fetching user:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const closeModal = () => {
     setIsShareModalOpen(false);
@@ -106,7 +98,7 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
 
   const getAllReactions = () => {
     return reactions
-      .map((reaction) => reaction.fullName + " (" + reaction.reactionType + ")")
+      .map((reaction) => reaction.user.name + " (" + reaction.type + ")")
       .join("<br />"); // Thay thế '\n' bằng '<br />'
   };
 
@@ -116,7 +108,7 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
     try {
       setLoading(true);
       const response = await userFindByIdService(userId);
-      setUserInfo(response?.data?.data || []); // Lưu dữ liệu trả về
+      setUserInfo(response?.data?.user || []); // Lưu dữ liệu trả về
     } catch (error) {
       console.error("Error fetching user:", error);
     } finally {
@@ -127,8 +119,8 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
   const countReaction = async () => {
     try {
       setLoading(true);
-      const response = await countPostReactionService(postId);
-      setPostReactionCount(response?.data?.data || 0);
+      const response = await getPostReactionService(postId);
+      setPostReactionCount(response?.data?.counts.total || 0);
     } catch (error) {
       console.error("Error count reaction:", error);
     } finally {
@@ -140,7 +132,7 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
     try {
       setLoading(true);
       const response = await countCommentService(postId);
-      setCommentCount(response?.data?.data || 0);
+      setCommentCount(response || 0);
     } catch (error) {
       console.error("Error count reaction:", error);
     } finally {
@@ -160,15 +152,17 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
   const fetchUserReaction = async () => {
     try {
       const response = await getPostReactionService(postId);
-      const reactions = response?.data?.data || [];
+      const reactions = response?.data?.reactions || [];
       const userReaction = reactions.find(
-        (reaction) => reaction.userId === userId1
+        (reaction) => String(reaction.user_id) === String(userId1)
       );
-      if (userReaction) {
-        setSelectedReaction(userReaction.reactionType);
-      }
+      console.log("fetchUserReaction: ", userReaction);
+      
+      // Nếu tìm thấy userReaction, set selectedReaction bằng reactionType, nếu không, set là "NONE"
+      setSelectedReaction(userReaction ? userReaction.type : "NONE");
     } catch (error) {
       console.error("Error fetching user reactions:", error);
+      setSelectedReaction("NONE"); // Đảm bảo selectedReaction là "NONE" trong trường hợp lỗi
     }
   };
 
@@ -195,21 +189,16 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
     fetchUserReaction(); // Gọi thêm hàm kiểm tra cảm xúc
     fetchReactions();
     countComment();
-  }, []);
+  }, [postId]);
 
   useEffect(() => {
-    getSharedPost();
-    fetchUser();
     countReaction();
     fetchUserReaction(); 
+    getAllReactions();
     fetchReactions();
     countComment();
   }, [isCommentModalOpen]); //đóng mở modal thì xem lại số lượt like
-  useEffect(() => {
-    if (sharedPost?.user_id) {
-      fetchMainUser();
-    }
-  }, [sharedPost?.user_id]);
+  
   const handleReactionAdded = async (reactionType) => {
     try {
       console.log("Selected Reaction:", selectedReaction);
@@ -218,7 +207,10 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
       // Nếu người dùng bỏ chọn cảm xúc hoặc chọn lại cùng cảm xúc đã chọn
       if (reactionType === "NONE" || reactionType === selectedReaction) {
         console.log("Xóa cảm xúc hiện tại...");
-        await deletePostReactionService(postId, userId1);
+        await deletePostReactionService({
+          post_id: postId,
+          user_id: userId1,
+        });
         setSelectedReaction("NONE");
         console.log("Cảm xúc đã bị xóa");
       }
@@ -228,7 +220,7 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
         await addPostReactionService({
           post_id: postId,
           user_id: userId1,
-          reaction_type: reactionType,
+          type: reactionType,
         });
         setSelectedReaction(reactionType);
         console.log("Cảm xúc mới đã được thêm:", reactionType);
@@ -236,11 +228,14 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
       // Nếu bài viết đã có cảm xúc, cập nhật sang cảm xúc khác
       else {
         console.log("Cập nhật cảm xúc...");
-        await deletePostReactionService(postId, userId1); // Xóa cảm xúc cũ
+        await deletePostReactionService({
+          post_id: postId,
+          user_id: userId1,
+        }); // Xóa cảm xúc cũ
         await addPostReactionService({
           post_id: postId,
           user_id: userId1,
-          reaction_type: reactionType,
+          type: reactionType,
         }); // Thêm cảm xúc mới
         setSelectedReaction(reactionType);
         console.log("Cảm xúc đã được cập nhật thành:", reactionType);
@@ -261,7 +256,10 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
     if (selectedReaction !== "NONE") {
       // Nếu đang có cảm xúc LIKE, xóa nó đi
       console.log("Xóa cảm xúc ĐANG CÓ...");
-      await deletePostReactionService(postId, userId1);
+      await deletePostReactionService({
+        post_id: postId,
+        user_id: userId1,
+      });
       setSelectedReaction("NONE");
       console.log("đã xóa cảm xúc ĐANG CÓ");
     } else {
@@ -270,7 +268,7 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
       await addPostReactionService({
         post_id: postId,
         user_id: userId1,
-        reaction_type: "LIKE",
+        type: "LIKE",
       });
       setSelectedReaction("LIKE");
       console.log("Đã thêm cảm xúc LIKE");
@@ -278,9 +276,11 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
     fetchReactions();
     countReaction();
     getAllReactions();
+    fetchUserReaction();
     setIsReactionBoxVisible(false); // Đóng box cảm xúc
     setIsReactionBoxVisible2(false); // Đóng box cảm xúc
   };
+
 
   const addComment = (newComment) => {
     setComments((prevComments) => [
@@ -294,10 +294,10 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
       <ToastContainer /> 
       <div className={styles.postContainer}>
         <div className={styles.header}>
-          <Avatar src={userInfo.profilePictureUrl} className={styles.avatar} />
+          <Avatar src={userInfo.avatar_url} className={styles.avatar} />
           <div className={styles.userInfo}>
             <div>
-              <span className={styles.userName}>{userInfo.fullName}</span>
+              <span className={styles.userName}>{userInfo.name}</span>
               <span style={{ marginLeft: "4px", color: "#65686c" }}>
                 đã chia sẻ một bài viết
               </span>
@@ -333,20 +333,20 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
           <p style={{margin: '0'}}>{content}</p>
 
           <div className={styles.sharedContent}>
-            {sharedPost?.images?.length > 0 &&
-              sharedPost?.images
+            {sharedPost?.originalPost.images?.length > 0 &&
+              sharedPost?.originalPost.images
                 .slice(0, 2)
                 .map((image, index) => (
                   <img
                     key={index}
-                    src={image}
+                    src={image.image_url}
                     alt={`post-image-${index}`}
                     className={styles.mainImage}
                     onClick={() => handleImageClick(shareId)}
                   />
             ))}
               {/* Hiển thị nút "Xem tất cả" nếu có từ 3 ảnh trở lên */}
-              {sharedPost?.images.length >= 3 && (
+              {sharedPost?.originalPost.images.length >= 3 && (
                 <button
                   onClick={() => setIsCommentModalOpen(true)}
                   className={styles.viewMoreButton}
@@ -356,19 +356,19 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
               )}
             <div style={{ padding: "10px" }} className={styles.header}>
               <Avatar
-                src={mainUserInfo?.profilePictureUrl}
+                src={mainUserInfo?.avatar_url}
                 className={styles.avatar}
               />
               <div className={styles.userInfo}>
-                <span className={styles.userName}>{mainUserInfo?.fullName}</span>
+                <span className={styles.userName}>{mainUserInfo?.name}</span>
                 <span className={styles.time}>
-                  {new Date(sharedPost?.create_at).toLocaleString()} ·{" "}
+                  {new Date(sharedPost?.originalPost.created_at).toLocaleString()} ·{" "}
                   <FaEarthAmericas style={{ marginLeft: "4px" }} />
                 </span>
               </div>
             </div>
             <div className={styles.content}>
-              <p>{sharedPost?.content}</p>
+              <p>{sharedPost?.originalPost.content}</p>
             </div>
           </div>
         </div>
@@ -442,7 +442,6 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
             <span className={styles.cmtCount} style={{ marginRight: "10px" }}>
               {CommentCount} bình luận
             </span>
-            <span className={styles.shareCount}>1 lượt chia sẻ</span>
           </div>
         </div>
 
