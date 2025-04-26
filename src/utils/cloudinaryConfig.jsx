@@ -1,6 +1,6 @@
 // src/utils/cloudinaryConfig.js
-export const CLOUDINARY_UPLOAD_PRESET = "kbavfpzy";   // 🔧 Thay giá trị thật
-export const CLOUDINARY_CLOUD_NAME = "dzkzebsn7";         // 🔧 Thay giá trị thật
+export const CLOUDINARY_UPLOAD_PRESET = "kbavfpzy";   
+export const CLOUDINARY_CLOUD_NAME = "dzkzebsn7";         
 
 export const uploadToCloudinary = async (image, onProgress) => {
     const formData = new FormData();

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Avatar, Badge, Button, Divider, Input, List, Typography, Space, Tooltip, Popover, Spin } from 'antd';
-import { EllipsisOutlined, ExpandOutlined, EditOutlined } from '@ant-design/icons';
+import { EllipsisOutlined, ExpandOutlined, EditOutlined, PictureOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import SettingsMenu from './SettingsMenu';
 import { getUserIdFromLocalStorage } from '../../utils/authUtils';
@@ -9,10 +9,8 @@ import { getUserMessageListService } from '../../services/privateMessageService'
 const { Text, Title } = Typography;
 
 const truncateText = (text, maxLength) => {
-  if (text.length > maxLength) {
-    return text.slice(0, maxLength) + '...';
-  }
-  return text;
+  if (!text) return '';
+  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 };
 
 const MessageContent = ({ onMessageClick, onClose }) => {
@@ -23,55 +21,76 @@ const MessageContent = ({ onMessageClick, onClose }) => {
 
   const handleExpandClick = () => {
     navigate('/messages');
-    if (typeof onClose === 'function') {
-      onClose(); // Đóng Popover nếu có
-    }
+    if (typeof onClose === 'function') onClose();
   };
-
 
   const fetchUserMessageList = async () => {
     try {
       setLoading(true);
-      const response = await getUserMessageListService(userId.toString()); // Truyền chuỗi trực tiếp
-      setList(response?.data?.data || []);
+      const response = await getUserMessageListService(userId.toString());
+      setList(response?.data?.conversations || []);
     } catch (error) {
       console.error("Error fetching List:", error);
     } finally {
       setLoading(false);
     }
   };
-  
 
   useEffect(() => {
     fetchUserMessageList();
   }, []);
 
-  const MessageItem = ({ userId, fullName, lastMessageTime, profilePictureUrl, unread }) => (
-    <List.Item
-      style={styles.messageItem}
-      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
-      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fff')}
-      onClick={() => {
-        if (typeof onMessageClick === 'function') {
-          onMessageClick({ userId, fullName, profilePictureUrl });
-        }
-        if (typeof onClose === 'function') {
-          onClose(); // Đóng Popover khi chọn tin nhắn
-        }
-      }}
-    >
-      <List.Item.Meta
-        avatar={<Avatar src={profilePictureUrl} size="large" />}
-        title={<Text strong>{truncateText(fullName, 30)}</Text>} // Hiển thị tối đa 20 ký tự
-        description={
-          <Text type="secondary" style={styles.messageDescription}>
-            Tin nhắn mới · {lastMessageTime}
-          </Text>
-        }
-      />
-      {unread && <Badge dot color="#1890ff" />}
-    </List.Item>
-  );
+  const MessageItem = ({ conversation }) => {
+    const otherUser = conversation.other_user;
+    const lastMessage = conversation.last_message;
+
+    const renderLastMessageContent = () => {
+      if (!lastMessage) return '';
+      if (lastMessage.type === 'image') {
+        return (
+          <span>
+            <PictureOutlined style={{ marginRight: 4 }} />
+            Ảnh
+          </span>
+        );
+      }
+      if (lastMessage.content) {
+        return truncateText(lastMessage.content, 30);
+      }
+      return '';
+    };
+
+    return (
+      <List.Item
+        style={styles.messageItem}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fff')}
+        onClick={() => {
+          if (typeof onMessageClick === 'function') {
+            onMessageClick({
+              userId: otherUser.id,
+              fullName: otherUser.name,
+              profilePictureUrl: otherUser.avatar_url,
+            });
+          }
+          if (typeof onClose === 'function') {
+            onClose();
+          }
+        }}
+      >
+        <List.Item.Meta
+          avatar={<Avatar src={otherUser.avatar_url} size="large" />}
+          title={<Text strong>{truncateText(otherUser.name, 30)}</Text>}
+          description={
+            <Text type="secondary" style={styles.messageDescription}>
+              {renderLastMessageContent()}
+            </Text>
+          }
+        />
+        {/* Nếu cần badge thông báo tin nhắn chưa đọc, có thể thêm logic */}
+      </List.Item>
+    );
+  };
 
   return (
     <div style={styles.container}>
@@ -79,12 +98,8 @@ const MessageContent = ({ onMessageClick, onClose }) => {
         <Title level={4} style={styles.title}>Đoạn chat</Title>
         <Space>
           <Tooltip title="Tùy chọn">
-            <Popover
-              content={<SettingsMenu />}
-              trigger="click"
-              placement="bottomRight"
-            >
-              <EllipsisOutlined className={styles.icon} style={{ fontSize: '22px', color: 'gray' }} />
+            <Popover content={<SettingsMenu />} trigger="click" placement="bottomRight">
+              <EllipsisOutlined style={styles.icon} />
             </Popover>
           </Tooltip>
           <Tooltip title="Mở rộng">
@@ -107,11 +122,10 @@ const MessageContent = ({ onMessageClick, onClose }) => {
           <List
             itemLayout="horizontal"
             dataSource={list}
-            renderItem={(item) => <MessageItem key={item.userId} {...item} />}
+            renderItem={(conversation) => <MessageItem key={conversation.id} conversation={conversation} />}
           />
         )}
       </div>
-
       <Button type="text" onClick={handleExpandClick} style={styles.viewAllButton}>
         Xem tất cả trong Messenger
       </Button>
@@ -119,9 +133,8 @@ const MessageContent = ({ onMessageClick, onClose }) => {
   );
 };
 
-
 const styles = {
-  container: { minWidth: '400px', padding: '0 8px', },
+  container: { minWidth: '400px', padding: '0 8px' },
   header: { display: 'flex', justifyContent: 'space-between', padding: '10px' },
   content: { minHeight: '400px', padding: '8px' },
   title: { margin: 0, fontWeight: 'bold' },
@@ -130,7 +143,6 @@ const styles = {
   messageItem: { padding: '8px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', borderRadius: '10px' },
   messageDescription: { fontSize: '12px' },
   viewAllButton: { width: '100%', textAlign: 'center', color: '#1877f2' },
-
 };
 
 export default MessageContent;

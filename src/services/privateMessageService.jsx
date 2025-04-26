@@ -1,53 +1,35 @@
 import axiosCreate from "../utils/axiosRelease";
 import { domain } from "./api";
 
-
 export const sendPrivateMessageService = (data) => {
-    const formData = new FormData();
-    formData.append("senderId", data.senderId);
-    formData.append("receiverId", data.receiverId);
-    formData.append("messageContent", data.messageContent);
-    formData.append("messageType", data.messageType);
+  const payload = {
+    sender_id: data.sender_id,
+    receiver_id: data.receiver_id,
+    type: data.type,
+  };
 
-    if (data.attachments && Array.isArray(data.attachments)) {
-        data.attachments.forEach((file) => {
-            formData.append("attachments", file);
-        });
-    }
+  if (data.type === "text") {
+    payload.content = data.content;
+  } else if (data.type === "image") {
+    payload.image_url = data.image_url;
+  }
 
-    return axiosCreate.post(`${domain}/api/v1/private-message/send`, formData, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
-    });
+  return axiosCreate.post(`${domain}/chat/send`, payload);
 };
 
-export const getMessageHistoryService = (Data) => {
-    const { senderId, receiverId, page, size } = Data;
-    return axiosCreate.get(`${domain}/api/v1/private-message/history`, {
-        params: {
-            senderId, 
-            receiverId,
-            page,
-            size,
-        },
-    });
+export const getMessageHistoryService = (chatId) => {
+  return axiosCreate.get(`${domain}/chat/conversation/${chatId}`);
 };
 
 export const getUserMessageListService = (userId) => {
-    return axiosCreate.get(`${domain}/api/v1/private-message/users/last-messages`, {
-      params: {
-        userId, // Truyền trực tiếp chuỗi userId
-      },
-    });
-  };
-  
+  return axiosCreate.get(`${domain}/chat/user/${userId}/conversations`);
+};
 
-export const deleteMessageService = (Data, message_id) => {
-    const { userId } = Data;
-    return axiosCreate.delete(`${domain}/api/v1/private-message/delete/${message_id}`,{}, {
-        params: {
-            userId,
-        },
-    });
+export const deleteMessageService = (data, message_id) => {
+  const { userId } = data;
+  return axiosCreate.delete(`${domain}/api/v1/private-message/delete/${message_id}`, {
+    params: {
+      userId,
+    },
+  });
 };

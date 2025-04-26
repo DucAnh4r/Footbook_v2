@@ -1,46 +1,24 @@
 import React, { useEffect, useState, useRef } from 'react';
-import io from 'socket.io-client';
-import { Avatar, Input, Button, List, Typography, Space, Tooltip, Spin } from 'antd';
-import { SmileOutlined, PhoneOutlined, VideoCameraOutlined, InfoCircleOutlined, SendOutlined, CloseOutlined, StopOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import { RiEmojiStickerLine } from "react-icons/ri";
-import { PiGifFill } from "react-icons/pi";
-import { FaMicrophone } from "react-icons/fa";
-import { AiFillLike } from "react-icons/ai";
-import GifModal from '../../Modal/GifModal';
-import StickerModal from '../../Modal/StickerModal';
-import { startRecording, stopRecording } from '../../utils/audioRecorder';
-import './Messagepage.scss';
-import AudioMessage from "../../Components/AudioMessage";
+import { Avatar, Input, Button, Space, Tooltip, Typography, Upload, message as AntdMessage } from 'antd';
+import { PhoneOutlined, VideoCameraOutlined, InfoCircleOutlined, SendOutlined, UploadOutlined } from '@ant-design/icons';
 import { getMessageHistoryService, sendPrivateMessageService } from '../../services/privateMessageService';
+import { userFindByIdService } from '../../services/userService';
 import { getUserIdFromLocalStorage } from '../../utils/authUtils';
+import styles from './Messagepage.module.scss'; 
 
 const { Text } = Typography;
 
-// Kết nối WebSocket
-const socket = io.connect('http://localhost:5173');
-
 const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
-  const [message, setMessage] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]);
-  const [gifModalVisible, setGifModalVisible] = useState(false);
-  const [stickerModalVisible, setStickerModalVisible] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [audioUrl, setAudioUrl] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const chatBodyRef = useRef(null);
+
   const senderId = getUserIdFromLocalStorage();
-  const receiverId = selectedChat?.userId || null; 
-
-  useEffect(() => {
-    // Nhận tin nhắn từ server WebSocket
-    socket.on('receive_message', (data) => {
-      setMessages((prev) => [...prev, data]);
-    });
-
-    return () => {
-      socket.off('receive_message');
-    };
-  }, []);
+  const receiverId = selectedChat?.other_user?.id || null;
+  const conversationId = selectedChat?.id || null;
 
   useEffect(() => {
     if (chatBodyRef.current) {
@@ -48,227 +26,189 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
     }
   }, [messages]);
 
-  const handleSendGif = (gifUrl) => {
-    const gifMessage = {
-      senderId,
-      receiverId,
-      content: `<img src="${gifUrl}" alt="GIF" style="max-width: 200px; max-height: 200px;" />`,
-      type: 'gif',
-      time: new Date().toLocaleTimeString(),
+  // Fetch current user info
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (!senderId) return;
+      
+      try {
+        const response = await userFindByIdService(senderId);
+        setCurrentUser(response?.data?.user || null);
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+      }
     };
-    socket.emit('send_message', gifMessage);
-    setMessages((prev) => [...prev, gifMessage]);
-    setGifModalVisible(false);
-  };
-
-  const handleSendSticker = (stickerUrl) => {
-    const stickerMessage = {
-      senderId,
-      receiverId,
-      content: `<img src="${stickerUrl}" alt="Sticker" style="max-width: 200px; max-height: 200px;" />`,
-      type: 'sticker',
-      time: new Date().toLocaleTimeString(),
-    };
-    socket.emit('send_message', stickerMessage);
-    setMessages((prev) => [...prev, stickerMessage]);
-    setStickerModalVisible(false);
-  };
-
-  const handleStartRecording = async () => {
-    try {
-      await startRecording();
-      setIsRecording(true);
-    } catch (error) {
-      console.error("Error starting recording:", error);
-    }
-  };
-
-  const handleStopRecording = async () => {
-    try {
-      const { audioUrl } = await stopRecording();
-      setAudioUrl(audioUrl);
-
-      const audioMessage = {
-        senderId,
-        receiverId,
-        content: `<audio controls src="${audioUrl}"></audio>`,
-        type: 'audio',
-        time: new Date().toLocaleTimeString(),
-      };
-      socket.emit('send_message', audioMessage);
-      setMessages((prev) => [...prev, audioMessage]);
-      setIsRecording(false);
-    } catch (error) {
-      console.error('Error stopping recording:', error);
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (inputValue.trim() === "") return;
-
-    const newMessage = {
-        senderId,
-        receiverId,
-        messageContent: inputValue.trim(),
-        messageType: "TEXT", // Tin nhắn dạng văn bản
-    };
-
-    try {
-        // Gửi tin nhắn qua API
-        await sendPrivateMessageService(newMessage);
-
-        // Phát tin nhắn qua Socket.IO
-        socket.emit("sendMessage", {
-            senderId,
-            receiverId,
-            messageContent: inputValue.trim(),
-            messageType: "TEXT",
-        });
-
-        // Cập nhật giao diện người gửi
-        setMessages((prevMessages) => [{ ...newMessage, isSender: true }, ...prevMessages]);
-
-        // Reset input
-        setInputValue("");
-    } catch (error) {
-        console.error("Error sending message:", error);
-    }
-};
+    
+    fetchCurrentUser();
+  }, [senderId]);
 
   const fetchMessageHistory = async () => {
     try {
       setLoading(true);
-      const response = await getMessageHistoryService({
-        senderId,
-        receiverId,
-      });
-      const data = response?.data?.data || [];
+      const response = await getMessageHistoryService(conversationId);
+      const data = response?.data || {};
       setMessages(data.messages || []);
     } catch (error) {
-      console.error("Error fetching message history:", error);
+      console.error('Error fetching message history:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (receiverId) {
+    if (receiverId && conversationId) {
       fetchMessageHistory();
     }
-  }, [receiverId]);
+  }, [receiverId, conversationId]);
+
+  const handleSendMessage = async (type, value) => {
+    if (!value) return;
+
+    const payload = {
+      sender_id: senderId,
+      receiver_id: receiverId,
+      type: type,
+    };
+
+    if (type === 'text') {
+      payload.content = value;
+    } else if (type === 'image') {
+      payload.image_url = value;
+    }
+
+    try {
+      setSending(true);
+      await sendPrivateMessageService(payload);
+      setInputValue('');
+      fetchMessageHistory();
+    } catch (error) {
+      console.error('Error sending message:', error);
+      AntdMessage.error('Failed to send message.');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleUpload = async (file) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64Data = reader.result;
+      handleSendMessage('image', base64Data);
+    };
+    reader.readAsDataURL(file);
+
+    return false; // chặn upload mặc định của antd
+  };
+  
+  // Chuyển đổi sang kiểu số để so sánh
+  const isSameUser = (msgSenderId) => {
+    return Number(msgSenderId) === Number(senderId);
+  };
+
+  // Lấy avatar của người dùng hiện tại từ state
+  const getCurrentUserAvatar = () => {
+    return currentUser?.avatar_url || "https://via.placeholder.com/40";
+  };
 
   return (
-    <div style={styles.chatContainer}>
+    <div className={styles.chatContainer}>
       {/* Header */}
-      <div style={styles.header}>
+      <div className={styles.header}>
         <Space>
-          <Avatar src={selectedChat?.profilePrictureUrl || "https://via.placeholder.com/40"} />
-          <Text strong>{selectedChat?.fullName || "Select a chat"}</Text>
+          <Avatar src={selectedChat?.other_user?.avatar_url || "https://via.placeholder.com/40"} />
+          <Text strong>{selectedChat?.other_user?.name || "Select a chat"}</Text>
         </Space>
-        <Space style={{ paddingRight: '10px', columnGap: '15px' }}>
-          <Tooltip title="Call"><PhoneOutlined style={styles.icon} /></Tooltip>
-          <Tooltip title="Video"><VideoCameraOutlined style={styles.icon} /></Tooltip>
+        <Space className={styles.headerIcons}>
+          <Tooltip title="Call"><PhoneOutlined className={styles.icon} /></Tooltip>
+          <Tooltip title="Video"><VideoCameraOutlined className={styles.icon} /></Tooltip>
           <Tooltip title="Info">
-            <InfoCircleOutlined onClick={() => toggleRightSidebar((prev) => !prev)} style={styles.icon} />
+            <InfoCircleOutlined onClick={() => toggleRightSidebar((prev) => !prev)} className={styles.icon} />
           </Tooltip>
         </Space>
       </div>
 
-      {/* Messages List */}
-      <div className="chat-body" ref={chatBodyRef}>
+      {/* Messages */}
+      <div className={styles.chatBody} ref={chatBodyRef}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '10px' }}>Loading...</div>
+          <div className={styles.centerText}>Loading...</div>
         ) : messages.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '10px' }}>No messages yet.</div>
+          <div className={styles.centerText}>No messages yet.</div>
         ) : (
-          messages.map((msg, index) => (
-            <div
-              key={msg.messageId || index}
-              className={`chat-message ${msg.isSender ? "sender" : "receiver"}`}
-            >
-              {!msg.isSender && (
-                <Avatar
-                  src={selectedChat.avatarUrl || "https://via.placeholder.com/40"}
-                  style={{ marginRight: '8px' }}
-                />
-              )}
-              <div className="message-content">
-                {msg.messageType === "TEXT" && <span>{msg.messageContent}</span>}
+          messages.map((msg) => {
+            const isMyMessage = isSameUser(msg.sender_id);
+            
+            return (
+              <div
+                key={msg.id}
+                className={`${styles.chatMessage} ${isMyMessage ? styles.sender : styles.receiver}`}
+              >
+                {isMyMessage ? (
+                  // Tin nhắn của mình (sender)
+                  <>
+                    <div className={styles.messageContent}>
+                      {msg.type === 'text' && (
+                        <span>{msg.content}</span>
+                      )}
+                      {msg.type === 'image' && msg.image && (
+                        <img src={msg.image.image_url} alt="sent-img" className={styles.sentImage} />
+                      )}
+                    </div>
+                    <Avatar
+                      src={getCurrentUserAvatar()}
+                      className={styles.messageAvatar}
+                    />
+                  </>
+                ) : (
+                  // Tin nhắn của người khác (receiver)
+                  <>
+                    <Avatar
+                      src={selectedChat?.other_user?.avatar_url || "https://via.placeholder.com/40"}
+                      className={styles.messageAvatar}
+                    />
+                    <div className={styles.messageContent}>
+                      {msg.type === 'text' && (
+                        <span>{msg.content}</span>
+                      )}
+                      {msg.type === 'image' && msg.image && (
+                        <img src={msg.image.image_url} alt="sent-img" className={styles.sentImage} />
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
       {/* Footer */}
-      <div style={styles.footer}>
+      <div className={styles.footer}>
+        <Input
+          className={styles.input}
+          placeholder="Aa"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onPressEnter={() => handleSendMessage('text', inputValue)}
+          disabled={sending}
+        />
         <Space>
-          <Tooltip title="Record">
+          <Upload showUploadList={false} beforeUpload={handleUpload}>
+            <Tooltip title="Send Image">
+              <Button icon={<UploadOutlined />} type="text" />
+            </Tooltip>
+          </Upload>
+          <Tooltip title="Send">
             <Button
-              icon={<FaMicrophone style={{ color: '#0084ff' }} />}
-              onClick={isRecording ? handleStopRecording : handleStartRecording}
+              icon={<SendOutlined />}
               type="text"
-              style={{ color: isRecording ? 'red' : 'black' }}
+              onClick={() => handleSendMessage('text', inputValue)}
+              disabled={!inputValue.trim() || sending}
             />
           </Tooltip>
-          <Tooltip title="GIF">
-            <Button icon={<PiGifFill style={{ color: '#0084ff' }} />} onClick={() => setGifModalVisible(true)} />
-          </Tooltip>
-          <Tooltip title="Sticker">
-            <Button icon={<RiEmojiStickerLine style={{ color: '#0084ff' }} />} onClick={() => setStickerModalVisible(true)} />
-          </Tooltip>
         </Space>
-        <Input
-          style={styles.input}
-          placeholder="Aa"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onPressEnter={handleSendMessage}
-        />
-        <Tooltip title="Send">
-          <Button icon={<SendOutlined />} onClick={handleSendMessage} />
-        </Tooltip>
       </div>
-
-      {/* Modals */}
-      <GifModal visible={gifModalVisible} onClose={() => setGifModalVisible(false)} onSendGif={handleSendGif} />
-      <StickerModal visible={stickerModalVisible} onClose={() => setStickerModalVisible(false)} onSendSticker={handleSendSticker} />
     </div>
   );
-};
-
-const styles = {
-  chatContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    border: '1px solid #f0f0f0',
-    borderRadius: '8px',
-  },
-  header: {
-    padding: '10px',
-    backgroundColor: '#fff',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '1px solid #f0f0f0',
-  },
-  icon: {
-    fontSize: '18px',
-    cursor: 'pointer',
-  },
-  footer: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '10px',
-    borderTop: '1px solid #f0f0f0',
-    backgroundColor: '#fff',
-  },
-  input: {
-    flex: 1,
-    marginLeft: '10px',
-    borderRadius: '50px',
-  },
 };
 
 export default Messagepage;
