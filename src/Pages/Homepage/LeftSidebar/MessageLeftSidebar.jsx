@@ -99,7 +99,7 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
               <EllipsisOutlined className={styles.icon} />
             </Tooltip>
           </Dropdown>
-          <Tooltip title="Chỉnh sửa">
+          <Tooltip title="Tạo nhóm chat">
             <EditOutlined className={styles.icon} />
           </Tooltip>
         </div>
