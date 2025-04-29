@@ -28,7 +28,7 @@ import styles from "./Messagepage.module.scss";
 
 const { Text } = Typography;
 
-const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
+const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -98,7 +98,12 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
       setSending(true);
       await sendPrivateMessageService(payload);
       setInputValue("");
-      fetchMessageHistory();
+      await fetchMessageHistory();
+      
+      // Gọi callback để thông báo tin nhắn đã được gửi
+      if (typeof onSentMessage === 'function') {
+        onSentMessage();
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       AntdMessage.error("Failed to send message.");
@@ -122,7 +127,12 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
       };
 
       await sendPrivateMessageService(payload);
-      fetchMessageHistory();
+      await fetchMessageHistory();
+      
+      // Gọi callback để thông báo tin nhắn đã được gửi
+      if (typeof onSentMessage === 'function') {
+        onSentMessage();
+      }
     } catch (error) {
       console.error("Error sending image message:", error);
       AntdMessage.error("Failed to send image.");

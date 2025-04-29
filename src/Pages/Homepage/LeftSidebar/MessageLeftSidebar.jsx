@@ -11,7 +11,7 @@ import styles from './MessageLeftSidebar.module.scss';
 const { Text, Title } = Typography;
 const { TabPane } = Tabs;
 
-const MessageLeftSidebar = ({ onSelectChat }) => {
+const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isRestrictedView, setIsRestrictedView] = useState(false);
@@ -55,9 +55,17 @@ const MessageLeftSidebar = ({ onSelectChat }) => {
     }
   };
 
+  // Fetch khi component mount lần đầu
   useEffect(() => {
     fetchUserMessageList();
   }, []);
+
+  // Re-fetch khi refetchTrigger thay đổi
+  useEffect(() => {
+    if (refetchTrigger > 0) {
+      fetchUserMessageList();
+    }
+  }, [refetchTrigger]);
 
   const renderLastMessage = (lastMessage) => {
     if (!lastMessage) return '';

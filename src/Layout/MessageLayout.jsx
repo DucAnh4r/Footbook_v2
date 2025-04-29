@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 // /src/components/MassageLayout.jsx
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Layout } from "antd";
 import Header from "./Header";
 import MessageLeftSidebar from "../Pages/Homepage/LeftSidebar/MessageLeftSidebar";
@@ -15,6 +15,13 @@ const MessageLayout = (props) => {
   // State to hold selected chat details
   const [selectedChat, setSelectedChat] = useState(null);
   const [isRightSidebarVisible, setRightSidebarVisible] = useState(true);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  // Callback để kích hoạt việc refetch danh sách tin nhắn
+  const handleRefetchLeftList = useCallback(() => {
+    // Tăng counter để trigger rerender và useEffect trong MessageLeftSidebar
+    setRefetchTrigger(prev => prev + 1);
+  }, []);
 
   return (
     <Layout className="main-layout">
@@ -23,8 +30,10 @@ const MessageLayout = (props) => {
         <Layout className="inner-layout" style={{ marginTop: "63px" }}>
           {/* Left Sidebar */}
           <Sider width={360} className="scroll-on-hover sidebar">
-            <MessageLeftSidebar onSelectChat={setSelectedChat} />{" "}
-            {/* Pass handler */}
+            <MessageLeftSidebar
+              onSelectChat={setSelectedChat}
+              refetchTrigger={refetchTrigger}
+            />
           </Sider>
 
           {/* Main Content */}
@@ -34,6 +43,7 @@ const MessageLayout = (props) => {
               <Messagepage
                 selectedChat={selectedChat}
                 toggleRightSidebar={setRightSidebarVisible}
+                onSentMessage={handleRefetchLeftList} // Truyền callback cụ thể
               />
             </div>
           </Content>
