@@ -1,7 +1,8 @@
 import axiosCreate from "../utils/axiosRelease";
+import { uploadMessagesImgToCloudinary } from "../utils/cloudinaryConfig";
 import { domain } from "./api";
 
-export const sendPrivateMessageService = (data) => {
+export const sendPrivateMessageService = async (data) => {
   const payload = {
     sender_id: data.sender_id,
     receiver_id: data.receiver_id,
@@ -11,7 +12,11 @@ export const sendPrivateMessageService = (data) => {
   if (data.type === "text") {
     payload.content = data.content;
   } else if (data.type === "image") {
-    payload.image_url = data.image_url;
+    // Nếu là image, phải upload trước
+    const imageUrl = await uploadMessagesImgToCloudinary(data.image_file, data.onUploadProgress);
+    if (!imageUrl) throw new Error("Failed to upload image to cloud");
+
+    payload.image_url = imageUrl;
   }
 
   return axiosCreate.post(`${domain}/chat/send`, payload);

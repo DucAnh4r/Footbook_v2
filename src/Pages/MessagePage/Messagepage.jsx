@@ -1,15 +1,35 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Avatar, Input, Button, Space, Tooltip, Typography, Upload, message as AntdMessage } from 'antd';
-import { PhoneOutlined, VideoCameraOutlined, InfoCircleOutlined, SendOutlined, UploadOutlined } from '@ant-design/icons';
-import { getMessageHistoryService, sendPrivateMessageService } from '../../services/privateMessageService';
-import { userFindByIdService } from '../../services/userService';
-import { getUserIdFromLocalStorage } from '../../utils/authUtils';
-import styles from './Messagepage.module.scss'; 
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+import React, { useEffect, useState, useRef } from "react";
+import {
+  Avatar,
+  Input,
+  Button,
+  Space,
+  Tooltip,
+  Typography,
+  Upload,
+  message as AntdMessage,
+} from "antd";
+import {
+  PhoneOutlined,
+  VideoCameraOutlined,
+  InfoCircleOutlined,
+  SendOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
+import {
+  getMessageHistoryService,
+  sendPrivateMessageService,
+} from "../../services/privateMessageService";
+import { userFindByIdService } from "../../services/userService";
+import { getUserIdFromLocalStorage } from "../../utils/authUtils";
+import styles from "./Messagepage.module.scss";
 
 const { Text } = Typography;
 
 const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -30,7 +50,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       if (!senderId) return;
-      
+
       try {
         const response = await userFindByIdService(senderId);
         setCurrentUser(response?.data?.user || null);
@@ -38,7 +58,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
         console.error("Error fetching current user:", error);
       }
     };
-    
+
     fetchCurrentUser();
   }, [senderId]);
 
@@ -49,7 +69,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
       const data = response?.data || {};
       setMessages(data.messages || []);
     } catch (error) {
-      console.error('Error fetching message history:', error);
+      console.error("Error fetching message history:", error);
     } finally {
       setLoading(false);
     }
@@ -70,36 +90,49 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
       type: type,
     };
 
-    if (type === 'text') {
+    if (type === "text") {
       payload.content = value;
-    } else if (type === 'image') {
-      payload.image_url = value;
     }
 
     try {
       setSending(true);
       await sendPrivateMessageService(payload);
-      setInputValue('');
+      setInputValue("");
       fetchMessageHistory();
     } catch (error) {
-      console.error('Error sending message:', error);
-      AntdMessage.error('Failed to send message.');
+      console.error("Error sending message:", error);
+      AntdMessage.error("Failed to send message.");
     } finally {
       setSending(false);
     }
   };
 
   const handleUpload = async (file) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64Data = reader.result;
-      handleSendMessage('image', base64Data);
-    };
-    reader.readAsDataURL(file);
+    try {
+      setSending(true);
+
+      const payload = {
+        sender_id: senderId,
+        receiver_id: receiverId,
+        type: "image",
+        image_file: file, // truyền file thẳng vào, để sendPrivateMessageService tự upload
+        onUploadProgress: (progressEvent) => {
+          // bạn có thể console.log(Math.round((progressEvent.loaded * 100) / progressEvent.total));
+        },
+      };
+
+      await sendPrivateMessageService(payload);
+      fetchMessageHistory();
+    } catch (error) {
+      console.error("Error sending image message:", error);
+      AntdMessage.error("Failed to send image.");
+    } finally {
+      setSending(false);
+    }
 
     return false; // chặn upload mặc định của antd
   };
-  
+
   // Chuyển đổi sang kiểu số để so sánh
   const isSameUser = (msgSenderId) => {
     return Number(msgSenderId) === Number(senderId);
@@ -115,14 +148,28 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
       {/* Header */}
       <div className={styles.header}>
         <Space>
-          <Avatar src={selectedChat?.other_user?.avatar_url || "https://via.placeholder.com/40"} />
-          <Text strong>{selectedChat?.other_user?.name || "Select a chat"}</Text>
+          <Avatar
+            src={
+              selectedChat?.other_user?.avatar_url ||
+              "https://via.placeholder.com/40"
+            }
+          />
+          <Text strong>
+            {selectedChat?.other_user?.name || "Select a chat"}
+          </Text>
         </Space>
         <Space className={styles.headerIcons}>
-          <Tooltip title="Call"><PhoneOutlined className={styles.icon} /></Tooltip>
-          <Tooltip title="Video"><VideoCameraOutlined className={styles.icon} /></Tooltip>
+          <Tooltip title="Call">
+            <PhoneOutlined className={styles.icon} />
+          </Tooltip>
+          <Tooltip title="Video">
+            <VideoCameraOutlined className={styles.icon} />
+          </Tooltip>
           <Tooltip title="Info">
-            <InfoCircleOutlined onClick={() => toggleRightSidebar((prev) => !prev)} className={styles.icon} />
+            <InfoCircleOutlined
+              onClick={() => toggleRightSidebar((prev) => !prev)}
+              className={styles.icon}
+            />
           </Tooltip>
         </Space>
       </div>
@@ -136,21 +183,25 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
         ) : (
           messages.map((msg) => {
             const isMyMessage = isSameUser(msg.sender_id);
-            
+
             return (
               <div
                 key={msg.id}
-                className={`${styles.chatMessage} ${isMyMessage ? styles.sender : styles.receiver}`}
+                className={`${styles.chatMessage} ${
+                  isMyMessage ? styles.sender : styles.receiver
+                }`}
               >
                 {isMyMessage ? (
                   // Tin nhắn của mình (sender)
                   <>
                     <div className={styles.messageContent}>
-                      {msg.type === 'text' && (
-                        <span>{msg.content}</span>
-                      )}
-                      {msg.type === 'image' && msg.image && (
-                        <img src={msg.image.image_url} alt="sent-img" className={styles.sentImage} />
+                      {msg.type === "text" && <span>{msg.content}</span>}
+                      {msg.type === "image" && msg.image && (
+                        <img
+                          src={msg.image.image_url}
+                          alt="sent-img"
+                          className={styles.sentImage}
+                        />
                       )}
                     </div>
                     <Avatar
@@ -162,15 +213,20 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
                   // Tin nhắn của người khác (receiver)
                   <>
                     <Avatar
-                      src={selectedChat?.other_user?.avatar_url || "https://via.placeholder.com/40"}
+                      src={
+                        selectedChat?.other_user?.avatar_url ||
+                        "https://via.placeholder.com/40"
+                      }
                       className={styles.messageAvatar}
                     />
                     <div className={styles.messageContent}>
-                      {msg.type === 'text' && (
-                        <span>{msg.content}</span>
-                      )}
-                      {msg.type === 'image' && msg.image && (
-                        <img src={msg.image.image_url} alt="sent-img" className={styles.sentImage} />
+                      {msg.type === "text" && <span>{msg.content}</span>}
+                      {msg.type === "image" && msg.image && (
+                        <img
+                          src={msg.image.image_url}
+                          alt="sent-img"
+                          className={styles.sentImage}
+                        />
                       )}
                     </div>
                   </>
@@ -188,7 +244,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
           placeholder="Aa"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          onPressEnter={() => handleSendMessage('text', inputValue)}
+          onPressEnter={() => handleSendMessage("text", inputValue)}
           disabled={sending}
         />
         <Space>
@@ -201,7 +257,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar }) => {
             <Button
               icon={<SendOutlined />}
               type="text"
-              onClick={() => handleSendMessage('text', inputValue)}
+              onClick={() => handleSendMessage("text", inputValue)}
               disabled={!inputValue.trim() || sending}
             />
           </Tooltip>
