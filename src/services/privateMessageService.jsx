@@ -87,7 +87,7 @@ export const getGroupMessagesService = (groupId) => {
 
 // Lấy danh sách nhóm chat của một user
 export const getUserGroupChatsService = (userId) => {
-  return axiosCreate.get(`${domain}/group-chat/user/${userId}`);
+  return axiosCreate.get(`${domain}/group-chat/user/${userId}/groups`);
 };
 
 // Thêm thành viên vào nhóm chat

@@ -23,12 +23,12 @@ export const userLoginService = (Data) => {
 
 
 export const userSearchService = (Data) => {
-  const { keyword, page, size } = Data;
-  return axiosCreate.get(`${domain}/api/v1/users/search`, {
+  const { keyword, limit, offset } = Data;
+  return axiosCreate.get(`${domain}/users/search`, {
     params: {
       keyword,
-      page,
-      size,
+      limit,
+      offset,
     },
   });
 };
