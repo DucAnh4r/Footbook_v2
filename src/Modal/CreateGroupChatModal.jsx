@@ -19,24 +19,36 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
   const [uploading, setUploading] = useState(false);
   const [friends, setFriends] = useState([]);
   const [loadingFriends, setLoadingFriends] = useState(false);
+  const [allAvailableUsers, setAllAvailableUsers] = useState([]);
   const currentUserId = getUserIdFromLocalStorage();
 
   useEffect(() => {
     if (visible) {
       fetchFriends();
+      setSearchResults([]);
+      setAllAvailableUsers([]);
+      setSelectedMembers([]);
     }
   }, [visible]);
+
+  useEffect(() => {
+    if (friends.length > 0) {
+      showAvailableFriends();
+    }
+  }, [friends]);
 
   const fetchFriends = async () => {
     try {
       setLoadingFriends(true);
       const response = await userListFriendService(currentUserId);
       if (response && response.data) {
-        setFriends(response.data.map(friend => ({
+        const friendList = response.data.map(friend => ({
           id: friend.id || friend.user_id,
           name: friend.fullName || friend.name,
           avatar_url: friend.avatar_url || friend.profile_picture
-        })));
+        }));
+        setFriends(friendList);
+        setAllAvailableUsers(friendList);
       }
     } catch (error) {
       console.error("Error fetching friends:", error);
@@ -45,11 +57,16 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
     }
   };
 
+  const showAvailableFriends = () => {
+    const availableFriends = friends.filter(friend =>
+      !selectedMembers.some(member => member.id === friend.id)
+    );
+    setSearchResults(availableFriends);
+  };
+
   const handleSearch = async (value) => {
-    if (!value || value.length < 2) {
-      setSearchResults(friends.filter(friend =>
-        !selectedMembers.some(member => member.id === friend.id)
-      ));
+    if (!value) {
+      showAvailableFriends();
       return;
     }
   
@@ -58,17 +75,28 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
       const response = await userSearchService({ keyword: value });
   
       const users = response.data.results || [];
-      const filteredResults = users
-        .filter(user =>
-          user.id !== currentUserId &&
-          !selectedMembers.some(member => member.id === user.id)
-        )
+      const newSearchResults = users
+        .filter(user => user.id !== currentUserId)
         .map(user => ({
           id: user.id,
           name: user.name,
           avatar_url: user.avatar_url,
         }));
-  
+      
+      const updatedAllUsers = [...allAvailableUsers];
+      
+      newSearchResults.forEach(newUser => {
+        if (!updatedAllUsers.some(existingUser => existingUser.id === newUser.id)) {
+          updatedAllUsers.push(newUser);
+        }
+      });
+      
+      setAllAvailableUsers(updatedAllUsers);
+      
+      const filteredResults = newSearchResults.filter(user => 
+        !selectedMembers.some(member => member.id === user.id)
+      );
+      
       setSearchResults(filteredResults);
     } catch (error) {
       console.error("Error searching users:", error);
@@ -78,22 +106,40 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
     }
   };
   
-
-  const handleSelectMember = (selectedIds) => {
-    const combined = [...friends, ...searchResults];
-    const selected = selectedIds.map(id => {
-      const found = combined.find(user => user.id === id);
+  // Chuyển đổi sang sử dụng labelInValue
+  const handleSelectMember = (selectedOptions) => {
+    // selectedOptions sẽ là mảng các đối tượng { value: id, label: name }
+    const newSelectedMembers = selectedOptions.map(option => {
+      const found = allAvailableUsers.find(user => user.id === option.value);
       return found ? {
         id: found.id,
         name: found.name,
         avatar_url: found.avatar_url,
       } : null;
     }).filter(Boolean);
-    setSelectedMembers(selected);
+    
+    setSelectedMembers(newSelectedMembers);
+    
+    // Cập nhật lại danh sách hiển thị, loại bỏ người dùng đã chọn
+    const selectedIds = newSelectedMembers.map(member => member.id);
+    const availableUsers = allAvailableUsers.filter(user => 
+      !selectedIds.includes(user.id)
+    );
+    setSearchResults(availableUsers);
   };
 
   const handleRemoveMember = (memberId) => {
     setSelectedMembers(prev => prev.filter(member => member.id !== memberId));
+    
+    const removedUser = allAvailableUsers.find(user => user.id === memberId);
+    if (removedUser) {
+      setSearchResults(prev => {
+        if (!prev.some(user => user.id === memberId)) {
+          return [...prev, removedUser];
+        }
+        return prev;
+      });
+    }
   };
 
   const handleAvatarChange = (info) => {
@@ -148,13 +194,12 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
     setAvatarFile(null);
     setAvatarPreview(null);
     setSearchResults([]);
+    setAllAvailableUsers([]);
     onClose();
   };
 
   const handleFocus = () => {
-    setSearchResults(friends.filter(friend =>
-      !selectedMembers.some(member => member.id === friend.id)
-    ));
+    showAvailableFriends();
   };
 
   const uploadProps = {
@@ -174,6 +219,12 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
     onChange: handleAvatarChange,
     showUploadList: false,
   };
+
+  // Tạo mảng các đối tượng chứa value và label cho Select
+  const selectedOptions = selectedMembers.map(member => ({
+    value: member.id,
+    label: member.name
+  }));
 
   return (
     <Modal
@@ -214,7 +265,7 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
           <Select
             mode="multiple"
             placeholder="Tìm kiếm tên hoặc email"
-            value={selectedMembers.map(member => member.id)}
+            value={selectedOptions} // Sử dụng mảng các đối tượng {value, label}
             onSearch={handleSearch}
             onChange={handleSelectMember}
             onFocus={handleFocus}
@@ -222,9 +273,12 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
             filterOption={false}
             style={{ width: '100%' }}
             notFoundContent={searching ? "Đang tìm kiếm..." : "Không tìm thấy kết quả"}
+            defaultOpen={visible}
+            labelInValue={true} // Quan trọng: Bật chế độ sử dụng đối tượng {value, label}
+            optionLabelProp="label"
           >
             {searchResults.map(user => (
-              <Option key={user.id} value={user.id}>
+              <Option key={user.id} value={user.id} label={user.name}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <Avatar size="small" src={user.avatar_url} icon={<UserOutlined />} style={{ marginRight: '8px' }} />
                   {user.name}

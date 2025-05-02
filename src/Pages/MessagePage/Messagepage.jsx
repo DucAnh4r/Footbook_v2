@@ -10,6 +10,7 @@ import {
   Typography,
   Upload,
   message as AntdMessage,
+  Badge,
 } from "antd";
 import {
   PhoneOutlined,
@@ -17,10 +18,14 @@ import {
   InfoCircleOutlined,
   SendOutlined,
   UploadOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import {
   getMessageHistoryService,
   sendPrivateMessageService,
+  getGroupMessagesService,
+  sendGroupMessageService,
+  getGroupMembersService,
 } from "../../services/privateMessageService";
 import { userFindByIdService } from "../../services/userService";
 import { getUserIdFromLocalStorage } from "../../utils/authUtils";
@@ -34,17 +39,29 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [groupMembers, setGroupMembers] = useState([]);
   const chatBodyRef = useRef(null);
 
   const senderId = getUserIdFromLocalStorage();
-  const receiverId = selectedChat?.other_user?.id || null;
-  const conversationId = selectedChat?.id || null;
+  const isGroupChat = selectedChat?.type === 'group';
+  
+  // ID của người nhận hoặc ID của group chat tùy thuộc vào loại chat
+  const receiverId = !isGroupChat ? selectedChat?.other_user?.id : null;
+  const groupChatId = isGroupChat ? selectedChat?.id : null;
+  
+  // ID của cuộc trò chuyện (dùng cho lấy lịch sử tin nhắn cá nhân)
+  const conversationId = !isGroupChat ? selectedChat?.id : null;
 
   useEffect(() => {
-    if (chatBodyRef.current) {
-      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
-    }
-  }, [messages]);
+    const timeout = setTimeout(() => {
+      if (chatBodyRef.current) {
+        chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+      }
+    }, 100); // delay nhẹ để đảm bảo DOM đã vẽ xong
+  
+    return () => clearTimeout(timeout);
+  }, [messages, groupMembers]);
+  
 
   // Fetch current user info
   useEffect(() => {
@@ -62,43 +79,68 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
     fetchCurrentUser();
   }, [senderId]);
 
-  const fetchMessageHistory = async () => {
+  // Fetch tin nhắn - phân biệt giữa chat cá nhân và nhóm
+  const fetchMessages = async () => {
     try {
       setLoading(true);
-      const response = await getMessageHistoryService(conversationId);
-      const data = response?.data || {};
-      setMessages(data.messages || []);
+      
+      let response;
+      if (isGroupChat) {
+        // Lấy tin nhắn nhóm
+        response = await getGroupMessagesService(groupChatId);
+        setMessages(response?.data?.messages || []);
+        
+        // Lấy thêm thông tin thành viên nhóm
+        const membersResponse = await getGroupMembersService(groupChatId);
+        setGroupMembers(membersResponse?.data?.members || []);
+      } else {
+        // Lấy tin nhắn cá nhân
+        response = await getMessageHistoryService(conversationId);
+        setMessages(response?.data?.messages || []);
+      }
     } catch (error) {
-      console.error("Error fetching message history:", error);
+      console.error("Error fetching messages:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (receiverId && conversationId) {
-      fetchMessageHistory();
+    if ((isGroupChat && groupChatId) || (!isGroupChat && receiverId && conversationId)) {
+      fetchMessages();
     }
-  }, [receiverId, conversationId]);
+  }, [isGroupChat, receiverId, conversationId, groupChatId]);
 
   const handleSendMessage = async (type, value) => {
     if (!value) return;
 
-    const payload = {
-      sender_id: senderId,
-      receiver_id: receiverId,
-      type: type,
-    };
-
-    if (type === "text") {
-      payload.content = value;
-    }
-
     try {
       setSending(true);
-      await sendPrivateMessageService(payload);
+
+      if (isGroupChat) {
+        // Gửi tin nhắn nhóm
+        const payload = {
+          group_chat_id: groupChatId,
+          sender_id: senderId,
+          type: type,
+          content: value
+        };
+        
+        await sendGroupMessageService(payload);
+      } else {
+        // Gửi tin nhắn cá nhân
+        const payload = {
+          sender_id: senderId,
+          receiver_id: receiverId,
+          type: type,
+          content: value
+        };
+        
+        await sendPrivateMessageService(payload);
+      }
+      
       setInputValue("");
-      await fetchMessageHistory();
+      await fetchMessages();
       
       // Gọi callback để thông báo tin nhắn đã được gửi
       if (typeof onSentMessage === 'function') {
@@ -116,18 +158,35 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
     try {
       setSending(true);
 
-      const payload = {
-        sender_id: senderId,
-        receiver_id: receiverId,
-        type: "image",
-        image_file: file, // truyền file thẳng vào, để sendPrivateMessageService tự upload
-        onUploadProgress: (progressEvent) => {
-          // bạn có thể console.log(Math.round((progressEvent.loaded * 100) / progressEvent.total));
-        },
-      };
-
-      await sendPrivateMessageService(payload);
-      await fetchMessageHistory();
+      if (isGroupChat) {
+        // Gửi hình ảnh trong nhóm
+        const payload = {
+          group_chat_id: groupChatId,
+          sender_id: senderId,
+          type: "image",
+          image_file: file,
+          onUploadProgress: (progressEvent) => {
+            // Có thể hiển thị tiến trình upload nếu muốn
+          },
+        };
+        
+        await sendGroupMessageService(payload);
+      } else {
+        // Gửi hình ảnh cho cá nhân
+        const payload = {
+          sender_id: senderId,
+          receiver_id: receiverId,
+          type: "image",
+          image_file: file,
+          onUploadProgress: (progressEvent) => {
+            // Có thể hiển thị tiến trình upload nếu muốn
+          },
+        };
+        
+        await sendPrivateMessageService(payload);
+      }
+      
+      await fetchMessages();
       
       // Gọi callback để thông báo tin nhắn đã được gửi
       if (typeof onSentMessage === 'function') {
@@ -153,21 +212,51 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
     return currentUser?.avatar_url || "https://via.placeholder.com/40";
   };
 
+  // Lấy avatar của người gửi trong nhóm chat
+  const getSenderAvatar = (senderId) => {
+    if (Number(senderId) === Number(getUserIdFromLocalStorage())) {
+      return getCurrentUserAvatar();
+    }
+    
+    const member = groupMembers.find(member => Number(member.id) === Number(senderId));
+    return member?.avatar_url || "https://via.placeholder.com/40";
+  };
+
+  // Lấy tên của người gửi trong nhóm chat
+  const getSenderName = (senderId) => {
+    if (Number(senderId) === Number(getUserIdFromLocalStorage())) {
+      return currentUser?.name || "You";
+    }
+    
+    const member = groupMembers.find(member => Number(member.id) === Number(senderId));
+    return member?.name || "Unknown user";
+  };
+
   return (
     <div className={styles.chatContainer}>
       {/* Header */}
       <div className={styles.header}>
-        <Space>
-          <Avatar
-            src={
-              selectedChat?.other_user?.avatar_url ||
-              "https://via.placeholder.com/40"
-            }
-          />
-          <Text strong>
-            {selectedChat?.other_user?.name || "Select a chat"}
-          </Text>
-        </Space>
+        {isGroupChat ? (
+          <Space>
+            <Avatar src={selectedChat?.avatar_url || "https://via.placeholder.com/40"} />
+            <div>
+              <Text strong>{selectedChat?.name || "Group Chat"}</Text>
+              <div>
+                <Text type="secondary" style={{ fontSize: '12px' }}>
+                  {groupMembers.length} members
+                </Text>
+              </div>
+            </div>
+          </Space>
+        ) : (
+          <Space>
+            <Badge dot={selectedChat?.other_user?.status === 'available'} color="green" offset={[-2, 30]}>
+              <Avatar src={selectedChat?.other_user?.avatar_url || "https://via.placeholder.com/40"} />
+            </Badge>
+            <Text strong>{selectedChat?.other_user?.name || "Select a chat"}</Text>
+          </Space>
+        )}
+        
         <Space className={styles.headerIcons}>
           <Tooltip title="Call">
             <PhoneOutlined className={styles.icon} />
@@ -205,6 +294,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
                   // Tin nhắn của mình (sender)
                   <>
                     <div className={styles.messageContent}>
+                      {isGroupChat && <div className={styles.senderName}>You</div>}
                       {msg.type === "text" && <span>{msg.content}</span>}
                       {msg.type === "image" && msg.image && (
                         <img
@@ -223,13 +313,18 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
                   // Tin nhắn của người khác (receiver)
                   <>
                     <Avatar
-                      src={
-                        selectedChat?.other_user?.avatar_url ||
-                        "https://via.placeholder.com/40"
+                      src={isGroupChat 
+                        ? getSenderAvatar(msg.sender_id)
+                        : (selectedChat?.other_user?.avatar_url || "https://via.placeholder.com/40")
                       }
                       className={styles.messageAvatar}
                     />
                     <div className={styles.messageContent}>
+                      {isGroupChat && (
+                        <div className={styles.senderName}>
+                          {getSenderName(msg.sender_id)}
+                        </div>
+                      )}
                       {msg.type === "text" && <span>{msg.content}</span>}
                       {msg.type === "image" && msg.image && (
                         <img

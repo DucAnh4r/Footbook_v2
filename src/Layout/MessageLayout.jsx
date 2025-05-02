@@ -3,11 +3,11 @@
 import React, { useState, useCallback } from "react";
 import { Layout } from "antd";
 import Header from "./Header";
-import MessageLeftSidebar from "../Pages/Homepage/LeftSidebar/MessageLeftSidebar";
-import MessageRightSidebar from "../Pages/Homepage/RightSidebar/MessageRightSidebar";
 import Messagepage from "../Pages/MessagePage/Messagepage";
 import "./MessageLayout.scss";
 import { HeaderProvider } from "../Context/HeaderContext";
+import MessageLeftSidebar from "../Pages/MessagePage/MessageLeftSidebar";
+import MessageRightSidebar from "../Pages/MessagePage/MessageRightSidebar";
 
 const { Sider, Content } = Layout;
 

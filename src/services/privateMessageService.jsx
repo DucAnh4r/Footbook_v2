@@ -56,6 +56,9 @@ export const createGroupChatService = async (data) => {
     if (!avatarUrl) throw new Error("Failed to upload group avatar to cloud");
     payload.avatar_url = avatarUrl;
   }
+  else {
+    payload.avatar_url = "https://res.cloudinary.com/dzkzebsn7/image/upload/v1746200508/group-chat-icon-for-online-messaging-vector_ovjkhx.jpg"
+  }
 
   return axiosCreate.post(`${domain}/group-chat/create`, payload);
 };
@@ -77,12 +80,12 @@ export const sendGroupMessageService = async (data) => {
     payload.image_url = imageUrl;
   }
 
-  return axiosCreate.post(`${domain}/group-chat/send-message`, payload);
+  return axiosCreate.post(`${domain}/group-chat/send`, payload);
 };
 
 // Lấy danh sách tin nhắn của một nhóm chat
 export const getGroupMessagesService = (groupId) => {
-  return axiosCreate.get(`${domain}/group-chat/messages/${groupId}`);
+  return axiosCreate.get(`${domain}/group-chat/${groupId}/messages`);
 };
 
 // Lấy danh sách nhóm chat của một user
@@ -108,7 +111,7 @@ export const removeGroupMemberService = (groupChatId, userId) => {
 
 // Lấy danh sách thành viên của nhóm chat
 export const getGroupMembersService = (groupId) => {
-  return axiosCreate.get(`${domain}/group-chat/members/${groupId}`);
+  return axiosCreate.get(`${domain}/group-chat/${groupId}/members`);
 };
 
 // Cập nhật thông tin nhóm chat
