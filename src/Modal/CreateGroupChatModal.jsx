@@ -20,7 +20,8 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
   const [friends, setFriends] = useState([]);
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [allAvailableUsers, setAllAvailableUsers] = useState([]);
-  const currentUserId = getUserIdFromLocalStorage();
+  const currentUserId = parseInt(getUserIdFromLocalStorage(), 10);
+
 
   useEffect(() => {
     if (visible) {
@@ -273,7 +274,6 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
             filterOption={false}
             style={{ width: '100%' }}
             notFoundContent={searching ? "Đang tìm kiếm..." : "Không tìm thấy kết quả"}
-            defaultOpen={visible}
             labelInValue={true} // Quan trọng: Bật chế độ sử dụng đối tượng {value, label}
             optionLabelProp="label"
           >
