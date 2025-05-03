@@ -42,7 +42,7 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
       setLoadingFriends(true);
       const response = await userListFriendService(currentUserId);
       if (response && response.data) {
-        const friendList = response.data.map(friend => ({
+        const friendList = response.data.friends.map(friend => ({
           id: friend.id || friend.user_id,
           name: friend.fullName || friend.name,
           avatar_url: friend.avatar_url || friend.profile_picture

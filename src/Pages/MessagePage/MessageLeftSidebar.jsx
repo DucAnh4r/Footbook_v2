@@ -109,7 +109,15 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
     try {
       setLoading(true);
       const response = await getUserGroupChatsService(userId.toString());
-      const groups = response?.data?.group_chats || [];
+      let groups = response?.data?.group_chats || [];
+  
+      // 🔽 Sắp xếp theo thời gian tin nhắn mới nhất (giảm dần)
+      groups.sort((a, b) => {
+        const timeA = new Date(a.last_message?.created_at).getTime();
+        const timeB = new Date(b.last_message?.created_at).getTime();
+        return timeB - timeA;
+      });
+  
       setGroupChats(groups);
     } catch (error) {
       console.error("Error fetching group chats:", error);
@@ -117,6 +125,7 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     if (activeTab === "1") {
