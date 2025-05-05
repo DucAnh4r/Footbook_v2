@@ -1,0 +1,75 @@
+.container {
+    min-width: 400px;
+    padding: 0 8px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+  }
+  
+  .title {
+    margin: 0;
+    font-weight: bold;
+  }
+  
+  .icon {
+    font-size: 18px;
+    color: gray;
+    cursor: pointer;
+    &:hover {
+      color: #1877f2;
+    }
+  }
+  
+  .searchInput {
+    border-radius: 20px;
+    margin-bottom: 8px;
+  }
+  
+  .content {
+    min-height: 300px;
+    max-height: 400px;
+    padding: 8px;
+    overflow-y: auto;
+  }
+  
+  .messageItem {
+    padding: 8px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: #f0f0f0;
+    }
+  
+    &.selected {
+      background-color: #e6f7ff;
+    }
+  }
+  
+  .messageDescription {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    
+    .timeText {
+      margin-left: auto;
+      font-size: 11px;
+      color: rgba(0, 0, 0, 0.45);
+    }
+  }
+  
+  .viewAllButton {
+    width: 100%;
+    text-align: center;
+    color: #1877f2;
+    margin-top: 8px;
+    
+    &:hover {
+      background-color: #f0f8ff;
+    }
+  }

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Avatar, Badge, Button, Divider, Input, List, Typography, Space, Tooltip, Popover, Spin } from 'antd';
+import { Avatar, Badge, Button, Input, List, Typography, Space, Tooltip, Popover, Spin } from 'antd';
 import { EllipsisOutlined, ExpandOutlined, EditOutlined, PictureOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import SettingsMenu from './SettingsMenu';
 import { getUserIdFromLocalStorage } from '../../utils/authUtils';
-import { getUserMessageListService } from '../../services/privateMessageService';
+import { getUserMessageListService, getUserGroupChatsService } from '../../services/privateMessageService';
+import styles from './MessageContent.module.scss';
 
 const { Text, Title } = Typography;
 
@@ -15,7 +16,7 @@ const truncateText = (text, maxLength) => {
 
 const MessageContent = ({ onMessageClick, onClose }) => {
   const navigate = useNavigate();
-  const userId = getUserIdFromLocalStorage();
+  const userId = parseInt(getUserIdFromLocalStorage(), 10);
   const [loading, setLoading] = useState(true);
   const [list, setList] = useState([]);
 
@@ -24,54 +25,98 @@ const MessageContent = ({ onMessageClick, onClose }) => {
     if (typeof onClose === 'function') onClose();
   };
 
-  const fetchUserMessageList = async () => {
+  const fetchCombinedMessages = async () => {
     try {
       setLoading(true);
-      const response = await getUserMessageListService(userId.toString());
-      setList(response?.data?.conversations || []);
+
+      const [dmRes, groupRes] = await Promise.all([
+        getUserMessageListService(userId.toString()), 
+        getUserGroupChatsService(userId.toString())
+      ]);
+
+      const directMessages = (dmRes?.data?.conversations || []).map(conversation => ({
+        ...conversation,
+        type: 'dm' // đánh dấu tin nhắn cá nhân
+      }));
+
+      const groupMessages = (groupRes?.data?.group_chats || []).map(group => ({
+        ...group,
+        type: 'group' // đánh dấu nhóm
+      }));
+
+      // Gộp và sắp xếp theo thời gian tin nhắn mới nhất
+      const combined = [...directMessages, ...groupMessages].sort((a, b) => {
+        const timeA = new Date(a.last_message?.created_at ||  a.created_at).getTime();
+        const timeB = new Date(b.last_message?.created_at ||  b.created_at).getTime();
+        return timeB - timeA;
+      });
+
+      setList(combined);
     } catch (error) {
-      console.error("Error fetching List:", error);
+      console.error("Error fetching combined messages:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUserMessageList();
+    fetchCombinedMessages();
   }, []);
 
-  const MessageItem = ({ conversation }) => {
-    const otherUser = conversation.other_user;
-    const lastMessage = conversation.last_message;
+  const renderLastMessageContent = (item) => {
+    const msg = item.last_message;
+    if (!msg) return 'Chưa có tin nhắn';
 
-    const renderLastMessageContent = () => {
-      if (!lastMessage) return '';
-      if (lastMessage.type === 'image') {
-        return (
-          <span>
-            <PictureOutlined style={{ marginRight: 4 }} />
-            Ảnh
-          </span>
-        );
+    const isSelf = msg.sender_id === userId;
+    const isText = msg.type === 'text';
+
+    if (item.type === 'dm') {
+      if (isSelf) {
+        return isText ? `Bạn: ${truncateText(msg.content, 30)}` : 'Bạn đã gửi một ảnh';
+      } else {
+        return isText ? `${truncateText(msg.content, 30)}` : 'Đã gửi một ảnh';
       }
-      if (lastMessage.content) {
-        return truncateText(lastMessage.content, 30);
+    } else if (item.type === 'group') {
+      if (isSelf) {
+        return isText ? `Bạn: ${truncateText(msg.content, 30)}` : 'Bạn đã gửi một ảnh';
+      } else {
+        return isText ? `${msg.sender?.name}: ${truncateText(msg.content, 30)}` : `${msg.sender?.name} đã gửi một ảnh`;
       }
-      return '';
-    };
+    }
+
+    return '';
+  };
+
+  const MessageItem = ({ item }) => {
+    const isGroup = item.type === 'group';
+    const avatarSrc = isGroup ? item.avatar_url : item.other_user?.avatar_url;
+    const title = isGroup ? item.name : item.other_user?.name;
+    const lastMessageTime = item.last_message?.created_at 
+      ? new Date(item.last_message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : '';
 
     return (
       <List.Item
-        style={styles.messageItem}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fff')}
+        className={styles.messageItem}
         onClick={() => {
           if (typeof onMessageClick === 'function') {
-            onMessageClick({
-              userId: otherUser.id,
-              fullName: otherUser.name,
-              profilePictureUrl: otherUser.avatar_url,
-            });
+            if (isGroup) {
+              onMessageClick({
+                id: item.id,
+                type: 'group',
+                name: item.name,
+                profilePictureUrl: item.avatar_url,
+                ...item
+              });
+            } else {
+              onMessageClick({
+                userId: item.other_user.id,
+                fullName: item.other_user.name,
+                profilePictureUrl: item.other_user.avatar_url,
+                type: 'dm',
+                ...item
+              });
+            }
           }
           if (typeof onClose === 'function') {
             onClose();
@@ -79,38 +124,50 @@ const MessageContent = ({ onMessageClick, onClose }) => {
         }}
       >
         <List.Item.Meta
-          avatar={<Avatar src={otherUser.avatar_url} size="large" />}
-          title={<Text strong>{truncateText(otherUser.name, 30)}</Text>}
+          avatar={
+            isGroup ? (
+              <Avatar src={avatarSrc} size="large" />
+            ) : (
+              <Badge dot={item.other_user?.status === 'available'} color="green" offset={[-2, 30]}>
+                <Avatar src={avatarSrc} size="large" />
+              </Badge>
+            )
+          }
+          title={<Text strong>{truncateText(title, 30)}</Text>}
           description={
-            <Text type="secondary" style={styles.messageDescription}>
-              {renderLastMessageContent()}
-            </Text>
+            <div className={styles.messageDescription}>
+              <Text type="secondary" ellipsis>
+                {renderLastMessageContent(item)}
+              </Text>
+              <Text className={styles.timeText}>
+                {lastMessageTime}
+              </Text>
+            </div>
           }
         />
-        {/* Nếu cần badge thông báo tin nhắn chưa đọc, có thể thêm logic */}
       </List.Item>
     );
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <Title level={4} style={styles.title}>Đoạn chat</Title>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <Title level={4} className={styles.title}>Đoạn chat</Title>
         <Space>
           <Tooltip title="Tùy chọn">
             <Popover content={<SettingsMenu />} trigger="click" placement="bottomRight">
-              <EllipsisOutlined style={styles.icon} />
+              <EllipsisOutlined className={styles.icon} />
             </Popover>
           </Tooltip>
           <Tooltip title="Mở rộng">
-            <ExpandOutlined style={styles.icon} onClick={handleExpandClick} />
+            <ExpandOutlined className={styles.icon} onClick={handleExpandClick} />
           </Tooltip>
           <Tooltip title="Tạo bài viết">
-            <EditOutlined style={styles.icon} />
+            <EditOutlined className={styles.icon} />
           </Tooltip>
         </Space>
       </div>
-      <Input placeholder="Tìm kiếm trên Messenger" style={styles.searchInput} />
+      <Input placeholder="Tìm kiếm trên Messenger" className={styles.searchInput} />
       <div className={styles.content}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -122,27 +179,17 @@ const MessageContent = ({ onMessageClick, onClose }) => {
           <List
             itemLayout="horizontal"
             dataSource={list}
-            renderItem={(conversation) => <MessageItem key={conversation.id} conversation={conversation} />}
+            renderItem={(item) => <MessageItem key={item.id} item={item} />}
           />
         )}
       </div>
-      <Button type="text" onClick={handleExpandClick} style={styles.viewAllButton}>
+      <Button type="text" onClick={handleExpandClick} className={styles.viewAllButton}>
         Xem tất cả trong Messenger
       </Button>
     </div>
   );
 };
 
-const styles = {
-  container: { minWidth: '400px', padding: '0 8px' },
-  header: { display: 'flex', justifyContent: 'space-between', padding: '10px' },
-  content: { minHeight: '400px', padding: '8px' },
-  title: { margin: 0, fontWeight: 'bold' },
-  icon: { fontSize: '18px', color: 'gray', cursor: 'pointer' },
-  searchInput: { borderRadius: '20px', marginBottom: '8px' },
-  messageItem: { padding: '8px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', borderRadius: '10px' },
-  messageDescription: { fontSize: '12px' },
-  viewAllButton: { width: '100%', textAlign: 'center', color: '#1877f2' },
-};
+
 
 export default MessageContent;

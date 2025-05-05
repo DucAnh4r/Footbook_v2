@@ -57,7 +57,6 @@ const CreatePostModal = ({ isModalOpen, onClose, userName, onPostCreated }) => {
         theme: selectedTheme.id,
         images: uploadedFiles.map((file) => file.originFileObj),
         gif: selectedGif,
-        share: "",
       };
 
       await createPostService(postData);

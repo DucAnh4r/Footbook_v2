@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { Layout } from "antd";
-import StatusInput from "./StatusInput";
-import StoryList from "./StoryList";
-import Post from "../../Components/Post";
-import Reels from "./Reels";
-import LeftSidebar from "./LeftSidebar/LeftSidebar";
-import RightSidebar from "./RightSidebar/RightSidebar";
-import "./Homepage.scss";
-import SuggestedFriends from "../ProfilePage/UserProfilePage/SuggestedFriends";
-import GroupPost from "../../Components/GroupPost";
-import { useAuthCheck } from "../../utils/checkAuth";
-import { getUserIdFromLocalStorage } from "../../utils/authUtils";
-import { getFeedPostsService } from "../../services/postService";
-import SharedPost from "../../Components/SharedPost";
-import { userFindByIdService } from "../../services/userService";
+import React, { useEffect, useState } from 'react';
+import { Layout } from 'antd';
+import StatusInput from './StatusInput';
+import StoryList from './StoryList';
+import Post from '../../Components/Post';
+import Reels from './Reels';
+import LeftSidebar from './LeftSidebar/LeftSidebar';
+import RightSidebar from './RightSidebar/RightSidebar';
+import './Homepage.scss';
+import SuggestedFriends from '../ProfilePage/UserProfilePage/SuggestedFriends';
+import GroupPost from '../../Components/GroupPost';
+import { useAuthCheck } from '../../utils/checkAuth';
+import { getUserIdFromLocalStorage } from '../../utils/authUtils';
+import { getFeedPostsService } from '../../services/postService';
+import SharedPost from '../../Components/SharedPost';
+import { userFindByIdService } from '../../services/userService';
 
 const { Sider, Content } = Layout;
 
@@ -30,7 +30,7 @@ const Homepage = () => {
       const response = await userFindByIdService(user_id);
       setUserInfo(response?.data?.user || []);
     } catch (error) {
-      console.error("Error fetching user:", error);
+      console.error('Error fetching user:', error);
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ const Homepage = () => {
       const response = await getFeedPostsService(user_id);
       setPosts(response?.data?.posts || []); // Lưu dữ liệu trả về
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
     }
@@ -53,61 +53,36 @@ const Homepage = () => {
     fetchPosts();
   }, []);
 
-  document.title = "Trang chủ";
+  document.title = 'Trang chủ';
   return (
     <>
       <Sider
         width={360}
         style={{
-          background: "#f5f5f5",
-          height: "100vh",
-          overflow: "hidden",
-          position: "fixed",
-          top: "64px",
-          left: "0",
-          zIndex: "100",
+          background: '#f5f5f5',
+          height: '100vh',
+          overflow: 'hidden',
+          position: 'fixed',
+          top: '64px',
+          left: '0',
+          zIndex: '100'
         }}
         className="scroll-on-hover"
       >
-        <LeftSidebar user_id={user_id} />
+        <LeftSidebar user={userInfo} />
       </Sider>
 
-      <Content
-        style={{ padding: "70px 370px", minHeight: "100vh", overflow: "unset" }}
-      >
-        <div className="page-content" style={{ padding: "16px 30px" }}>
-          <StatusInput
-            userName={userInfo?.name}
-            avatar={userInfo?.avatar_url}
-            onPostCreated={fetchPosts}
-          />
+      <Content style={{ padding: '70px 370px', minHeight: '100vh', overflow: 'unset' }}>
+        <div className="page-content" style={{ padding: '16px 30px' }}>
+          <StatusInput userName={userInfo?.name} avatar={userInfo?.avatar_url} onPostCreated={fetchPosts} />
 
           {loading ? (
             <p>Đang tải bài viết...</p>
           ) : posts.length > 0 ? (
             posts
-              .filter((post) => !post.isDeleted)
-              .map((post) =>
-                post.shareId!=0 ? (
-                  <SharedPost
-                    postId={post.id}
-                    content={post.content}
-                    createdAt={post.created_at}
-                    userId={post.user_id}
-                    images={post.images}
-                    shareId={post.shareId}
-                  />
-                ) : (
-                  <Post
-                    key={post.id}
-                    postId={post.id}
-                    content={post.content}
-                    createdAt={post.created_at}
-                    userId={post.user.id}
-                    images={post.images}
-                    isModalOpen={false}
-                  />
-                )
+              .filter(post => !post.isDeleted)
+              .map(post =>
+                post.shareId !== 0 && post.shareId !== null ? <SharedPost key={post.id} postId={post.id} content={post.content} createdAt={post.created_at} userId={post.user_id} images={post.images} shareId={post.shareId} user={post.user} /> : <Post key={post.id} postId={post.id} content={post.content} createdAt={post.created_at} userId={post.user.id} images={post.images} isModalOpen={false} user={post.user} />
               )
           ) : (
             <p>Không có bài viết nào để hiển thị.</p>
@@ -118,13 +93,13 @@ const Homepage = () => {
       <Sider
         width={360}
         style={{
-          background: "#f5f5f5",
-          height: "100vh",
-          overflow: "hidden",
-          position: "fixed",
-          top: "64px",
-          right: "0",
-          zIndex: "100",
+          background: '#f5f5f5',
+          height: '100vh',
+          overflow: 'hidden',
+          position: 'fixed',
+          top: '64px',
+          right: '0',
+          zIndex: '100'
         }}
         className="scroll-on-hover"
       >

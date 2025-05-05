@@ -34,14 +34,14 @@ import { reactionConfig } from "../assets/Config";
 import { DeletePostByIdService, getShareCount } from "../services/postService";
 import { useNavigate } from "react-router-dom";
 
-const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
+const Post = ({ content, createdAt, userId, images, postId, isModalOpen, user }) => {
   const userId1 = getUserIdFromLocalStorage(); // Lấy userId1 từ localStorage
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isReactionBoxVisible, setIsReactionBoxVisible] = useState(false);
   const [isReactionBoxVisible2, setIsReactionBoxVisible2] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState("NONE");
-  const [userInfo, setUserInfo] = useState([]);
+  const [userInfo, setUserInfo] = useState(user);
   const [postReactionCount, setPostReactionCount] = useState([]);
   const [CommentCount, setCommentCount] = useState([]);
   const [ShareCount, setShareCount] = useState([]);
@@ -74,18 +74,6 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
   };
 
   const [comments, setComments] = useState([]);
-
-  const fetchUser = async () => {
-    try {
-      setLoading(true);
-      const response = await userFindByIdService(userId);
-      setUserInfo(response?.data?.user || []); // Lưu dữ liệu trả về
-    } catch (error) {
-      console.error("Error fetching user:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const countReaction = async () => {
     try {
@@ -169,7 +157,6 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
   };
 
   useEffect(() => {
-    fetchUser();
     countReaction();
     fetchUserReaction(); // Gọi thêm hàm kiểm tra cảm xúc
     fetchReactions();
@@ -280,9 +267,9 @@ const Post = ({ content, createdAt, userId, images, postId, isModalOpen }) => {
       <ToastContainer />
       <div className={styles.postContainer}>
         <div className={styles.header}>
-          <Avatar src={userInfo.avatar_url} className={styles.avatar} />
+          <Avatar src={userInfo?.avatar_url} className={styles.avatar} />
           <div className={styles.userInfo}>
-            <span className={styles.userName}>{userInfo.name}</span>
+            <span className={styles.userName}>{userInfo?.name}</span>
             <span className={styles.time}>
               {new Date(createdAt).toLocaleString()} ·{" "}
               <FaEarthAmericas style={{ marginLeft: "4px" }} />

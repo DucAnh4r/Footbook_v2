@@ -62,8 +62,8 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
 
       // Gộp và sắp xếp theo thời gian tin nhắn mới nhất
       const combined = [...directMessages, ...groupMessages].sort((a, b) => {
-        const timeA = new Date(a.last_message?.created_at || 0).getTime();
-        const timeB = new Date(b.last_message?.created_at || 0).getTime();
+        const timeA = new Date(a.last_message?.created_at ||  a.created_at).getTime();
+        const timeB = new Date(b.last_message?.created_at ||  b.created_at).getTime();
         return timeB - timeA;
       });
 

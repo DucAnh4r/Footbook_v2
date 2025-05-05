@@ -64,7 +64,6 @@ export const createPostService = async (Data, onUploadProgress) => {
     content: Data.content,
     privacy: Data.privacy,
     theme: Data.theme,
-    share: Data.share,
     images: imageUrls,
   };
 

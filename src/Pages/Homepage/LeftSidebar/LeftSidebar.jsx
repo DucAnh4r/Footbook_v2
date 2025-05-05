@@ -1,27 +1,15 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import styles from './LeftSidebar.module.scss';
 import FriendImg from '../../../assets/image/Homepage/LeftSidebar/friend.png';
 import MessImg from '../../../assets/image/Homepage/LeftSidebar/messenger.png';
 import { useNavigate } from 'react-router-dom';
 import { getUserIdFromLocalStorage } from '../../../utils/authUtils';
-import { userFindByIdService } from '../../../services/userService'; // Giả sử service đã được import đúng
 
-const LeftSidebar = () => {
-    const [userInfo, setUserInfo] = useState({});
+const LeftSidebar = ({user}) => {
+    const [userInfo, setUserInfo] = useState(user);
     const [loading, setLoading] = useState(false);
     const user_id = getUserIdFromLocalStorage(); // Lấy user_id từ LocalStorage
-
-    const fetchUser = async () => {
-        try {
-            setLoading(true);
-            const response = await userFindByIdService(user_id);
-            setUserInfo(response?.data?.user || {});
-        } catch (error) {
-            console.error("Error fetching user:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const navigate = useNavigate();
 
@@ -38,11 +26,9 @@ const LeftSidebar = () => {
     };
 
     useEffect(() => {
-        if (user_id) {
-            fetchUser();
-        }
-    }, [user_id]);
-
+        setUserInfo(user);
+    }, [user]);
+    
     return (
         <div className={styles['container']}>
             {loading ? (
@@ -54,11 +40,11 @@ const LeftSidebar = () => {
                             <div className={styles['image-container']}>
                                 <img
                                     className={styles['image']}
-                                    src={userInfo?.avatar_url}
+                                    src={userInfo.avatar_url}
                                     alt=""
                                 />
                             </div>
-                            <span className={styles['text']}>{userInfo?.name || 'Người dùng'}</span>
+                            <span className={styles['text']}>{userInfo.name || 'Người dùng'}</span>
                         </div>
                     </li>
                     <li className={styles['list-item']} onClick={handleFriendsClick}>

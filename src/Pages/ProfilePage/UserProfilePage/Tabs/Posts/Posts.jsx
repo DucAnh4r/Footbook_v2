@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
-import AboutSection from "./AboutSection";
-import { Col, Row, Space } from "antd";
-import StatusInput from "../../../../Homepage/StatusInput";
-import Post from "../../../../../Components/Post";
-import PostFilter from "./PostFilter";
-import PhotoGallery from "./PhotoGallery";
-import FriendsList from "./FriendsList";
-import styles from "./Posts.module.scss";
-import { getUserIdFromLocalStorage } from "../../../../../utils/authUtils";
-import { getPostByUserIdService } from "../../../../../services/postService";
-import SharedPost from "../../../../../Components/SharedPost";
+import React, { useEffect, useState } from 'react';
+import AboutSection from './AboutSection';
+import { Col, Row, Space } from 'antd';
+import StatusInput from '../../../../Homepage/StatusInput';
+import Post from '../../../../../Components/Post';
+import PostFilter from './PostFilter';
+import PhotoGallery from './PhotoGallery';
+import FriendsList from './FriendsList';
+import styles from './Posts.module.scss';
+import { getUserIdFromLocalStorage } from '../../../../../utils/authUtils';
+import { getPostByUserIdService } from '../../../../../services/postService';
+import SharedPost from '../../../../../Components/SharedPost';
 
 const Posts = ({ userInfo, userName, avatar }) => {
   const [posts, setPosts] = useState([]);
@@ -22,7 +22,7 @@ const Posts = ({ userInfo, userName, avatar }) => {
       const response = await getPostByUserIdService(user_id, 1000);
       setPosts(response?.data?.posts || []);
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
     }
@@ -34,7 +34,7 @@ const Posts = ({ userInfo, userName, avatar }) => {
   return (
     <Row gutter={16}>
       <Col span={10} className={styles.leftCol}>
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
           <AboutSection userInfo={userInfo} />
           <PhotoGallery />
           <FriendsList />
@@ -42,44 +42,19 @@ const Posts = ({ userInfo, userName, avatar }) => {
       </Col>
       <Col
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}
         span={14}
       >
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          <StatusInput
-            userName={userName}
-            avatar={avatar}
-            onPostCreated={fetchPosts}
-          />
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+          <StatusInput userName={userName} avatar={avatar} onPostCreated={fetchPosts} />
           <PostFilter />
           {loading ? (
             <p>Đang tải bài viết...</p>
           ) : posts.length > 0 ? (
-            posts.map((post) =>
-              post.shareId != 0 ? (
-                <SharedPost
-                  postId={post.id}
-                  content={post.content}
-                  createdAt={post.created_at}
-                  userId={post.user_id}
-                  images={post.images}
-                  shareId={post.shareId}
-                />
-              ) : (
-                <Post
-                  key={post.id}
-                  postId={post.id}
-                  content={post.content}
-                  createdAt={post.created_at}
-                  userId={post.user.id}
-                  images={post.images}
-                  isModalOpen={false}
-                />
-              )
-            )
+            posts.map(post => (post.shareId !== 0 && post.shareId !== null ? <SharedPost postId={post.id} content={post.content} createdAt={post.created_at} userId={post.user_id} images={post.images} shareId={post.shareId} /> : <Post key={post.id} postId={post.id} content={post.content} createdAt={post.created_at} userId={post.user.id} images={post.images} isModalOpen={false} />))
           ) : (
             <p>Không có bài viết nào để hiển thị.</p>
           )}

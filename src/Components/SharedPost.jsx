@@ -36,7 +36,7 @@ import { DeletePostByIdService } from "../services/postService";
 import { useNavigate } from "react-router-dom";
 
 
-const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => {
+const SharedPost = ({ content, createdAt, userId, images, postId, shareId, user }) => {
   const userId1 = getUserIdFromLocalStorage(); // Lấy userId1 từ localStorage
 
   const [sharedPost, setSharedPost] = useState(null); // Lưu bài chia sẻ
@@ -46,7 +46,7 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
   const [isReactionBoxVisible, setIsReactionBoxVisible] = useState(false);
   const [isReactionBoxVisible2, setIsReactionBoxVisible2] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState("NONE");
-  const [userInfo, setUserInfo] = useState([]);
+  const [userInfo, setUserInfo] = useState(user);
   const [mainUserInfo, setMainUserInfo] = useState([]);
   const [postReactionCount, setPostReactionCount] = useState([]);
   const [CommentCount, setCommentCount] = useState([]);
@@ -103,18 +103,6 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
   };
 
   const [comments, setComments] = useState([]);
-
-  const fetchUser = async () => {
-    try {
-      setLoading(true);
-      const response = await userFindByIdService(userId);
-      setUserInfo(response?.data?.user || []); // Lưu dữ liệu trả về
-    } catch (error) {
-      console.error("Error fetching user:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const countReaction = async () => {
     try {
@@ -184,7 +172,6 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
 
   useEffect(() => {
     getSharedPost();
-    fetchUser();
     countReaction();
     fetchUserReaction(); // Gọi thêm hàm kiểm tra cảm xúc
     fetchReactions();
@@ -294,10 +281,10 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId }) => 
       <ToastContainer /> 
       <div className={styles.postContainer}>
         <div className={styles.header}>
-          <Avatar src={userInfo.avatar_url} className={styles.avatar} />
+          <Avatar src={userInfo?.avatar_url} className={styles.avatar} />
           <div className={styles.userInfo}>
             <div>
-              <span className={styles.userName}>{userInfo.name}</span>
+              <span className={styles.userName}>{userInfo?.name}</span>
               <span style={{ marginLeft: "4px", color: "#65686c" }}>
                 đã chia sẻ một bài viết
               </span>
