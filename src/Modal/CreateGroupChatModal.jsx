@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { Modal, Input, Button, Avatar, message, Upload, Select, Tag } from 'antd';
-import { UserOutlined, CameraOutlined } from '@ant-design/icons';
+import { Modal, Input, Button, Avatar, message, Upload, Select, Tag, Spin } from 'antd';
+import { UserOutlined, CameraOutlined, PictureOutlined, CloseCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import { createGroupChatService } from '../services/privateMessageService';
 import { getUserIdFromLocalStorage } from '../utils/authUtils';
 import { userSearchService, userListFriendService } from '../services/userService';
@@ -107,9 +107,7 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
     }
   };
   
-  // Chuyển đổi sang sử dụng labelInValue
   const handleSelectMember = (selectedOptions) => {
-    // selectedOptions sẽ là mảng các đối tượng { value: id, label: name }
     const newSelectedMembers = selectedOptions.map(option => {
       const found = allAvailableUsers.find(user => user.id === option.value);
       return found ? {
@@ -121,7 +119,6 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
     
     setSelectedMembers(newSelectedMembers);
     
-    // Cập nhật lại danh sách hiển thị, loại bỏ người dùng đã chọn
     const selectedIds = newSelectedMembers.map(member => member.id);
     const availableUsers = allAvailableUsers.filter(user => 
       !selectedIds.includes(user.id)
@@ -144,15 +141,30 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
   };
 
   const handleAvatarChange = (info) => {
-    if (info.file.originFileObj) {
-      setAvatarFile(info.file.originFileObj);
+    const file = info.file.originFileObj || info.file;
+    if (file) {
+      setUploading(true);
+      setAvatarFile(file);
+      
+      // Đảm bảo preview hoạt động bằng cách sử dụng FileReader
       const reader = new FileReader();
-      reader.readAsDataURL(info.file.originFileObj);
+      reader.readAsDataURL(file);
       reader.onload = () => {
         setAvatarPreview(reader.result);
         setUploading(false);
+        console.log("Preview đã được tạo:", reader.result.substring(0, 50) + "...");
+      };
+      reader.onerror = (error) => {
+        console.error("Lỗi khi đọc file:", error);
+        setUploading(false);
+        message.error("Không thể xem trước ảnh");
       };
     }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview(null);
   };
 
   const generateDefaultGroupName = () => {
@@ -165,27 +177,37 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
       message.error("Vui lòng chọn ít nhất 2 thành viên để tạo nhóm chat");
       return;
     }
-
+  
     const finalGroupName = groupName.trim() || generateDefaultGroupName();
+    
     try {
+      // Get member IDs
       const memberIds = selectedMembers.map(member => member.id);
-      const data = {
+      
+      // Create data object (not FormData) as expected by the service
+      const groupChatData = {
         name: finalGroupName,
         creator_id: currentUserId,
         members: [currentUserId, ...memberIds],
-        avatar_file: avatarFile,
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          console.log(`Upload progress: ${percentCompleted}%`);
-        }
       };
-      await createGroupChatService(data);
+      
+      // Add avatar file if available
+      if (avatarFile) {
+        groupChatData.avatar_file = avatarFile;
+        groupChatData.onUploadProgress = (progressEvent) => {
+          console.log("Upload progress:", Math.round((progressEvent.loaded * 100) / progressEvent.total));
+        };
+      }
+      
+      // Call the service with the correct data format
+      await createGroupChatService(groupChatData);
+      
       message.success("Tạo nhóm chat thành công");
       onSuccess && onSuccess();
       handleCancel();
     } catch (error) {
       console.error("Error creating group chat:", error);
-      message.error("Không thể tạo nhóm chat");
+      message.error("Không thể tạo nhóm chat: " + (error.response?.data?.message || error.message));
     }
   };
 
@@ -204,24 +226,29 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
   };
 
   const uploadProps = {
+    accept: "image/*",
     beforeUpload: (file) => {
       const isImage = file.type.startsWith('image/');
       const isLt2M = file.size / 1024 / 1024 < 2;
+      
       if (!isImage) {
         message.error('Bạn chỉ có thể tải lên tệp hình ảnh!');
-        return false;
+        return Upload.LIST_IGNORE;
       }
+      
       if (!isLt2M) {
         message.error('Hình ảnh phải nhỏ hơn 2MB!');
-        return false;
+        return Upload.LIST_IGNORE;
       }
-      return false;
+      
+      // Xử lý file và preview trực tiếp tại đây
+      handleAvatarChange({ file });
+      return false; // Ngăn chặn upload tự động
     },
-    onChange: handleAvatarChange,
     showUploadList: false,
+    multiple: false,
   };
 
-  // Tạo mảng các đối tượng chứa value và label cho Select
   const selectedOptions = selectedMembers.map(member => ({
     value: member.id,
     label: member.name
@@ -241,15 +268,86 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
       width={500}
     >
       <div className={styles.modalContent}>
-        <div className={styles.avatarUploadContainer}>
-          <Upload {...uploadProps}>
-            <div className={styles.avatarWrapper}>
-              <Avatar size={100} icon={<UserOutlined />} src={avatarPreview} />
-              <div className={styles.avatarIcon}>
-                <CameraOutlined className={styles.avatarIconInner} />
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel}>Ảnh nhóm:</label>
+          <div className={styles.uploadArea} style={{ position: 'relative' }}>
+            {uploading ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
+                <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+                <div style={{ marginTop: '12px' }}>Đang xử lý ảnh...</div>
               </div>
-            </div>
-          </Upload>
+            ) : avatarPreview ? (
+              <>
+                <img 
+                  src={avatarPreview} 
+                  alt="Avatar preview" 
+                  style={{ 
+                    width: '100%', 
+                    height: 'auto', 
+                    borderRadius: '8px',
+                    maxHeight: '200px',
+                    objectFit: 'contain'
+                  }} 
+                />
+                <Button
+                  type="text"
+                  icon={<CloseCircleOutlined />}
+                  className={styles.closeUploadButton}
+                  onClick={handleRemoveAvatar}
+                  style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    borderRadius: '50%'
+                  }}
+                />
+                <div 
+                  style={{ 
+                    position: 'absolute', 
+                    bottom: 0, 
+                    left: 0, 
+                    width: '100%', 
+                    background: 'rgba(0,0,0,0.6)', 
+                    padding: '8px',
+                    textAlign: 'center',
+                    color: 'white',
+                    cursor: 'pointer',
+                    borderBottomLeftRadius: '8px',
+                    borderBottomRightRadius: '8px'
+                  }}
+                  onClick={() => document.getElementById('upload-avatar-input').click()}
+                >
+                  Thay đổi ảnh
+                </div>
+                <input 
+                  type="file" 
+                  id="upload-avatar-input" 
+                  accept="image/*" 
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      handleAvatarChange({ file: e.target.files[0] });
+                    }
+                  }}
+                />
+              </>
+            ) : (
+              <Upload.Dragger
+                {...uploadProps}
+                style={{ 
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '20px'
+                }}
+              >
+                <PictureOutlined style={{ fontSize: '42px', color: '#8c8c8c' }} />
+                <div className={styles.uploadHint}>
+                  Nhấp hoặc kéo thả để tải lên ảnh nhóm
+                </div>
+              </Upload.Dragger>
+            )}
+          </div>
         </div>
 
         <div className={styles.formGroup}>
@@ -266,7 +364,7 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
           <Select
             mode="multiple"
             placeholder="Tìm kiếm tên hoặc email"
-            value={selectedOptions} // Sử dụng mảng các đối tượng {value, label}
+            value={selectedOptions}
             onSearch={handleSearch}
             onChange={handleSelectMember}
             onFocus={handleFocus}
@@ -274,7 +372,7 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
             filterOption={false}
             style={{ width: '100%' }}
             notFoundContent={searching ? "Đang tìm kiếm..." : "Không tìm thấy kết quả"}
-            labelInValue={true} // Quan trọng: Bật chế độ sử dụng đối tượng {value, label}
+            labelInValue={true}
             optionLabelProp="label"
           >
             {searchResults.map(user => (
