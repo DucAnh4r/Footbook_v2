@@ -1,6 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Row, Col, Tabs, Dropdown, Menu } from "antd";
 import styles from "./ProfilePage.module.scss";
 import { IoIosCamera, IoIosArrowDown, IoMdAdd } from "react-icons/io";
@@ -25,50 +24,42 @@ import { toast } from "react-toastify";
 const ProfilePage = () => {
   useAuthCheck();
   const [activeTab, setActiveTab] = useState("1");
-  const [isFriendSuggestionVisible, setFriendSuggestionVisible] =
-    useState(false);
+  const [isFriendSuggestionVisible, setFriendSuggestionVisible] = useState(false);
   const [headerWidth, setHeaderWidth] = useState("70%");
   const containerRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(true); // Trạng thái tải dữ liệu
-  const [userInfo, setUserInfo] = useState([]);
-  const [friendCount, setFriendCount] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userInfo, setUserInfo] = useState({});
+  const [friendCount, setFriendCount] = useState(0);
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
-  const userId = getUserIdFromLocalStorage();
+  const userId = useMemo(() => getUserIdFromLocalStorage(), []);
 
-  const fetchUser = async () => {
+  // Memoize fetch functions to avoid recreating them on each render
+  const fetchUser = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await userFindByIdService(userId);
-      setUserInfo(response?.data?.user || []);
+      if (response?.data?.user) {
+        setUserInfo(response.data.user);
+      }
     } catch (error) {
       console.error("Error fetching user:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
 
-  const countFriend = async () => {
+  const countFriend = useCallback(async () => {
     try {
-      setIsLoading(true);
       const response = await countFriendService(userId);
       setFriendCount(response?.data?.friends_count || 0);
     } catch (error) {
       console.error("Error count friend:", error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [userId]);
 
-  const handleImageClick = (type) => {
-    if (type === "avatar") {
-      avatarInputRef.current.click();
-    } else {
-      coverInputRef.current.click();
-    }
-  };
-
-  const handleImageChange = async (e, type) => {
+  // Upload image helper
+  const handleImageChange = useCallback(async (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -84,53 +75,56 @@ const ProfilePage = () => {
         await updateCoverService(formData, userId);
         toast.success("Ảnh bìa đã được cập nhật!");
       }
-      fetchUser();
+      await fetchUser();
     } catch (error) {
       toast.error("Cập nhật ảnh thất bại!");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId, fetchUser]);
+
+  const handleImageClick = useCallback((type) => {
+    if (type === "avatar") {
+      avatarInputRef.current?.click();
+    } else {
+      coverInputRef.current?.click();
+    }
+  }, []);
 
   useEffect(() => {
+    // Fetch data when component mounts
     fetchUser();
     countFriend();
-  }, []); // Chạy một lần khi component được render
 
-  const handleTabChange = (key) => {
-    setActiveTab(key);
-  };
+    // Observe container width changes
+    const checkContainerWidth = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        setHeaderWidth(containerWidth < 1300 ? "94%" : "70%");
+      }
+    };
 
-  const toggleFriendSuggestion = () => {
-    setFriendSuggestionVisible(!isFriendSuggestionVisible);
-  };
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "1":
-        return <Posts userInfo={userInfo} userName={userInfo.name} avatar={userInfo.avatar_url} />;
-      case "2":
-        return <Introduction userInfo={userInfo} onProfileUpdated={fetchUser} />;
-      case "3":
-        return <Friends />;
-      case "4":
-        return <Photos />;
-      case "5":
-        return <Videos />;
-      case "6":
-        return (
-          <div style={{ minHeight: "1000px" }}>Nội dung của tab Reels</div>
-        );
-      case "7":
-        return (
-          <div style={{ minHeight: "1000px" }}>Nội dung của tab Xem thêm</div>
-        );
-      default:
-        return null;
+    const resizeObserver = new ResizeObserver(checkContainerWidth);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
     }
-  };
 
-  const menu = (
+    // Cleanup
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [fetchUser, countFriend]);
+
+  const handleTabChange = useCallback((key) => {
+    setActiveTab(key);
+  }, []);
+
+  const toggleFriendSuggestion = useCallback(() => {
+    setFriendSuggestionVisible(prev => !prev);
+  }, []);
+
+  // Memoize menu to prevent re-creation on every render
+  const menu = useMemo(() => (
     <Menu className={styles["custom-menu"]}>
       <Menu.Item key="1" className={styles["menu-item"]}>
         Chế độ xem
@@ -163,29 +157,33 @@ const ProfilePage = () => {
         Tạo trang cá nhân khác
       </Menu.Item>
     </Menu>
-  );
+  ), []);
 
-  useEffect(() => {
-    // Hàm kiểm tra chiều rộng của container
-    const checkContainerWidth = () => {
-      if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
-        // Kiểm tra nếu chiều rộng container < 1000px thì set width của header khác
-        setHeaderWidth(containerWidth < 1300 ? "94%" : "70%");
-      }
-    };
-
-    // Lắng nghe sự thay đổi kích thước của container
-    const resizeObserver = new ResizeObserver(() => checkContainerWidth());
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
+  // Lazy load tabs to improve performance
+  const renderTabContent = useCallback(() => {
+    switch (activeTab) {
+      case "1":
+        return <Posts 
+          userInfo={userInfo} 
+          userName={userInfo.name} 
+          avatar={userInfo.avatar_url} 
+        />;
+      case "2":
+        return <Introduction userInfo={userInfo} onProfileUpdated={fetchUser} />;
+      case "3":
+        return <Friends />;
+      case "4":
+        return <Photos />;
+      case "5":
+        return <Videos />;
+      case "6":
+        return <div style={{ minHeight: "1000px" }}>Nội dung của tab Reels</div>;
+      case "7":
+        return <div style={{ minHeight: "1000px" }}>Nội dung của tab Xem thêm</div>;
+      default:
+        return null;
     }
-
-    // Dọn dẹp ResizeObserver khi component unmount
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []); // Chạy 1 lần khi component mount
+  }, [activeTab, userInfo, fetchUser]);
 
   return (
     <>
@@ -222,9 +220,7 @@ const ProfilePage = () => {
               >
                 <img
                   className={styles["avatar-img"]}
-                  src={
-                    userInfo.avatar_url
-                  }
+                  src={userInfo.avatar_url}
                   alt="Avatar"
                 />
                 <input
@@ -294,7 +290,7 @@ const ProfilePage = () => {
                   <IoIosArrowDown
                     className={`${styles.arrowIcon} ${
                       isFriendSuggestionVisible ? styles.arrowIconRotated : ""
-                    }`} // Thêm lớp xoay mũi tên
+                    }`}
                   />
                 </button>
               </div>

@@ -1,290 +1,210 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import React, { useEffect, useState } from "react";
-import { Avatar, Button, Tooltip, Menu, Dropdown } from "antd";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { Avatar, Button, Dropdown, Menu, Tooltip } from "antd";
 import { FaRegComment } from "react-icons/fa";
 import { PiShareFat } from "react-icons/pi";
 import { FaEarthAmericas } from "react-icons/fa6";
-import styles from "./SharedPost.module.scss";
-import CommentModal from "../Modal/CommentModal";
-import HahaIcon from "../assets/image/Reacts/haha.png";
-import LikeIcon from "../assets/image/Reacts/like.png";
-import LoveIcon from "../assets/image/Reacts/heart.png";
-import WowIcon from "../assets/image/Reacts/wow.png";
-import SadIcon from "../assets/image/Reacts/sad.png";
-import AngryIcon from "../assets/image/Reacts/angry.png";
-import ReactionIconsBox from "./ReactionIconsBox";
-import ShareModal from "../Modal/ShareModal";
 import { BsThreeDots } from "react-icons/bs";
-import Toastify from "../assets/Toastify";
-import { ToastContainer } from 'react-toastify';
-import { userFindByIdService } from "../services/userService";
-import {
-  countPostReactionService,
-  getPostReactionService,
-  deletePostReactionService,
-  addPostReactionService,
-} from "../services/postReactionService";
-
-import { countCommentService } from "../services/commentService";
-
-import { getUserIdFromLocalStorage } from "../utils/authUtils";
-
-import { reactionConfig } from "../assets/Config";
-import { getPostByIdService, getShareCount, getSharedPostByIdService } from "../services/postService";
-import { DeletePostByIdService } from "../services/postService";
+import { ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
+// Services
+import { 
+  countPostReactionService, 
+  getPostReactionService,
+  deletePostReactionService, 
+  addPostReactionService 
+} from "../services/postReactionService";
+import { countCommentService } from "../services/commentService";
+import { 
+  DeletePostByIdService, 
+  getShareCount, 
+  getSharedPostByIdService 
+} from "../services/postService";
 
-const SharedPost = ({ content, createdAt, userId, images, postId, shareId, user }) => {
-  const userId1 = getUserIdFromLocalStorage(); // Lấy userId1 từ localStorage
+// Components and assets
+import styles from "./SharedPost.module.scss";
+import CommentModal from "../Modal/CommentModal";
+import ShareModal from "../Modal/ShareModal";
+import ReactionIconsBox from "./ReactionIconsBox";
+import Toastify from "../assets/Toastify";
 
-  const [sharedPost, setSharedPost] = useState(null); // Lưu bài chia sẻ
+// Assets
+import HahaIcon from "../assets/image/Reacts/haha.png";
+import LikeIcon from "../assets/image/Reacts/like.png";
 
+// Utils
+import { getUserIdFromLocalStorage } from "../utils/authUtils";
+import { reactionConfig } from "../assets/Config";
+
+const SharedPost = ({ content, createdAt, userId, images = [], postId, shareId, user }) => {
+  const navigate = useNavigate();
+  const currentUserId = getUserIdFromLocalStorage();
+  
+  // Modal states
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  
+  // Reaction states
   const [isReactionBoxVisible, setIsReactionBoxVisible] = useState(false);
-  const [isReactionBoxVisible2, setIsReactionBoxVisible2] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState("NONE");
-  const [userInfo, setUserInfo] = useState(user);
-  const [mainUserInfo, setMainUserInfo] = useState([]);
-  const [postReactionCount, setPostReactionCount] = useState([]);
-  const [CommentCount, setCommentCount] = useState([]);
+  
+  // Data states
+  const [sharedPost, setSharedPost] = useState(null);
   const [reactions, setReactions] = useState([]);
-  const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
+  const [postReactionCount, setPostReactionCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
+  const [shareCount, setShareCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [mainUserInfo, setMainUserInfo] = useState({});
 
-  const [likeCount, setLikeCount] = useState(0);
-  const [loveCount, setLoveCount] = useState(0);
-  const [hahaCount, setHahaCount] = useState(0);
-  const [sadCount, setSadCount] = useState(0);
-  const [angryCount, setAngryCount] = useState(0);
-  const navigate = useNavigate();
+  // Get all reaction users - Memoized for performance
+  const reactionUsers = useMemo(() => {
+    return reactions
+      .map((reaction) => reaction.user?.name + " (" + reaction.type + ")")
+      .join("<br />");
+  }, [reactions]);
 
-  const handleImageClick = (shareId) => {
-    navigate(`/photo/${shareId}`);
-  };
+  // Get liked users - Memoized for performance
+  const likedUsers = useMemo(() => {
+    return reactions
+      .filter((reaction) => reaction.type === "LIKE")
+      .map((reaction) => reaction.user?.name)
+      .join("<br />");
+  }, [reactions]);
 
-  const getSharedPost = async () => {
+  // Get shared post data
+  const fetchSharedPost = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getSharedPostByIdService(postId);
 
       if (response?.data?.post) {
-        setSharedPost(response.data.post); // Lưu bài chia sẻ nếu có dữ liệu
-        setMainUserInfo(response?.data?.post.originalPost.user || []);
+        setSharedPost(response.data.post);
+        setMainUserInfo(response?.data?.post.originalPost.user || {});
       } else {
         console.warn("Shared post is null or undefined");
-        setSharedPost(null); // Đặt giá trị null nếu không có dữ liệu
+        setSharedPost(null);
       }
     } catch (error) {
-      console.error("Error fetching post:", error);
-      setSharedPost(null); // Đặt giá trị null nếu có lỗi
+      console.error("Error fetching shared post:", error);
+      setSharedPost(null);
     } finally {
       setLoading(false);
     }
-  };
-
-
-  const closeModal = () => {
-    setIsShareModalOpen(false);
-  };
-
-  const getLikedUsers = () => {
-    return reactions
-      .filter((reaction) => reaction.reactionType === "LIKE")
-      .map((reaction) => reaction.fullName)
-      .join("<br />");
-  };
-
-  const getAllReactions = () => {
-    return reactions
-      .map((reaction) => reaction.user.name + " (" + reaction.type + ")")
-      .join("<br />"); // Thay thế '\n' bằng '<br />'
-  };
-
-  const [comments, setComments] = useState([]);
-
-  const countReaction = async () => {
+  }, [postId]);
+  
+  // Data fetching function - combined for efficiency
+  const fetchData = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await getPostReactionService(postId);
-      setPostReactionCount(response?.data?.counts.total || 0);
-    } catch (error) {
-      console.error("Error count reaction:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const countComment = async () => {
-    try {
-      setLoading(true);
-      const response = await countCommentService(postId);
-      setCommentCount(response || 0);
-    } catch (error) {
-      console.error("Error count reaction:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchReactions = async () => {
-    try {
-      const response = await getPostReactionService(postId);
-      setReactions(response?.data?.data || []); // Lưu dữ liệu phản ứng
-    } catch (error) {
-      console.error("Error fetching reactions:", error);
-    }
-  };
-
-  const fetchUserReaction = async () => {
-    try {
-      const response = await getPostReactionService(postId);
-      const reactions = response?.data?.reactions || [];
-      const userReaction = reactions.find(
-        (reaction) => String(reaction.user_id) === String(userId1)
-      );
-      console.log("fetchUserReaction: ", userReaction);
+      const [reactionsResponse, commentCountResponse, shareCountResponse] = await Promise.all([
+        getPostReactionService(postId),
+        countCommentService(postId),
+        getShareCount(postId)
+      ]);
       
-      // Nếu tìm thấy userReaction, set selectedReaction bằng reactionType, nếu không, set là "NONE"
+      setPostReactionCount(reactionsResponse?.data?.counts?.total || 0);
+      setReactions(reactionsResponse?.data?.reactions || []);
+      setCommentCount(commentCountResponse || 0);
+      setShareCount(shareCountResponse?.data?.share_count || 0);
+      
+      // Find user's current reaction
+      const userReaction = reactionsResponse?.data?.reactions?.find(
+        (reaction) => String(reaction.user_id) === String(currentUserId)
+      );
       setSelectedReaction(userReaction ? userReaction.type : "NONE");
     } catch (error) {
-      console.error("Error fetching user reactions:", error);
-      setSelectedReaction("NONE"); // Đảm bảo selectedReaction là "NONE" trong trường hợp lỗi
+      console.error("Error fetching post data:", error);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleDeletePost = async (postId) => {
+  }, [postId, currentUserId]);
+  
+  // Load data on mount and when modals change
+  useEffect(() => {
+    fetchSharedPost();
+    fetchData();
+  }, [fetchSharedPost, fetchData, isCommentModalOpen]);
+  
+  // Handle reaction updates
+  const handleReactionAdded = useCallback(async (reactionType) => {
+    try {
+      // Handle case when user clicks the same reaction or wants to remove reaction
+      if (reactionType === "NONE" || reactionType === selectedReaction) {
+        await deletePostReactionService({
+          post_id: postId,
+          user_id: currentUserId,
+        });
+        setSelectedReaction("NONE");
+      } 
+      // Handle adding a new reaction when none exists
+      else if (selectedReaction === "NONE") {
+        await addPostReactionService({
+          post_id: postId,
+          user_id: currentUserId,
+          type: reactionType,
+        });
+        setSelectedReaction(reactionType);
+      } 
+      // Handle changing from one reaction to another
+      else {
+        await deletePostReactionService({
+          post_id: postId,
+          user_id: currentUserId,
+        });
+        await addPostReactionService({
+          post_id: postId,
+          user_id: currentUserId,
+          type: reactionType,
+        });
+        setSelectedReaction(reactionType);
+      }
+      
+      // Refresh data after reaction changes
+      fetchData();
+      setIsReactionBoxVisible(false);
+    } catch (error) {
+      console.error("Error handling reaction:", error);
+    }
+  }, [postId, currentUserId, selectedReaction, fetchData]);
+  
+  // Handle like button click - simplified
+  const handleLikeButtonClick = useCallback(async () => {
+    // Toggle LIKE reaction
+    handleReactionAdded(selectedReaction !== "NONE" ? "NONE" : "LIKE");
+  }, [selectedReaction, handleReactionAdded]);
+  
+  // Handle post deletion
+  const handleDeletePost = useCallback(async () => {
     try {
       const response = await DeletePostByIdService(postId);
-  
       if (response?.data?.success) {
-        console.log(response.data.message); // Hiển thị thông báo thành công
         Toastify("Xóa bài viết thành công!", "success");
-
       } else {
-        console.error("Không thể xóa bài viết. Vui lòng thử lại.");
+        Toastify("Không thể xóa bài viết. Vui lòng thử lại.", "error");
       }
     } catch (error) {
       console.error("Lỗi khi xóa bài viết:", error);
+      Toastify("Đã xảy ra lỗi khi xóa bài viết.", "error");
     }
-  };
-
-  useEffect(() => {
-    getSharedPost();
-    countReaction();
-    fetchUserReaction(); // Gọi thêm hàm kiểm tra cảm xúc
-    fetchReactions();
-    countComment();
   }, [postId]);
-
-  useEffect(() => {
-    countReaction();
-    fetchUserReaction(); 
-    getAllReactions();
-    fetchReactions();
-    countComment();
-  }, [isCommentModalOpen]); //đóng mở modal thì xem lại số lượt like
   
-  const handleReactionAdded = async (reactionType) => {
-    try {
-      console.log("Selected Reaction:", selectedReaction);
-      console.log("Reaction Type:", reactionType);
-
-      // Nếu người dùng bỏ chọn cảm xúc hoặc chọn lại cùng cảm xúc đã chọn
-      if (reactionType === "NONE" || reactionType === selectedReaction) {
-        console.log("Xóa cảm xúc hiện tại...");
-        await deletePostReactionService({
-          post_id: postId,
-          user_id: userId1,
-        });
-        setSelectedReaction("NONE");
-        console.log("Cảm xúc đã bị xóa");
-      }
-      // Nếu bài viết chưa có cảm xúc (NONE), thêm cảm xúc mới
-      else if (selectedReaction === "NONE") {
-        console.log("Thêm cảm xúc mới...");
-        await addPostReactionService({
-          post_id: postId,
-          user_id: userId1,
-          type: reactionType,
-        });
-        setSelectedReaction(reactionType);
-        console.log("Cảm xúc mới đã được thêm:", reactionType);
-      }
-      // Nếu bài viết đã có cảm xúc, cập nhật sang cảm xúc khác
-      else {
-        console.log("Cập nhật cảm xúc...");
-        await deletePostReactionService({
-          post_id: postId,
-          user_id: userId1,
-        }); // Xóa cảm xúc cũ
-        await addPostReactionService({
-          post_id: postId,
-          user_id: userId1,
-          type: reactionType,
-        }); // Thêm cảm xúc mới
-        setSelectedReaction(reactionType);
-        console.log("Cảm xúc đã được cập nhật thành:", reactionType);
-      }
-      fetchReactions();
-      countReaction();
-      getAllReactions();
-      // Đóng hộp thoại chọn cảm xúc (nếu có)
-      setIsReactionBoxVisible(false);
-      setIsReactionBoxVisible2(false);
-    } catch (error) {
-      console.error("Lỗi khi xử lý cảm xúc:", error);
-    }
-  };
-
-  // Hàm riêng cho nút "LIKE"
-  const handleLikeButtonClick = async () => {
-    if (selectedReaction !== "NONE") {
-      // Nếu đang có cảm xúc LIKE, xóa nó đi
-      console.log("Xóa cảm xúc ĐANG CÓ...");
-      await deletePostReactionService({
-        post_id: postId,
-        user_id: userId1,
-      });
-      setSelectedReaction("NONE");
-      console.log("đã xóa cảm xúc ĐANG CÓ");
-    } else {
-      // Nếu không có cảm xúc, thêm cảm xúc LIKE
-      console.log("Thêm cảm xúc LIKE...");
-      await addPostReactionService({
-        post_id: postId,
-        user_id: userId1,
-        type: "LIKE",
-      });
-      setSelectedReaction("LIKE");
-      console.log("Đã thêm cảm xúc LIKE");
-    }
-    fetchReactions();
-    countReaction();
-    getAllReactions();
-    fetchUserReaction();
-    setIsReactionBoxVisible(false); // Đóng box cảm xúc
-    setIsReactionBoxVisible2(false); // Đóng box cảm xúc
-  };
-
-
-  const addComment = (newComment) => {
-    setComments((prevComments) => [
-      ...prevComments,
-      { id: prevComments.length + 1, user: "Bạn", content: newComment },
-    ]);
-  };
+  // Navigate to photo detail page
+  const handleImageClick = useCallback((id) => {
+    navigate(`/photo/${id}`);
+  }, [navigate]);
 
   return (
     <>
-      <ToastContainer /> 
+      <ToastContainer />
       <div className={styles.postContainer}>
+        {/* Post Header */}
         <div className={styles.header}>
-          <Avatar src={userInfo?.avatar_url} className={styles.avatar} />
+          <Avatar src={user?.avatar_url} className={styles.avatar} />
           <div className={styles.userInfo}>
             <div>
-              <span className={styles.userName}>{userInfo?.name}</span>
+              <span className={styles.userName}>{user?.name}</span>
               <span style={{ marginLeft: "4px", color: "#65686c" }}>
                 đã chia sẻ một bài viết
               </span>
@@ -294,7 +214,9 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId, user 
               <FaEarthAmericas style={{ marginLeft: "4px" }} />
             </span>
           </div>
-          {userId === getUserIdFromLocalStorage() ? (
+          
+          {/* Post options menu - only show delete for post owner */}
+          {userId === currentUserId ? (
             <Dropdown
               overlay={
                 <Menu>
@@ -303,7 +225,7 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId, user 
                   </Menu.Item>
                 </Menu>
               }
-              trigger={['click']}
+              trigger={["click"]}
             >
               <div className={styles.optionContainer}>
                 <BsThreeDots />
@@ -313,34 +235,41 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId, user 
             <div className={styles.optionContainer}>
               <BsThreeDots />
             </div>
-          )} 
+          )}
         </div>
 
+        {/* Post Content */}
         <div className={styles.content}>
-          <p style={{margin: '0'}}>{content}</p>
+          <p style={{ margin: "0" }}>{content}</p>
 
+          {/* Shared Post Content */}
           <div className={styles.sharedContent}>
-            {sharedPost?.originalPost.images?.length > 0 &&
-              sharedPost?.originalPost.images
-                .slice(0, 2)
-                .map((image, index) => (
+            {sharedPost?.originalPost.images?.length > 0 && (
+              <div className={styles.imageGrid}>
+                {sharedPost.originalPost.images.slice(0, 2).map((image, index) => (
                   <img
                     key={index}
                     src={image.image_url}
                     alt={`post-image-${index}`}
                     className={styles.mainImage}
                     onClick={() => handleImageClick(shareId)}
+                    loading="lazy" // Lazy loading for better performance
                   />
-            ))}
-              {/* Hiển thị nút "Xem tất cả" nếu có từ 3 ảnh trở lên */}
-              {sharedPost?.originalPost.images.length >= 3 && (
-                <button
-                  onClick={() => setIsCommentModalOpen(true)}
-                  className={styles.viewMoreButton}
-                >
-                  Xem tất cả
-                </button>
-              )}
+                ))}
+              </div>
+            )}
+
+            {/* View All Images Button */}
+            {sharedPost?.originalPost.images?.length >= 3 && (
+              <button
+                onClick={() => setIsCommentModalOpen(true)}
+                className={styles.viewMoreButton}
+              >
+                Xem tất cả
+              </button>
+            )}
+
+            {/* Original Post Author Info */}
             <div style={{ padding: "10px" }} className={styles.header}>
               <Avatar
                 src={mainUserInfo?.avatar_url}
@@ -349,122 +278,93 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId, user 
               <div className={styles.userInfo}>
                 <span className={styles.userName}>{mainUserInfo?.name}</span>
                 <span className={styles.time}>
-                  {new Date(sharedPost?.originalPost.created_at).toLocaleString()} ·{" "}
+                  {sharedPost?.originalPost?.created_at && 
+                    new Date(sharedPost.originalPost.created_at).toLocaleString()
+                  } ·{" "}
                   <FaEarthAmericas style={{ marginLeft: "4px" }} />
                 </span>
               </div>
             </div>
+
+            {/* Original Post Content */}
             <div className={styles.content}>
-              <p>{sharedPost?.originalPost.content}</p>
+              <p>{sharedPost?.originalPost?.content}</p>
             </div>
           </div>
         </div>
 
+        {/* Reactions Summary */}
         <div className={styles.reactionsContainer}>
           <div className={styles["reactions"]}>
-            <Tooltip
-              title={
-                <span dangerouslySetInnerHTML={{ __html: getLikedUsers() }} />
-              }
-              arrow
-            >
+            <Tooltip title={<span dangerouslySetInnerHTML={{ __html: likedUsers }} />} arrow>
               <img
                 src={LikeIcon}
-                alt="Image 2"
+                alt="Like"
                 className={`${styles["icon"]} ${styles["icon-1"]}`}
               />
             </Tooltip>
-            <Tooltip
-              title={
-                <span dangerouslySetInnerHTML={{ __html: getLikedUsers() }} />
-              }
-              arrow
-            >
+            <Tooltip title={<span dangerouslySetInnerHTML={{ __html: likedUsers }} />} arrow>
               <img
                 src={HahaIcon}
-                alt="Image 2"
+                alt="Haha"
                 className={`${styles["icon"]} ${styles["icon-2"]}`}
               />
             </Tooltip>
-            {/* <Tooltip 
-              title={<span dangerouslySetInnerHTML={{ __html: getLikedUsers() }} />} 
-              arrow
-            >
-              <img
-                src={LoveIcon}
-                alt="Image 2"
-                className={`${styles["icon"]} ${styles["icon-3"]}`}
-              />
-            </Tooltip>
-            <Tooltip 
-              title={<span dangerouslySetInnerHTML={{ __html: getLikedUsers() }} />} 
-              arrow
-            >
-              <img
-                src={SadIcon}
-                alt="Image 2"
-                className={`${styles["icon"]} ${styles["icon-4"]}`}
-              />
-            </Tooltip>
-            <Tooltip 
-              title={<span dangerouslySetInnerHTML={{ __html: getLikedUsers() }} />} 
-              arrow
-            >
-              <img
-                src={AngryIcon}
-                alt="Image 2"
-                className={`${styles["icon"]} ${styles["icon-5"]}`}
-              />
-            </Tooltip> */}
           </div>
-          <Tooltip
-            title={
-              <span dangerouslySetInnerHTML={{ __html: getAllReactions() }} />
-            }
-            arrow
-          >
+          
+          {/* Reaction counts and comments/shares summary */}
+          <Tooltip title={<span dangerouslySetInnerHTML={{ __html: reactionUsers }} />} arrow>
             <span className={styles.reactionCount}>{postReactionCount}</span>
           </Tooltip>
+          
           <div className={styles.rightFooter}>
             <span className={styles.cmtCount} style={{ marginRight: "10px" }}>
-              {CommentCount} bình luận
+              {commentCount} bình luận
             </span>
+            <span className={styles.shareCount}>{shareCount} lượt chia sẻ</span>
           </div>
         </div>
 
+        {/* Post Actions Footer */}
         <div className={styles.footer}>
-          <Button
-            icon={reactionConfig[selectedReaction].icon}
-            type="text"
-            className={styles.likeButtonWrapper}
+          {/* Like Button with Reaction Hover Box */}
+          <div 
+            className={styles.reactionButtonContainer}
             onMouseEnter={() => setIsReactionBoxVisible(true)}
             onMouseLeave={() => setIsReactionBoxVisible(false)}
-            onClick={handleLikeButtonClick}
-            style={{
-              color: reactionConfig[selectedReaction].color, // Màu chữ theo cấu hình
-            }}
           >
-            {reactionConfig[selectedReaction].text}
-          </Button>
-
-          {isReactionBoxVisible && (
-            <div
+            <Button
+              icon={reactionConfig[selectedReaction].icon}
+              type="text"
+              className={styles.likeButtonWrapper}
+              onClick={handleLikeButtonClick}
               style={{
-                position: "absolute",
-                left: "0px",
-                bottom: "0px",
+                color: reactionConfig[selectedReaction].color,
               }}
-              className={styles.reactionBoxWrapper}
-              onMouseEnter={() => setIsReactionBoxVisible(true)}
-              onMouseLeave={() => setIsReactionBoxVisible(false)}
             >
-              <ReactionIconsBox
-                postId={postId}
-                onReactionAdded={handleReactionAdded}
-                currentReaction={selectedReaction}
-              />
-            </div>
-          )}
+              {reactionConfig[selectedReaction].text}
+            </Button>
+
+            {/* Reaction Selection Box */}
+            {isReactionBoxVisible && (
+              <div
+                className={styles.reactionBoxWrapper}
+                style={{
+                  position: "absolute",
+                  left: "0px",
+                  bottom: "0px",
+                }}
+              >
+                <ReactionIconsBox
+                  postId={postId}
+                  onReactionAdded={handleReactionAdded}
+                  currentReaction={selectedReaction}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Comment Button */}
           <Button
             icon={<FaRegComment />}
             type="text"
@@ -472,6 +372,8 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId, user 
           >
             Bình luận
           </Button>
+
+          {/* Share Button */}
           <Button
             icon={<PiShareFat />}
             type="text"
@@ -482,35 +384,33 @@ const SharedPost = ({ content, createdAt, userId, images, postId, shareId, user 
         </div>
       </div>
 
-      {/* Modal bình luận */}
-      <CommentModal
-        type="sharedpost"
-        userId={userId}
-        content={content}
-        isModalOpen={isCommentModalOpen}
-        onCancel={() => setIsCommentModalOpen(false)}
-        postId={postId}
-        userInfo={userInfo}
-        images={images}
-        addComment={addComment}
-        shareId={shareId}
-        createdAt={createdAt}
-      />
-
-      {/* Modal chia sẻ */}
+      {/* Modals */}
+      {isCommentModalOpen && (
+        <CommentModal
+          type="sharedpost"
+          userId={userId}
+          content={content}
+          isModalOpen={isCommentModalOpen}
+          onCancel={() => setIsCommentModalOpen(false)}
+          postId={postId}
+          userInfo={user}
+          images={images}
+          shareId={shareId}
+          createdAt={createdAt}
+        />
+      )}
+      
       {isShareModalOpen && (
-      <ShareModal
-        isModalOpen={isShareModalOpen}
-        onCancel={() => setIsShareModalOpen(false)}
-        onClose={closeModal}
-        userInfo={userInfo}
-        postId = {shareId}
-      />
+        <ShareModal
+          isModalOpen={isShareModalOpen}
+          onCancel={() => setIsShareModalOpen(false)}
+          postId={shareId}
+          userInfo={user}
+          onClose={() => setIsShareModalOpen(false)}
+        />
       )}
     </>
   );
 };
 
-
-
-export default SharedPost;
+export default React.memo(SharedPost);

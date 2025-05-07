@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, Input, Button, Avatar, message, Upload, Select, Tag, Spin } from 'antd';
 import { UserOutlined, CameraOutlined, PictureOutlined, CloseCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import { createGroupChatService } from '../services/privateMessageService';
 import { getUserIdFromLocalStorage } from '../utils/authUtils';
 import { userSearchService, userListFriendService } from '../services/userService';
 import styles from './CreateGroupChatModal.module.scss';
+import { debounce } from 'lodash';
 
 const { Option } = Select;
 
@@ -21,7 +22,6 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [allAvailableUsers, setAllAvailableUsers] = useState([]);
   const currentUserId = parseInt(getUserIdFromLocalStorage(), 10);
-
 
   useEffect(() => {
     if (visible) {
@@ -52,83 +52,100 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
         setAllAvailableUsers(friendList);
       }
     } catch (error) {
-      console.error("Error fetching friends:", error);
+      console.error('Error fetching friends:', error);
     } finally {
       setLoadingFriends(false);
     }
   };
 
   const showAvailableFriends = () => {
-    const availableFriends = friends.filter(friend =>
-      !selectedMembers.some(member => member.id === friend.id)
-    );
+    const availableFriends = friends.filter(friend => !selectedMembers.some(member => member.id === friend.id));
     setSearchResults(availableFriends);
   };
 
-  const handleSearch = async (value) => {
+  // Tạo hàm search với debounce
+  const performSearch = async (value) => {
     if (!value) {
       showAvailableFriends();
       return;
     }
-  
+
     setSearching(true);
     try {
       const response = await userSearchService({ keyword: value });
-  
+
       const users = response.data.results || [];
       const newSearchResults = users
         .filter(user => user.id !== currentUserId)
         .map(user => ({
           id: user.id,
           name: user.name,
-          avatar_url: user.avatar_url,
+          avatar_url: user.avatar_url
         }));
-      
+
       const updatedAllUsers = [...allAvailableUsers];
-      
+
       newSearchResults.forEach(newUser => {
         if (!updatedAllUsers.some(existingUser => existingUser.id === newUser.id)) {
           updatedAllUsers.push(newUser);
         }
       });
-      
+
       setAllAvailableUsers(updatedAllUsers);
-      
-      const filteredResults = newSearchResults.filter(user => 
-        !selectedMembers.some(member => member.id === user.id)
-      );
-      
+
+      const filteredResults = newSearchResults.filter(user => !selectedMembers.some(member => member.id === user.id));
+
       setSearchResults(filteredResults);
     } catch (error) {
-      console.error("Error searching users:", error);
-      message.error("Không thể tìm kiếm người dùng");
+      console.error('Error searching users:', error);
+      message.error('Không thể tìm kiếm người dùng');
     } finally {
       setSearching(false);
     }
   };
-  
-  const handleSelectMember = (selectedOptions) => {
-    const newSelectedMembers = selectedOptions.map(option => {
-      const found = allAvailableUsers.find(user => user.id === option.value);
-      return found ? {
-        id: found.id,
-        name: found.name,
-        avatar_url: found.avatar_url,
-      } : null;
-    }).filter(Boolean);
-    
+
+  // Sử dụng useCallback và debounce để tạo hàm debouncedSearch
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      performSearch(value);
+    }, 1500),
+    [selectedMembers, allAvailableUsers]
+  );
+
+  // Thay thế handleSearch cũ bằng hàm này
+  const handleSearch = (value) => {
+    if (!value) {
+      showAvailableFriends();
+      return;
+    }
+    debouncedSearch(value);
+  };
+
+  const handleSelectMember = selectedOptions => {
+    const newSelectedMembers = selectedOptions
+      .map(option => {
+        const found = allAvailableUsers.find(user => user.id === option.value);
+        return found
+          ? {
+              id: found.id,
+              name: found.name,
+              avatar_url: found.avatar_url
+            }
+          : null;
+      })
+      .filter(Boolean);
+
     setSelectedMembers(newSelectedMembers);
-    
+
     const selectedIds = newSelectedMembers.map(member => member.id);
-    const availableUsers = allAvailableUsers.filter(user => 
-      !selectedIds.includes(user.id)
-    );
+    const availableUsers = allAvailableUsers.filter(user => !selectedIds.includes(user.id));
     setSearchResults(availableUsers);
   };
 
-  const handleRemoveMember = (memberId) => {
+  const handleRemoveMember = memberId => {
     setSelectedMembers(prev => prev.filter(member => member.id !== memberId));
-    
+
     const removedUser = allAvailableUsers.find(user => user.id === memberId);
     if (removedUser) {
       setSearchResults(prev => {
@@ -140,24 +157,24 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
     }
   };
 
-  const handleAvatarChange = (info) => {
+  const handleAvatarChange = info => {
     const file = info.file.originFileObj || info.file;
     if (file) {
       setUploading(true);
       setAvatarFile(file);
-      
+
       // Đảm bảo preview hoạt động bằng cách sử dụng FileReader
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
         setAvatarPreview(reader.result);
         setUploading(false);
-        console.log("Preview đã được tạo:", reader.result.substring(0, 50) + "...");
+        console.log('Preview đã được tạo:', reader.result.substring(0, 50) + '...');
       };
-      reader.onerror = (error) => {
-        console.error("Lỗi khi đọc file:", error);
+      reader.onerror = error => {
+        console.error('Lỗi khi đọc file:', error);
         setUploading(false);
-        message.error("Không thể xem trước ảnh");
+        message.error('Không thể xem trước ảnh');
       };
     }
   };
@@ -174,40 +191,40 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
 
   const handleCreateGroup = async () => {
     if (selectedMembers.length < 1) {
-      message.error("Vui lòng chọn ít nhất 2 thành viên để tạo nhóm chat");
+      message.error('Vui lòng chọn ít nhất 2 thành viên để tạo nhóm chat');
       return;
     }
-  
+
     const finalGroupName = groupName.trim() || generateDefaultGroupName();
-    
+
     try {
       // Get member IDs
       const memberIds = selectedMembers.map(member => member.id);
-      
+
       // Create data object (not FormData) as expected by the service
       const groupChatData = {
         name: finalGroupName,
         creator_id: currentUserId,
-        members: [currentUserId, ...memberIds],
+        members: [currentUserId, ...memberIds]
       };
-      
+
       // Add avatar file if available
       if (avatarFile) {
         groupChatData.avatar_file = avatarFile;
-        groupChatData.onUploadProgress = (progressEvent) => {
-          console.log("Upload progress:", Math.round((progressEvent.loaded * 100) / progressEvent.total));
+        groupChatData.onUploadProgress = progressEvent => {
+          console.log('Upload progress:', Math.round((progressEvent.loaded * 100) / progressEvent.total));
         };
       }
-      
+
       // Call the service with the correct data format
       await createGroupChatService(groupChatData);
-      
-      message.success("Tạo nhóm chat thành công");
+
+      message.success('Tạo nhóm chat thành công');
       onSuccess && onSuccess();
       handleCancel();
     } catch (error) {
-      console.error("Error creating group chat:", error);
-      message.error("Không thể tạo nhóm chat: " + (error.response?.data?.message || error.message));
+      console.error('Error creating group chat:', error);
+      message.error('Không thể tạo nhóm chat: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -226,27 +243,27 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
   };
 
   const uploadProps = {
-    accept: "image/*",
-    beforeUpload: (file) => {
+    accept: 'image/*',
+    beforeUpload: file => {
       const isImage = file.type.startsWith('image/');
       const isLt2M = file.size / 1024 / 1024 < 2;
-      
+
       if (!isImage) {
         message.error('Bạn chỉ có thể tải lên tệp hình ảnh!');
         return Upload.LIST_IGNORE;
       }
-      
+
       if (!isLt2M) {
         message.error('Hình ảnh phải nhỏ hơn 2MB!');
         return Upload.LIST_IGNORE;
       }
-      
+
       // Xử lý file và preview trực tiếp tại đây
       handleAvatarChange({ file });
       return false; // Ngăn chặn upload tự động
     },
     showUploadList: false,
-    multiple: false,
+    multiple: false
   };
 
   const selectedOptions = selectedMembers.map(member => ({
@@ -254,16 +271,25 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
     label: member.name
   }));
 
+  // Đảm bảo hủy debounce khi component unmount
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
   return (
     <Modal
       title="Tạo nhóm chat"
       open={visible}
       onCancel={handleCancel}
       footer={[
-        <Button key="back" onClick={handleCancel}>Hủy</Button>,
+        <Button key="back" onClick={handleCancel}>
+          Hủy
+        </Button>,
         <Button key="submit" type="primary" onClick={handleCreateGroup} disabled={selectedMembers.length < 1}>
           Tạo nhóm
-        </Button>,
+        </Button>
       ]}
       width={500}
     >
@@ -278,16 +304,16 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
               </div>
             ) : avatarPreview ? (
               <>
-                <img 
-                  src={avatarPreview} 
-                  alt="Avatar preview" 
-                  style={{ 
-                    width: '100%', 
-                    height: 'auto', 
+                <img
+                  src={avatarPreview}
+                  alt="Avatar preview"
+                  style={{
+                    width: '100%',
+                    height: 'auto',
                     borderRadius: '8px',
                     maxHeight: '200px',
                     objectFit: 'contain'
-                  }} 
+                  }}
                 />
                 <Button
                   type="text"
@@ -302,13 +328,13 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
                     borderRadius: '50%'
                   }}
                 />
-                <div 
-                  style={{ 
-                    position: 'absolute', 
-                    bottom: 0, 
-                    left: 0, 
-                    width: '100%', 
-                    background: 'rgba(0,0,0,0.6)', 
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    width: '100%',
+                    background: 'rgba(0,0,0,0.6)',
                     padding: '8px',
                     textAlign: 'center',
                     color: 'white',
@@ -320,12 +346,12 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
                 >
                   Thay đổi ảnh
                 </div>
-                <input 
-                  type="file" 
-                  id="upload-avatar-input" 
-                  accept="image/*" 
+                <input
+                  type="file"
+                  id="upload-avatar-input"
+                  accept="image/*"
                   style={{ display: 'none' }}
-                  onChange={(e) => {
+                  onChange={e => {
                     if (e.target.files && e.target.files[0]) {
                       handleAvatarChange({ file: e.target.files[0] });
                     }
@@ -335,16 +361,14 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
             ) : (
               <Upload.Dragger
                 {...uploadProps}
-                style={{ 
+                style={{
                   background: 'transparent',
                   border: 'none',
                   padding: '20px'
                 }}
               >
                 <PictureOutlined style={{ fontSize: '42px', color: '#8c8c8c' }} />
-                <div className={styles.uploadHint}>
-                  Nhấp hoặc kéo thả để tải lên ảnh nhóm
-                </div>
+                <div className={styles.uploadHint}>Nhấp hoặc kéo thả để tải lên ảnh nhóm</div>
               </Upload.Dragger>
             )}
           </div>
@@ -352,27 +376,23 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
 
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Tên nhóm chat:</label>
-          <Input
-            placeholder="Nhập tên nhóm chat (hoặc để trống để tự động tạo)"
-            value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
-          />
+          <Input placeholder="Nhập tên nhóm chat (hoặc để trống để tự động tạo)" value={groupName} onChange={e => setGroupName(e.target.value)} />
         </div>
 
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Thêm thành viên:</label>
-          <Select
-            mode="multiple"
-            placeholder="Tìm kiếm tên hoặc email"
-            value={selectedOptions}
-            onSearch={handleSearch}
-            onChange={handleSelectMember}
-            onFocus={handleFocus}
-            loading={searching || loadingFriends}
-            filterOption={false}
-            style={{ width: '100%' }}
-            notFoundContent={searching ? "Đang tìm kiếm..." : "Không tìm thấy kết quả"}
-            labelInValue={true}
+          <Select 
+            mode="multiple" 
+            placeholder="Tìm kiếm tên hoặc email" 
+            value={selectedOptions} 
+            onSearch={handleSearch} 
+            onChange={handleSelectMember} 
+            onFocus={handleFocus} 
+            loading={searching || loadingFriends} 
+            filterOption={false} 
+            style={{ width: '100%' }} 
+            notFoundContent={searching ? 'Đang tìm kiếm...' : 'Không tìm thấy kết quả'} 
+            labelInValue={true} 
             optionLabelProp="label"
           >
             {searchResults.map(user => (
@@ -393,18 +413,8 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
               <span className={styles.emptyMembers}>Chưa có thành viên nào được chọn</span>
             ) : (
               selectedMembers.map(member => (
-                <Tag
-                  key={member.id}
-                  closable
-                  onClose={() => handleRemoveMember(member.id)}
-                  className={styles.memberTag}
-                >
-                  <Avatar
-                    size="small"
-                    src={member.avatar_url}
-                    icon={<UserOutlined />}
-                    className={styles.memberAvatar}
-                  />
+                <Tag key={member.id} closable onClose={() => handleRemoveMember(member.id)} className={styles.memberTag}>
+                  <Avatar size="small" src={member.avatar_url} icon={<UserOutlined />} className={styles.memberAvatar} />
                   {member.name}
                 </Tag>
               ))
@@ -412,11 +422,7 @@ const CreateGroupChatModal = ({ visible, onClose, onSuccess }) => {
           </div>
         </div>
 
-        {selectedMembers.length < 1 && (
-          <div className={styles.errorMessage}>
-            Vui lòng chọn ít nhất 2 thành viên để tạo nhóm chat
-          </div>
-        )}
+        {selectedMembers.length < 1 && <div className={styles.errorMessage}>Vui lòng chọn ít nhất 2 thành viên để tạo nhóm chat</div>}
       </div>
     </Modal>
   );

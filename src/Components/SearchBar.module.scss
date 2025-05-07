@@ -196,3 +196,56 @@
   max-height: 50px;
   margin-right: 10px;
 }
+
+.viewAllContainer {
+  padding: 8px 12px;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  justify-content: center;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.viewAllContainer:hover {
+  background-color: #f0f0f0;
+}
+
+.viewAllButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0;
+  height: auto;
+  font-size: 14px;
+  color: #1890ff;
+}
+
+.viewAllButton:hover {
+  color: #40a9ff;
+}
+
+.noResultsContainer {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.noResultsMessage {
+  padding: 12px;
+  text-align: center;
+  color: #888;
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+.loadingContainer {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #888;
+}

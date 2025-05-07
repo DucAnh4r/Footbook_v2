@@ -1,12 +1,19 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from "react";
-import { Modal, Avatar, Input, Row, Col, Skeleton } from "antd";
-import styles from "./CommentModal.module.scss"; // Import SCSS module
+import React, { useState, useEffect, useCallback } from "react";
+import { Modal, Avatar, Row, Col, Skeleton } from "antd";
+import { IoIosSend } from "react-icons/io";
+import styles from "./CommentModal.module.scss";
+
+// Components
 import Post from "../Components/Post";
 import SharedPost from "../Components/SharedPost";
-import { IoIosSend } from "react-icons/io";
-import { addCommentService, getCommentService, countCommentService } from "../services/commentService";
 import Comment from "../Pages/Photo/Components/Comment";
+
+// Services
+import { 
+  addCommentService, 
+  getCommentService, 
+  countCommentService 
+} from "../services/commentService";
 
 const CommentModal = ({
   type,
@@ -15,24 +22,29 @@ const CommentModal = ({
   isModalOpen,
   onCancel,
   postId,
-  images,
+  images = [],
   userInfo,
   createdAt,
   shareId
 }) => {
-  const [commentText, setCommentText] = useState(""); // Biến duy nhất để lưu nội dung bình luận
-  const [comments, setComments] = useState([]); // Lưu danh sách bình luận
-  const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
-  const [commentCount, setCommentCount] = useState(0); // Đếm số lượng bình luận
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [commentCount, setCommentCount] = useState(0);
 
-  // Fetch comments and comment count
-  const fetchCommentsAndCount = async () => {
+  // Fetch comments and count in a single function
+  const fetchCommentsAndCount = useCallback(async () => {
+    if (!postId || !isModalOpen) return;
+    
     try {
       setLoading(true);
+      // Use Promise.all for parallel requests
       const [commentResponse, countResponse] = await Promise.all([
         getCommentService(postId),
         countCommentService(postId),
       ]);
+      
+      // Set data with safe fallbacks
       setComments(commentResponse?.data?.comments || []);
       setCommentCount(countResponse || 0);
     } catch (error) {
@@ -40,29 +52,62 @@ const CommentModal = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId, isModalOpen]);
 
+  // Fetch data when modal opens
   useEffect(() => {
     if (isModalOpen) {
       fetchCommentsAndCount();
     }
-  }, [isModalOpen]);
+  }, [isModalOpen, fetchCommentsAndCount]);
 
-  // Xử lý gửi bình luận
-  const handleAddComment = async () => {
-    if (!commentText.trim()) return; // Không gửi bình luận rỗng
+  // Handle comment submission
+  const handleAddComment = useCallback(async () => {
+    const trimmedComment = commentText.trim();
+    if (!trimmedComment) return;
 
     try {
-      const newComment = {
+      await addCommentService({
         userId,
         postId,
-        content: commentText.trim(),
-      };
-      await addCommentService(newComment);
-      setCommentText(""); // Reset input
-      fetchCommentsAndCount(); // Refresh comments and count
+        content: trimmedComment,
+      });
+      
+      setCommentText(""); // Clear input field
+      fetchCommentsAndCount(); // Refresh comments
     } catch (error) {
       console.error("Error adding comment:", error);
+    }
+  }, [commentText, userId, postId, fetchCommentsAndCount]);
+
+  // Handle Enter key press
+  const handleKeyPress = useCallback((e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleAddComment();
+    }
+  }, [handleAddComment]);
+
+  // Determine which post component to render based on type
+  const renderPostComponent = () => {
+    const commonProps = {
+      key: postId,
+      postId,
+      content,
+      createdAt,
+      userId,
+      images,
+      isModalOpen: true,
+      user: userInfo,
+    };
+
+    switch (type) {
+      case "post":
+        return <Post {...commonProps} />;
+      case "sharedpost":
+        return <SharedPost {...commonProps} shareId={shareId} />;
+      default:
+        return <p>Loại bài viết không hợp lệ</p>;
     }
   };
 
@@ -74,38 +119,17 @@ const CommentModal = ({
       width="700px"
       title={`${userInfo?.name || "Người dùng"}'s post`}
       className={styles.commentModal}
+      destroyOnClose={true} // Clean up on close for better performance
     >
-      {/* Render bài post */}
-      {type === "post" ? (
-        <Post
-          key={postId}
-          postId={postId}
-          content={content}
-          createdAt={createdAt}
-          userId={userId}
-          images={images}
-          isModalOpen={true}
-        />
-      ) : type === "sharedpost" ? (
-        <SharedPost
-          key={postId}
-          postId={postId}
-          content={content}
-          createdAt={createdAt}
-          userId={userId}
-          images={images}
-          shareId={shareId}
-          isModalOpen={true}
-        />
-      ) : (
-        <p>Loại bài viết không hợp lệ</p>
-      )}
+      {/* Post Content */}
+      {renderPostComponent()}
 
-      {/* Section bình luận */}
+      {/* Comments Section */}
       <div className={styles.commentsSection}>
         <h3>{`Bình luận (${commentCount})`}</h3>
+        
         {loading ? (
-          // Hiển thị Skeleton khi đang tải dữ liệu
+          // Skeleton loading state
           Array.from({ length: 3 }).map((_, index) => (
             <div key={index} className={styles.skeletonComment}>
               <Skeleton.Avatar active size="small" style={{ marginRight: 10 }} />
@@ -113,6 +137,7 @@ const CommentModal = ({
             </div>
           ))
         ) : comments.length > 0 ? (
+          // Comments list
           comments.map((comment) => (
             <Comment
               key={comment.id}
@@ -129,7 +154,7 @@ const CommentModal = ({
         )}
       </div>
 
-      {/* Section viết bình luận */}
+      {/* Comment Input Section */}
       <div className={styles.writeCommentSection}>
         <Row>
           <Col span={2}>
@@ -145,20 +170,16 @@ const CommentModal = ({
                 placeholder="Viết bình luận..."
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault(); // Ngăn xuống dòng
-                    handleAddComment(); // Gửi bình luận
-                  }
-                }}
-              ></textarea>
+                onKeyPress={handleKeyPress}
+              />
               <IoIosSend
-                className={styles["sendCommentButton"]}
+                className={styles.sendCommentButton}
                 style={{
                   color: commentText.trim() ? "blue" : "gray",
                   cursor: commentText.trim() ? "pointer" : "not-allowed",
                 }}
                 onClick={handleAddComment}
+                aria-label="Send comment"
               />
             </div>
           </Col>
@@ -168,4 +189,4 @@ const CommentModal = ({
   );
 };
 
-export default CommentModal;
+export default React.memo(CommentModal);

@@ -39,7 +39,7 @@ const HomePageSearch = () => {
         page: 0,
         size: 100,
       });
-      setSearchResults(response.data.data || []); // Truy cập `data` trong response
+      setSearchResults(response.data?.results || []); // Truy cập `data` trong response
     } catch (err) {
       setError(err.message || 'Có lỗi xảy ra khi tìm kiếm');
     } finally {
@@ -73,7 +73,7 @@ const HomePageSearch = () => {
         <LeftSidebar query={searchQuery} />
       </Sider>
 
-      <Content style={{ padding: '70px 0px 70px 380px', minHeight: '100vh', overflow: 'auto' }}>
+      <Content style={{ padding: '70px 0px 70px 380px', minHeight: '100vh', overflow: 'hidden' }}>
         <div className="page-content">
           <h1>Kết quả tìm kiếm cho: {searchQuery}</h1>
 
@@ -104,11 +104,11 @@ const HomePageSearch = () => {
                   <List.Item.Meta onClick={() => handleUserClick(user.userId)} className={styles.userItem}
                     avatar={
                       <Avatar className={styles.avatar}
-                        src={user.profilePictureUrl || 'https://via.placeholder.com/150'}
-                        alt={user.fullName}
+                        src={user.avatar_url || 'https://via.placeholder.com/150'}
+                        alt={user.name}
                       />
                     }
-                    title={<span className={styles.userName}>{user.fullName}</span>}
+                    title={<span className={styles.userName}>{user.name}</span>}
                   />
                 </List.Item>
               )}
