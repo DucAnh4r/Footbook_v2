@@ -3,23 +3,28 @@ import { Layout } from "antd";
 import LeftSidebar from "./Components/LeftSidebar";
 import FriendRequestsList from "./Components/FriendRequestsList";
 import { useAuthCheck } from "../../utils/checkAuth";
-import { getFriendshipRequestService } from "../../services/friendService";
+import { getFriendshipRequestService, getSuggestedFriendsService, createFriendshipService } from "../../services/friendService";
 import { getUserIdFromLocalStorage } from "../../utils/authUtils";
 
 const { Sider, Content } = Layout;
 
 const FriendsHomePage = () => {
   useAuthCheck();
-  const userId1 = getUserIdFromLocalStorage(); // Lấy userId1 từ localStorage
-  console.log(userId1); // Kiểm tra console để đảm bảo userId2 có giá trị
-
-  // State để lưu danh sách lời mời kết bạn
+  const userId = getUserIdFromLocalStorage();
+  
+  // State để lưu danh sách lời mời kết bạn và gợi ý kết bạn
   const [friendRequests, setFriendRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [suggestedFriends, setSuggestedFriends] = useState([]);
+  const [loading, setLoading] = useState({
+    requests: true,
+    suggestions: true
+  });
 
+  // Fetch lời mời kết bạn
   const fetchFriendRequests = async () => {
     try {
-      const response = await getFriendshipRequestService({ user_id: userId1 });
+      setLoading(prev => ({ ...prev, requests: true }));
+      const response = await getFriendshipRequestService({ user_id: userId });
       if (response.data && response.data.received_requests) {
         const formattedData = response.data.received_requests.map((item) => ({
           id: item.id,
@@ -37,27 +42,76 @@ const FriendsHomePage = () => {
         setFriendRequests(formattedData);
       } else {
         console.error("No friend requests found or malformed response.");
+        setFriendRequests([]);
       }
     } catch (error) {
       console.error("Error fetching friend requests:", error);
+      setFriendRequests([]);
     } finally {
-      setLoading(false);
+      setLoading(prev => ({ ...prev, requests: false }));
     }
   };
 
-  useEffect(() => {
-    fetchFriendRequests();
-  }, []);
+  // Fetch danh sách gợi ý kết bạn
+  const fetchSuggestedFriends = async () => {
+    try {
+      setLoading(prev => ({ ...prev, suggestions: true }));
+      const response = await getSuggestedFriendsService({ 
+        user_id: userId,
+        limit: 20 // Lấy tối đa 20 gợi ý
+      });
+      
+      if (response.data && response.data.suggested_friends) {
+        const formattedData = response.data.suggested_friends.map((item) => ({
+          id: item.id,
+          name: item.name,
+          email: item.email,
+          image: item.avatar_url,
+          coverPhoto: item.cover_photo_url,
+          birthYear: item.birth_year,
+          profession: item.profession,
+          address: item.address,
+          mutualFriends: item.mutual_friends_count,
+          createdAt: item.created_at,
+        }));
+        setSuggestedFriends(formattedData);
+      } else {
+        console.error("No suggested friends found or malformed response.");
+        setSuggestedFriends([]);
+      }
+    } catch (error) {
+      console.error("Error fetching suggested friends:", error);
+      setSuggestedFriends([]);
+    } finally {
+      setLoading(prev => ({ ...prev, suggestions: false }));
+    }
+  };
 
-  // Dữ liệu ví dụ cho "Những người bạn có thể biết"
-  const suggestedFriends = [
-    {
-      name: "John Doe",
-      image:
-        "https://cdn.britannica.com/37/231937-050-9228ECA1/Drake-rapper-2019.jpg?w=400&h=300&c=crop",
-      mutualFriends: 5,
-    },
-  ];
+  // Xử lý gửi lời mời kết bạn
+  const handleSendFriendRequest = async (addresseeId) => {
+    try {
+      await createFriendshipService({
+        requester_id: userId,
+        addressee_id: addresseeId
+      });
+      // Cập nhật lại danh sách gợi ý sau khi gửi lời mời
+      fetchSuggestedFriends();
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+    }
+  };
+
+  // Xóa khỏi danh sách gợi ý
+  const handleRemoveSuggestion = (friendId) => {
+    setSuggestedFriends(prev => prev.filter(friend => friend.id !== friendId));
+  };
+
+  useEffect(() => {
+    if (userId) {
+      fetchFriendRequests();
+      fetchSuggestedFriends();
+    }
+  }, [userId]);
 
   return (
     <Layout>
@@ -87,21 +141,22 @@ const FriendsHomePage = () => {
       >
         <div className="page-content">
           {/* Hiển thị Lời mời kết bạn */}
-          {loading ? (
-            <p>Loading...</p>
-          ) : (
-            <FriendRequestsList
-              userId={userId1}
-              requestsType="friendRequests"
-              data={friendRequests}
-              fetchFriendRequests={fetchFriendRequests}
-            />
-          )}
+          <FriendRequestsList
+            userId={userId}
+            requestsType="friendRequests"
+            data={friendRequests}
+            fetchFriendRequests={fetchFriendRequests}
+            loading={loading.requests}
+          />
 
           {/* Hiển thị Những người bạn có thể biết */}
           <FriendRequestsList
+            userId={userId}
             requestsType="suggestedFriends"
             data={suggestedFriends}
+            loading={loading.suggestions}
+            onSendRequest={handleSendFriendRequest}
+            onRemoveSuggestion={handleRemoveSuggestion}
           />
         </div>
       </Content>

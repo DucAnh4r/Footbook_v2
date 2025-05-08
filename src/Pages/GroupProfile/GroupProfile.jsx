@@ -1,27 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col, Tabs, Dropdown, Menu } from 'antd';
 import styles from './GroupProfile.module.scss';
-import { IoIosCamera, IoIosArrowDown, IoMdAdd } from "react-icons/io";
-import { TiArrowSortedDown } from "react-icons/ti";
-import { MdGroups } from "react-icons/md";
-import { FaPen, FaLock, FaShare } from "react-icons/fa6";
+import { IoIosCamera, IoIosArrowDown, IoMdAdd } from 'react-icons/io';
+import { TiArrowSortedDown } from 'react-icons/ti';
+import { MdGroups } from 'react-icons/md';
+import { FaPen, FaLock, FaShare } from 'react-icons/fa6';
 import { EllipsisOutlined } from '@ant-design/icons';
 import AboutTab from './Tabs/About/AboutTab.jsx';
 import Members from './Tabs/Members/Members.jsx';
 import Events from './Tabs/Events/Events.jsx';
-import FriendSuggestion from '../ProfilePage/UserProfilePage/SuggestedFriends.jsx';
+import FriendSuggestion from '../../Components/SuggestedFriends.jsx';
 import Discussion from './Tabs/Discussion/Discussion.jsx';
 import Noticeable from './Tabs/Noticeable/Noticeable.jsx';
 import Photos from './Tabs/Photos/Photos.jsx';
 import Files from './Tabs/Files/Files.jsx';
 
 const GroupProfile = () => {
-  const [activeTab, setActiveTab] = useState("1");
+  const [activeTab, setActiveTab] = useState('1');
   const [isFriendSuggestionVisible, setFriendSuggestionVisible] = useState(false);
   const [headerWidth, setHeaderWidth] = useState('70%');
   const containerRef = useRef(null);
 
-  const handleTabChange = (key) => {
+  const handleTabChange = key => {
     setActiveTab(key);
   };
 
@@ -31,19 +31,19 @@ const GroupProfile = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "1":
+      case '1':
         return <AboutTab />;
-      case "2":
+      case '2':
         return <Discussion />;
-      case "3":
+      case '3':
         return <Noticeable />;
-      case "4":
+      case '4':
         return <Members />;
-      case "5":
+      case '5':
         return <Events />;
-      case "6":
+      case '6':
         return <Photos />;
-      case "7":
+      case '7':
         return <Files />;
       default:
         return null;
@@ -52,24 +52,50 @@ const GroupProfile = () => {
 
   const menu1 = (
     <Menu className={styles['custom-menu']}>
-      <Menu.Item key="1" className={styles['menu-item']}>Quản lý thông báo</Menu.Item>
-      <Menu.Item key="2" className={styles['menu-item']}>Bỏ theo dõi nhóm</Menu.Item>
-      <Menu.Item key="3" className={styles['menu-item']}>Rời nhóm</Menu.Item>
+      <Menu.Item key="1" className={styles['menu-item']}>
+        Quản lý thông báo
+      </Menu.Item>
+      <Menu.Item key="2" className={styles['menu-item']}>
+        Bỏ theo dõi nhóm
+      </Menu.Item>
+      <Menu.Item key="3" className={styles['menu-item']}>
+        Rời nhóm
+      </Menu.Item>
     </Menu>
-  )
+  );
 
   const menu2 = (
     <Menu className={styles['custom-menu']}>
-      <Menu.Item key="1" className={styles['menu-item']}>Chế độ xem</Menu.Item>
-      <Menu.Item key="2" className={styles['menu-item']}>Tìm kiếm</Menu.Item>
-      <Menu.Item key="3" className={styles['menu-item']}>Trạng thái trang cá nhân</Menu.Item>
-      <Menu.Item key="4" className={styles['menu-item']}>Kho lưu trữ</Menu.Item>
-      <Menu.Item key="5" className={styles['menu-item']}>Kho lưu trữ tin</Menu.Item>
-      <Menu.Item key="6" className={styles['menu-item']}>Nhật ký hoạt động</Menu.Item>
-      <Menu.Item key="7" className={styles['menu-item']}>Cài đặt trang cá nhân và gần thể</Menu.Item>
-      <Menu.Item key="8" className={styles['menu-item']}>Khóa bảo vệ trang cá nhân</Menu.Item>
-      <Menu.Item key="9" className={styles['menu-item']}>Bật chế độ chuyên nghiệp</Menu.Item>
-      <Menu.Item key="10" className={styles['menu-item']}>Tạo trang cá nhân khác</Menu.Item>
+      <Menu.Item key="1" className={styles['menu-item']}>
+        Chế độ xem
+      </Menu.Item>
+      <Menu.Item key="2" className={styles['menu-item']}>
+        Tìm kiếm
+      </Menu.Item>
+      <Menu.Item key="3" className={styles['menu-item']}>
+        Trạng thái trang cá nhân
+      </Menu.Item>
+      <Menu.Item key="4" className={styles['menu-item']}>
+        Kho lưu trữ
+      </Menu.Item>
+      <Menu.Item key="5" className={styles['menu-item']}>
+        Kho lưu trữ tin
+      </Menu.Item>
+      <Menu.Item key="6" className={styles['menu-item']}>
+        Nhật ký hoạt động
+      </Menu.Item>
+      <Menu.Item key="7" className={styles['menu-item']}>
+        Cài đặt trang cá nhân và gần thể
+      </Menu.Item>
+      <Menu.Item key="8" className={styles['menu-item']}>
+        Khóa bảo vệ trang cá nhân
+      </Menu.Item>
+      <Menu.Item key="9" className={styles['menu-item']}>
+        Bật chế độ chuyên nghiệp
+      </Menu.Item>
+      <Menu.Item key="10" className={styles['menu-item']}>
+        Tạo trang cá nhân khác
+      </Menu.Item>
     </Menu>
   );
 
@@ -107,16 +133,16 @@ const GroupProfile = () => {
               <span style={{ fontSize: '30px', fontWeight: 700, marginTop: '24px' }}>Hội Ricon Việt Nam</span>
               <div>
                 <FaLock style={{ color: '#65686c' }} />
-                <span style={{ color: '#65686c' }}> Nhóm riêng tư ·  </span>
+                <span style={{ color: '#65686c' }}> Nhóm riêng tư · </span>
                 <a
                   style={{
                     fontSize: '16px',
                     fontWeight: 500,
                     color: '#65686c',
-                    textDecoration: 'none',
+                    textDecoration: 'none'
                   }}
-                  onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                  onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                  onMouseEnter={e => (e.target.style.textDecoration = 'underline')}
+                  onMouseLeave={e => (e.target.style.textDecoration = 'none')}
                 >
                   392K thành viên
                 </a>
@@ -141,19 +167,13 @@ const GroupProfile = () => {
                     <TiArrowSortedDown />
                   </button>
                 </Dropdown>
-                <button
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px' }}
-                  className={styles['small-button']}
-                  onClick={toggleFriendSuggestion}
-                >
+                <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px' }} className={styles['small-button']} onClick={toggleFriendSuggestion}>
                   <IoIosArrowDown
                     className={`${styles.arrowIcon} ${isFriendSuggestionVisible ? styles.arrowIconRotated : ''}`} // Thêm lớp xoay mũi tên
                   />
                 </button>
               </div>
-
             </Col>
-
           </Row>
 
           {isFriendSuggestionVisible && (

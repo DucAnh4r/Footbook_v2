@@ -1,10 +1,13 @@
+/* eslint-disable no-unused-vars */
 import React from "react";
 import styles from "./FriendRequestItem.module.scss";
-import { Row, Col } from "antd";
+import { Row, Col, Button } from "antd";
 import {
   acceptFriendshipService,
   declineFriendshipService,
+  createFriendshipService,
 } from "../../../services/friendService";
+import { getUserIdFromLocalStorage } from "../../../utils/authUtils";
 
 const FriendRequestItem = ({
   userId,
@@ -12,38 +15,67 @@ const FriendRequestItem = ({
   onSelectUser,
   isSelected,
   fetchFriendRequests,
+  itemType = "request" // 'request' or 'suggested'
 }) => {
-  const { senderId, fullName, profilePictureUrl, sentAt } = user;
+  const currentUserId = getUserIdFromLocalStorage();
+  
+  // Handle different user object structures based on itemType
+  const id = user.id || user.senderId;
+  const name = user.name || user.fullName;
+  const profileImage = user.avatar_url || user.image || user.profilePictureUrl || "https://via.placeholder.com/150";
+  
+  // Format date if available
+  const createdAt = user.created_at || user.sentAt;
+  const formattedDate = createdAt;
 
   const handleClick = () => {
     if (onSelectUser) {
-      onSelectUser(senderId);
+      onSelectUser(id);
     }
   };
 
-  const handleAccept = async (e, requester_id, addressee_id) => {
-    e.stopPropagation(); // Chặn lan sự kiện
+  const handleAccept = async (e) => {
+    e.stopPropagation(); // Prevent event propagation
     try {
       await acceptFriendshipService({
-        requester_id,
-        addressee_id,
+        requester_id: id,
+        addressee_id: currentUserId,
       });
-      await fetchFriendRequests();
+      if (fetchFriendRequests) {
+        await fetchFriendRequests();
+      }
     } catch (error) {
       console.error("Error accepting friend request:", error);
     }
   };
 
-  const handleDecline = async (e, requester_id, addressee_id) => {
-    e.stopPropagation(); // Chặn lan sự kiện
+  const handleDecline = async (e) => {
+    e.stopPropagation(); // Prevent event propagation
     try {
       await declineFriendshipService({
-        requester_id,
-        addressee_id,
+        requester_id: id,
+        addressee_id: currentUserId,
       });
-      await fetchFriendRequests();
+      if (fetchFriendRequests) {
+        await fetchFriendRequests();
+      }
     } catch (error) {
-      console.error("Error decline friend request:", error);
+      console.error("Error declining friend request:", error);
+    }
+  };
+
+  const handleSendRequest = async (e) => {
+    e.stopPropagation(); // Prevent event propagation
+    try {
+      await createFriendshipService({
+        requester_id: currentUserId,
+        addressee_id: id,
+      });
+      if (fetchFriendRequests) {
+        await fetchFriendRequests();
+      }
+    } catch (error) {
+      console.error("Error sending friend request:", error);
     }
   };
 
@@ -52,43 +84,57 @@ const FriendRequestItem = ({
       className={`${styles.content} ${isSelected ? styles.selected : ""}`}
       onClick={handleClick}
     >
-      <Row style={{ cursor: "pointer" }}>
-        {/* Ảnh đại diện */}
+      <Row align="middle" style={{ cursor: "pointer" }}>
+        {/* Profile image */}
         <Col span={5}>
           <div className={styles["image-container"]}>
             <img
               className={styles["image"]}
-              src={profilePictureUrl}
-              alt={fullName}
+              src={profileImage}
+              alt={name}
             />
           </div>
         </Col>
 
-        {/* Thông tin người dùng */}
+        {/* User information */}
         <Col span={19}>
           <Row className={styles["flex-between"]}>
-            <span style={{ fontSize: "15px", fontWeight: 500, color: "black" }}>
-              {fullName}
-            </span>
-            <span
-              style={{ fontSize: "14px", fontWeight: 400, color: "#65686c" }}
-            >
-              {sentAt}
-            </span>
+            <span className={styles["name"]}>{name}</span>
+            {itemType === "request" ? (
+              <span className={styles["date"]}>{formattedDate}</span>
+            ) : (
+              <span className={styles["mutual-friends"]}>
+                {user.mutual_friends_count} bạn chung
+              </span>
+            )}
           </Row>
-          <Row className={styles["flex-between"]}>
-            <button
-              onClick={(e) => handleAccept(e, user.senderId, userId)}
-              className={styles["button"]}
-            >
-              Xác nhận
-            </button>
-            <button
-              onClick={(e) => handleDecline(e, user.senderId, userId)}
-              className={`${styles["button"]} ${styles["delete-button"]}`}
-            >
-              Từ chối
-            </button>
+          
+          <Row className={styles["flex-between"]} style={{ marginTop: '8px' }}>
+            {itemType === "request" ? (
+              <>
+                <Button
+                  onClick={handleAccept}
+                  className={`${styles["button"]} ${styles["confirm-button"]}`}
+                  type="primary"
+                >
+                  Xác nhận
+                </Button>
+                <Button
+                  onClick={handleDecline}
+                  className={`${styles["button"]} ${styles["delete-button"]}`}
+                >
+                  Từ chối
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={handleSendRequest}
+                className={`${styles["button"]} ${styles["add-button"]}`}
+                type="primary"
+              >
+                Thêm bạn bè
+              </Button>
+            )}
           </Row>
         </Col>
       </Row>

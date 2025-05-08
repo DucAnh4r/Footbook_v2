@@ -72,3 +72,74 @@
   opacity: 0.7;
 }
 
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.headerRow {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.backButton {
+  cursor: pointer;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+.backIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1890ff;
+}
+
+.titleCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+}
+
+.subTitle {
+  font-size: 14px;
+  color: #8c8c8c;
+}
+
+.statsRow {
+  padding-top: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.friendsContainer {
+  margin-top: 16px;
+  padding-bottom: 20px;
+  overflow: visible;
+  height: auto;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.emptyState {
+  width: 100%;
+  margin-top: 40px;
+}

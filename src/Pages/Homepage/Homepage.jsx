@@ -7,7 +7,7 @@ import Reels from './Reels';
 import LeftSidebar from './LeftSidebar/LeftSidebar';
 import RightSidebar from './RightSidebar/RightSidebar';
 import './Homepage.scss';
-import SuggestedFriends from '../ProfilePage/UserProfilePage/SuggestedFriends';
+import SuggestedFriends from '../../Components/SuggestedFriends';
 import GroupPost from '../../Components/GroupPost';
 import { useAuthCheck } from '../../utils/checkAuth';
 import { getUserIdFromLocalStorage } from '../../utils/authUtils';

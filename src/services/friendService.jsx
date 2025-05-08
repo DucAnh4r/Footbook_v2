@@ -76,3 +76,14 @@ export const countFriendService = (userId) => {
   //dem so ban
   return axiosCreate.get(`${domain}/relationships/count?user_id=${userId}`, {});
 };
+
+export const getSuggestedFriendsService = (Data) => {
+  // Lấy danh sách bạn bè gợi ý (ưu tiên bạn chung)
+  const { user_id, limit } = Data;
+  return axiosCreate.get(`${domain}/relationships/suggested`, {
+    params: {
+      user_id,
+      limit
+    },
+  });
+};

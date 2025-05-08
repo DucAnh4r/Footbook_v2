@@ -1,27 +1,33 @@
-import React, { useState } from "react";
-import { Row, Col } from "antd";
+import React from "react";
+import { Row, Col, Spin, Empty } from "antd";
 import styles from "./SuggestedFriends.module.scss";
 import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import FriendRequestItem from "../../Components/FriendRequestItem";
+import { getUserIdFromLocalStorage } from "../../../../utils/authUtils";
 
-const SuggestedFriends = ({ users, onSelectUser }) => {
-  const [selectedUserId, setSelectedUserId] = useState(null); // State để lưu id người dùng được chọn
+const SuggestedFriends = ({ 
+  users = [], 
+  onSelectUser, 
+  selectedUserId, 
+  loading = false,
+  fetchSuggestedFriends
+}) => {
   const navigate = useNavigate();
+  const currentUserId = getUserIdFromLocalStorage();
+  
   const handleBack = () => {
     navigate("/friends");
   };
 
   const handleSelectUser = (userId) => {
-    // Cập nhật selectedUserId khi thẻ FriendRequestItem được chọn
-    setSelectedUserId(userId);
     if (onSelectUser) {
-      onSelectUser(userId); // Gọi callback từ cha nếu có
+      onSelectUser(userId);
     }
   };
 
   return (
-    <>
+    <div className={styles.container}>
       <Row className={styles.headerRow}>
         <Col>
           <div className={styles.backButton} onClick={handleBack}>
@@ -35,22 +41,38 @@ const SuggestedFriends = ({ users, onSelectUser }) => {
           <span className={styles.title}>Gợi ý</span>
         </Col>
       </Row>
+      
       <Row style={{ padding: "0 16px" }} className={styles.statsRow}>
         <span>Những người bạn có thể biết</span>
       </Row>
       
-      <Row style={{ marginTop: "16px" }}>
-        {users.map((user) => (
-          <FriendRequestItem
-            key={user.senderId}
-            userId={user.senderId}
-            user={user} // Truyền thêm dữ liệu người dùng
-            onSelectUser={handleSelectUser}
-            isSelected={user.senderId === selectedUserId} // Truyền prop để biết thẻ nào được chọn
-          />
-        ))}
-      </Row>
-    </>
+      {loading ? (
+        <div className={styles.loadingContainer}>
+          <Spin size="large" />
+        </div>
+      ) : (
+        <Row className={styles.friendsContainer}>
+          {users.length > 0 ? (
+            users.map((user) => (
+              <FriendRequestItem
+                key={user.id}
+                userId={currentUserId}
+                user={user}
+                onSelectUser={handleSelectUser}
+                isSelected={user.id === selectedUserId}
+                itemType="suggested"
+                fetchFriendRequests={fetchSuggestedFriends}
+              />
+            ))
+          ) : (
+            <Empty 
+              description="Không có gợi ý bạn bè"
+              className={styles.emptyState}
+            />
+          )}
+        </Row>
+      )}
+    </div>
   );
 };
 

@@ -1,39 +1,76 @@
-import React, { useState } from 'react';
-import { Layout } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Layout, message, Spin } from 'antd';
 import { useParams } from 'react-router-dom';
 import styles from './ShowFriendsPage.module.scss';
 import FriendInvitations from './Sidebars/FriendInvitations';
 import SuggestedFriends from './Sidebars/SuggestedFriends'; 
 import FriendPicture from '../../../assets/image/FriendPage/friends.png';
-import ProfilePage from '../../ProfilePage/UserProfilePage/ProfilePage';
 import { useAuthCheck } from '../../../utils/checkAuth';
 import FriendProfilePage from '../../ProfilePage/FriendProfilePage/FriendProfilePage';
 import AllFriends from './Sidebars/AllFriends';
+import { getSuggestedFriendsService } from '../../../services/friendService';
+import { getUserIdFromLocalStorage } from '../../../utils/authUtils';
 
 const { Sider, Content } = Layout;
 
 const ShowFriendsPage = () => {
   useAuthCheck();
+  const userId = getUserIdFromLocalStorage();
+  const { type } = useParams(); // Get type parameter from URL
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const { type } = useParams(); // Lấy tham số type từ URL
-  const [selectedUserId, setSelectedUserId] = useState(null); // State lưu ID người dùng đã chọn
+  // Function to handle user selection
+  const handleSelectUser = (userId) => {
+    setSelectedUserId(userId);
+  };
 
-  // Hàm gọi khi click vào một bạn trong FriendRequestItem
-  const handleSelectUser = (senderId) => {
-    setSelectedUserId(senderId);
-    console.log(senderId);
-  }
+  // Fetch suggested friends when component mounts
+  useEffect(() => {
+    if (type === 'suggested') {
+      fetchSuggestedFriends();
+    }
+  }, [type]);
 
-    // Dữ liệu mẫu người dùng
-    const users = [
-      { id: 1, name: 'Lionel Messi', bio: 'This is a bio about Messi.' },
-      { id: 2, name: 'Cristiano Ronaldo', bio: 'This is a bio about Ronaldo.' },{ id: 11, name: 'Lionel Messi', bio: 'This is a bio about Messi.' },
-      { id: 22, name: 'Cristiano Ronaldo', bio: 'This is a bio about Ronaldo.' },{ id: 41, name: 'Lionel Messi', bio: 'This is a bio about Messi.' },
-      { id: 222, name: 'Cristiano Ronaldo', bio: 'This is a bio about Ronaldo.' },{ id: 21, name: 'Lionel Messi', bio: 'This is a bio about Messi.' },
-      { id: 212, name: 'Cristiano Ronaldo', bio: 'This is a bio about Ronaldo.' },{ id: 15, name: 'Lionel Messi', bio: 'This is a bio about Messi.' },
-      { id: 234, name: 'Cristiano Ronaldo', bio: 'This is a bio about Ronaldo.' },
-      // Thêm người dùng khác vào đây
-    ];
+  // Function to fetch suggested friends from API
+  const fetchSuggestedFriends = async () => {
+    try {
+      setLoading(true);
+      const response = await getSuggestedFriendsService({ user_id: userId });
+      
+      if (response.data && response.data.suggested_friends) {
+        setSuggestedUsers(response.data.suggested_friends);
+      } else {
+        message.error("Không thể tải danh sách gợi ý bạn bè");
+        setSuggestedUsers([]);
+      }
+    } catch (error) {
+      console.error("Error fetching suggested friends:", error);
+      message.error("Đã xảy ra lỗi khi tải danh sách gợi ý bạn bè");
+      setSuggestedUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Render the appropriate sidebar based on URL parameter
+  const renderSidebar = () => {
+    switch (type) {
+      case 'requests':
+        return <FriendInvitations onSelectUser={handleSelectUser} />;
+      case 'suggested':
+        return <SuggestedFriends 
+                 users={suggestedUsers} 
+                 onSelectUser={handleSelectUser} 
+                 selectedUserId={selectedUserId}
+                 loading={loading}
+                 fetchSuggestedFriends={fetchSuggestedFriends}
+               />;
+      default:
+        return <AllFriends onSelectUser={handleSelectUser} />;
+    }
+  };
 
   return (
     <Layout>
@@ -52,16 +89,7 @@ const ShowFriendsPage = () => {
         }}
         className="scroll-on-hover"
       >
-        {(() => {
-          switch (type) {
-            case 'requests':
-              return <FriendInvitations onSelectUser={handleSelectUser} />;
-            case 'suggested':
-              return <SuggestedFriends users={users} onSelectUser={handleSelectUser} />;
-            default:
-              return <AllFriends onSelectUser={handleSelectUser} />;
-          }
-        })()}
+        {renderSidebar()}
         <div style={{ height: '16px' }}></div>
       </Sider>
 

@@ -70,6 +70,10 @@ const Header = ({ onMessageClick }) => {
     const pathMapping = {
       "/": "home",
       "/friends": "friends",
+      "/friends/": "friends",
+      "/friends/requests": "friends",
+      "/friends/suggested": "friends",
+      "/friends/allFriends": "friends",
       "/groups": "groups",
     };
 
