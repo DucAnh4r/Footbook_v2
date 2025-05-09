@@ -11,10 +11,20 @@ export const ChatProvider = ({ children }) => {
   const MAX_CHAT_WINDOWS = 3;
 
   const addChat = (message) => {
-    const isAlreadyOpen = selectedMessages.some((m) => m.userId === message.userId);
+    // Kiểm tra xem đã có cửa sổ chat này chưa
+    // Cho nhóm sẽ kiểm tra theo groupId, cho tin nhắn cá nhân sẽ kiểm tra theo userId
+    const isAlreadyOpen = selectedMessages.some((m) => {
+      if (message.type === 'group' && m.type === 'group') {
+        return m.groupId === message.groupId;
+      }
+      return m.userId === message.userId;
+    });
+
+    // Nếu chưa mở, thêm vào danh sách chat đang mở
     if (!isAlreadyOpen) {
       setSelectedMessages((prev) => {
         const newMessages = [...prev, message];
+        // Nếu vượt quá số lượng cho phép, ẩn chat cũ nhất
         if (newMessages.length > MAX_CHAT_WINDOWS) {
           const [oldest, ...rest] = newMessages;
           setHiddenMessages((hidden) => [...hidden, oldest]);
@@ -53,15 +63,12 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  const handleMessageClick = (message) => {
-    addChat(message);
-  };
-
   const handleNewMessage = () => {
     const newMessage = {
       userId: `new-${Date.now()}`, // Tạo ID duy nhất
       name: "Tin nhắn mới",
       message: "Nội dung tin nhắn mới",
+      type: 'new'
     };
     addChat(newMessage);
   };
@@ -75,7 +82,6 @@ export const ChatProvider = ({ children }) => {
         closeChat,
         hideChat,
         showChat,
-        handleMessageClick,
         handleNewMessage,
       }}
     >

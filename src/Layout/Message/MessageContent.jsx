@@ -100,23 +100,27 @@ const MessageContent = ({ onMessageClick, onClose }) => {
         className={styles.messageItem}
         onClick={() => {
           if (typeof onMessageClick === 'function') {
-            if (isGroup) {
-              onMessageClick({
-                id: item.id,
-                type: 'group',
-                name: item.name,
-                profilePictureUrl: item.avatar_url,
-                ...item
-              });
-            } else {
-              onMessageClick({
-                userId: item.other_user.id,
-                fullName: item.other_user.name,
-                profilePictureUrl: item.other_user.avatar_url,
-                type: 'dm',
-                ...item
-              });
-            }
+            // Cấu trúc dữ liệu chuẩn cho cả hai loại chat
+            const chatData = isGroup 
+              ? {
+                  userId: `group-${item.id}`, // Tạo định danh duy nhất cho nhóm
+                  name: item.name,
+                  profilePictureUrl: item.avatar_url,
+                  message: item.last_message?.content || "Nhóm chat",
+                  type: 'group',
+                  groupId: item.id,
+                  id: item.id
+                }
+              : {
+                  userId: item.other_user.id,
+                  name: item.other_user.name,
+                  profilePictureUrl: item.other_user.avatar_url,
+                  message: item.last_message?.content || "Tin nhắn",
+                  type: 'dm',
+                  conversationId: item.id
+                };
+                
+            onMessageClick(chatData);
           }
           if (typeof onClose === 'function') {
             onClose();
@@ -189,7 +193,5 @@ const MessageContent = ({ onMessageClick, onClose }) => {
     </div>
   );
 };
-
-
 
 export default MessageContent;

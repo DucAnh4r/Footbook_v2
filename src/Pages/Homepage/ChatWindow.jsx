@@ -1,468 +1,457 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from "react";
-import { Input, Avatar, Button, Flex, Typography, Tooltip } from "antd";
-import {
-  ArrowRightOutlined,
+import { Avatar, Button, Input, Space, Dropdown, Badge, Tooltip, message, Modal, Spin } from "antd";
+import { 
+  SmileOutlined, 
+  PictureOutlined, 
+  SendOutlined, 
+  MoreOutlined,
   CloseOutlined,
   MinusOutlined,
-  PhoneOutlined,
-  SmileOutlined,
-  StopOutlined,
-  VideoCameraOutlined,
+  LoadingOutlined
 } from "@ant-design/icons";
-import "./ChatWindow.scss";
-import { FaChevronDown, FaMicrophone } from "react-icons/fa";
-import { RiEmojiStickerLine } from "react-icons/ri";
-import { PiGifFill } from "react-icons/pi";
-import { io } from "socket.io-client";
-import { AiFillLike } from "react-icons/ai";
-
-// Import các hàm từ audioRecorder.js
-import {
-  startRecording,
-  stopRecording,
-  playAudio,
-  downloadAudio,
-} from "../../utils/audioRecorder";
-import GifModal from "../../Modal/GifModal";
-import StickerModal from "../../Modal/StickerModal";
-import FileUploadButton from "../../Components/FileUploadButton";
-import ChatSettingsPopup from "../../Components/ChatSettingsPopup";
-import {
-  getMessageHistoryService,
-  sendPrivateMessageService,
+import { 
+  getMessageHistoryService, 
+  sendPrivateMessageService, 
+  getGroupMessagesService, 
+  sendGroupMessageService 
 } from "../../services/privateMessageService";
 import { getUserIdFromLocalStorage } from "../../utils/authUtils";
-import WebSocketComponent from "../../utils/WebSocketComponent";
+import "./ChatWindow.scss";
 
-const { TextArea } = Input;
-
-const ChatWindow = ({ message, onClose, onHide, position, receiverId }) => {
-  const [socket, setSocket] = useState(null);
-  const [chatMessages, setChatMessages] = useState([]); // Lưu trữ tin nhắn
-  const [inputValue, setInputValue] = useState(""); // Giá trị input của TextArea
-  const [isRecording, setIsRecording] = useState(false); // Trạng thái ghi âm
-  const [audioUrl, setAudioUrl] = useState(null); // URL file âm thanh sau khi ghi âm
-  const [audioBlob, setAudioBlob] = useState(null); // Blob âm thanh để tải xuống
-  const chatBodyRef = useRef(null); // Thêm ref để theo dõi khung chat
-  const [isRecordingMode, setIsRecordingMode] = useState(false); // Chế độ ghi âm
-  const [gifModalVisible, setGifModalVisible] = useState(false); // Quản lý trạng thái hiển thị modal GIF
-  const [stickerModalVisible, setStickerModalVisible] = useState(false);
-  const senderId = getUserIdFromLocalStorage();
-  const [receiver, setReceiver] = useState({});
-  const [sender, setSender] = useState({});
-  const [messages, setMessages] = useState([]);
+const ChatWindow = ({ message, onClose, onHide, position }) => {
+  const [messageText, setMessageText] = useState("");
+  const [chatHistory, setChatHistory] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0);
-  const pageSize = 10;
-<WebSocketComponent/>
+  const [imageFile, setImageFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [imageLoading, setImageLoading] = useState({});
+  const messagesEndRef = useRef(null);
+  const chatBodyRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const currentUserId = getUserIdFromLocalStorage();
+
+  // Xác định loại chat (nhóm hay cá nhân)
+  const isGroupChat = message.type === 'group';
+  
   useEffect(() => {
-    const newSocket = io("http://localhost:4000");
-    setSocket(newSocket);
-  
-    // Gửi userId lên server để đăng ký socket
-    newSocket.emit("register", senderId);
-  
-    // Lắng nghe tin nhắn mới
-    newSocket.on("receiveMessage", (data) => {
-      if (
-        (data.senderId === senderId && data.receiverId === receiverId) || // Tin nhắn của người gửi
-        (data.senderId === receiverId && data.receiverId === senderId)    // Tin nhắn của người nhận
-      ) {
-        setMessages((prevMessages) => [...prevMessages, data]);
-      }
-    });
-  
-    return () => {
-      newSocket.disconnect();
-    };
-  }, [senderId, receiverId]);
-  
+    fetchChatHistory();
+  }, [message]);
 
   useEffect(() => {
-    if (chatBodyRef.current) {
-      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
-    }
-  }, [chatMessages]);
+    scrollToBottom();
+  }, [chatHistory]);
 
-  useEffect(() => {
-    return () => {
-      chatMessages.forEach((msg) => {
-        if (msg.content.startsWith("<img") || msg.content.startsWith("<a")) {
-          const matches = msg.content.match(/src="([^"]+)"/);
-          if (matches) URL.revokeObjectURL(matches[1]);
-        }
-      });
-    };
-  }, [chatMessages]);
-
-  const handleSendMessage = async () => {
-    if (inputValue.trim() === "") return;
-
-    const newMessage = {
-        senderId,
-        receiverId,
-        messageContent: inputValue.trim(),
-        messageType: "TEXT", // Tin nhắn dạng văn bản
-    };
-
-    try {
-        // Gửi tin nhắn qua API
-        await sendPrivateMessageService(newMessage);
-
-        // Phát tin nhắn qua Socket.IO
-        socket.emit("sendMessage", {
-            senderId,
-            receiverId,
-            messageContent: inputValue.trim(),
-            messageType: "TEXT",
-        });
-
-        // Cập nhật giao diện người gửi
-        setMessages((prevMessages) => [{ ...newMessage, isSender: true }, ...prevMessages]);
-
-        // Reset input
-        setInputValue("");
-    } catch (error) {
-        console.error("Error sending message:", error);
-    }
-};
-
-
-  const handleStartRecording = async () => {
-    try {
-      await startRecording();
-      setIsRecording(true);
-    } catch (error) {
-      console.error("Error starting recording:", error);
-    }
-  };
-
-  const handleStopRecording = async () => {
-    try {
-      const { audioUrl, audioBlob } = await stopRecording();
-      setAudioUrl(audioUrl);
-      setAudioBlob(audioBlob);
-
-      const audioMessage = {
-        user: "You",
-        text: `<audio controls src="${audioUrl}"></audio>`,
-        type: "audio",
-        time: new Date().toLocaleTimeString(),
-      };
-      socket.emit("send_message", audioMessage);
-      setMessages((prev) => [...prev, audioMessage]);
-      setIsRecording(false);
-    } catch (error) {
-      console.error("Error stopping recording:", error);
-    }
-  };
-
-  const handleSendGif = (gifUrl) => {
-    const gifMessage = {
-      content: `<img src="${gifUrl}" alt="GIF" style="max-width: 200px; max-height: 200px;" />`,
-      sender: "You",
-      type: "gif",
-    };
-    setChatMessages((prevMessages) => [gifMessage, ...prevMessages]);
-    socket.emit("sendMessage", {
-      content: gifMessage.content,
-      recipient: message.name,
-      type: "gif",
-    });
-    setGifModalVisible(false);
-  };
-
-  const handleSendSticker = (stickerUrl) => {
-    const stickerMessage = {
-      content: `<img src="${stickerUrl}" alt="Sticker" style="max-width: 200px; max-height: 200px;" />`,
-      sender: "You",
-      type: "sticker",
-    };
-    setChatMessages((prevMessages) => [stickerMessage, ...prevMessages]);
-    socket.emit("sendMessage", {
-      content: stickerMessage.content,
-      recipient: message.name,
-      type: "sticker",
-    });
-    setStickerModalVisible(false);
-  };
-
-  const handleSendLike = () => {
-    const likeMessage = {
-      content: `<img src="https://upload.wikimedia.org/wikipedia/commons/1/13/Facebook_like_thumb.png" alt="Like" style="max-width: 50px; max-height: 50px;" />`,
-      sender: "You",
-      type: "like",
-    };
-    setChatMessages((prevMessages) => [likeMessage, ...prevMessages]);
-    socket.emit("sendMessage", {
-      content: likeMessage.content,
-      recipient: message.name,
-      type: "like",
-    });
-  };
-
-  const truncateText = (text, maxLength) => {
-    if (text.length > maxLength) {
-      return text.slice(0, maxLength) + "...";
-    }
-    return text;
-  };
-
-  // Lấy lịch sử tin nhắn
-  const fetchMessageHistory = async () => {
+  const fetchChatHistory = async () => {
     try {
       setLoading(true);
-      const response = await getMessageHistoryService({
-        senderId,
-        receiverId,
-        page,
-        size: pageSize,
-      });
-
-      const data = response?.data?.data || {};
-      setMessages((prev) => [...data.messages, ...prev]);
-      setReceiver(data.receiver);
-      setSender(data.sender);
+      let response;
+      
+      // Lấy lịch sử chat dựa vào loại chat
+      if (isGroupChat) {
+        response = await getGroupMessagesService(message.groupId);
+      } else {
+        response = await getMessageHistoryService(message.conversationId || message.userId);
+      }
+      
+      const history = response?.data?.messages || [];
+      
+      // Log để debug
+      console.log("Chat history:", history);
+      
+      setChatHistory(history);
+      
+      // Khởi tạo lại trạng thái loading cho ảnh
+      initializeImageLoadingState(history);
     } catch (error) {
-      console.error("Error fetching message history:", error);
+      console.error("Error fetching chat history:", error);
+      message.error("Không thể tải tin nhắn. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchMessageHistory();
-  }, [page]);
+  // Khởi tạo trạng thái loading cho ảnh
+  const initializeImageLoadingState = (messages) => {
+    const newImageLoading = {};
+    messages.forEach((msg, index) => {
+      if (msg.type === "image" && msg.image && msg.image.image_url) {
+        newImageLoading[index] = true;
+      }
+    });
+    setImageLoading(newImageLoading);
+  };
 
-  useEffect(() => {
-    if (chatBodyRef.current) {
-      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+  const handleSendMessage = async () => {
+    if ((!messageText.trim() && !imageFile) || loading) return;
+
+    try {
+      setLoading(true);
+      const data = {
+        sender_id: parseInt(currentUserId, 10),
+        type: imageFile ? "image" : "text",
+        onUploadProgress: (progress) => {
+          setUploadProgress(Math.round((progress.loaded / progress.total) * 100));
+        },
+      };
+
+      if (imageFile) {
+        data.image_file = imageFile;
+      } else {
+        data.content = messageText;
+      }
+
+      // Gửi tin nhắn dựa vào loại chat
+      if (isGroupChat) {
+        data.group_chat_id = message.groupId;
+        await sendGroupMessageService(data);
+      } else {
+        data.receiver_id = message.userId;
+        await sendPrivateMessageService(data);
+      }
+
+      // Làm mới lịch sử chat
+      await fetchChatHistory();
+      
+      // Xóa dữ liệu đã gửi
+      setMessageText("");
+      setImageFile(null);
+      setUploadProgress(0);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      message.error("Không thể gửi tin nhắn. Vui lòng thử lại sau.");
+    } finally {
+      setLoading(false);
     }
-  }, [messages]);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+    }
+  };
+
+  const triggerImageUpload = () => {
+    fileInputRef.current.click();
+  };
+
+  const cancelImageUpload = () => {
+    setImageFile(null);
+    setUploadProgress(0);
+  };
+
+  const formatMessageDate = (dateString) => {
+    const messageDate = new Date(dateString);
+    const today = new Date();
+    
+    // Check if message is from today
+    if (messageDate.toDateString() === today.toDateString()) {
+      return messageDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else {
+      // Show date and time for older messages
+      return messageDate.toLocaleDateString([], {
+        month: "short",
+        day: "numeric",
+      }) + ' ' + messageDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+  };
+
+  const dropdownItems = [
+    {
+      key: "1",
+      label: "Xóa cuộc trò chuyện",
+    },
+    {
+      key: "2",
+      label: "Chặn người dùng",
+    },
+    {
+      key: "3",
+      label: "Tắt thông báo",
+    },
+  ];
+
+  // Mở hình ảnh xem trước
+  const handlePreviewImage = (imageUrl) => {
+    setPreviewImage(imageUrl);
+    setPreviewVisible(true);
+  };
+
+  // Đóng hình ảnh xem trước
+  const handlePreviewCancel = () => {
+    setPreviewVisible(false);
+  };
+
+  // Xử lý khi ảnh được tải xong
+  const handleImageLoaded = (index) => {
+    setImageLoading(prev => ({
+      ...prev,
+      [index]: false
+    }));
+  };
+
+  // Xử lý khi ảnh không tải được
+  const handleImageError = (index) => {
+    setImageLoading(prev => ({
+      ...prev,
+      [index]: false
+    }));
+  };
+
+  // Group messages by date for better visualization
+  const groupMessagesByDate = () => {
+    let currentDate = null;
+    let result = [];
+    
+    chatHistory.forEach((msg, index) => {
+      const messageDate = new Date(msg.created_at).toDateString();
+      
+      if (messageDate !== currentDate) {
+        currentDate = messageDate;
+        result.push({
+          type: 'date',
+          date: messageDate,
+          id: `date-${index}`
+        });
+      }
+      
+      result.push(msg);
+    });
+    
+    return result;
+  };
+
+  const groupedMessages = groupMessagesByDate();
 
   return (
     <div
       className="chat-window"
       style={{
         position: "fixed",
-        bottom: position.bottom,
-        right: position.right,
-        width: "338px",
-        height: "455px",
-        background: "#fff",
-        borderRadius: "10px",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-        zIndex: 200,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
+        bottom: `${position.bottom}px`,
+        right: `${position.right}px`,
+        zIndex: 1000,
+        width: "320px",
+        height: "450px",
       }}
     >
-      {/* Header */}
       <div className="chat-header">
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <Avatar
-            src={receiver.avatarUrl || "https://via.placeholder.com/40"}
-          />
-          <div style={{ marginLeft: "8px" }}>
-            <Typography.Text strong>
-              {receiver.fullName || "Người dùng"}
-            </Typography.Text>
-            <Typography.Text type="secondary">Active now</Typography.Text>
+        <div className="user-info">
+          <Badge dot={message.status === "available"} color="green" offset={[-2, 28]}>
+            <Avatar src={message.profilePictureUrl || message.avatar_url || "https://i.pravatar.cc/150"} size={36} />
+          </Badge>
+          <div className="user-details">
+            <div className="user-name">{message.name}</div>
+            <div className="user-status">
+              {message.status === "available" ? "Đang hoạt động" : "Ngoại tuyến"}
+            </div>
           </div>
         </div>
-        <div style={{ marginLeft: "auto" }}>
-          <Tooltip title="Gọi điện">
-            <Button type="text" icon={<PhoneOutlined />} />
-          </Tooltip>
-          <Tooltip title="Gọi video">
-            <Button type="text" icon={<VideoCameraOutlined />} />
-          </Tooltip>
-          <Tooltip title="Thu nhỏ cửa sổ">
-            <Button type="text" icon={<MinusOutlined />} onClick={onHide} />
-          </Tooltip>
-          <Tooltip title="Đóng cửa sổ">
-            <Button type="text" icon={<CloseOutlined />} onClick={onClose} />
-          </Tooltip>
+        <div className="chat-actions">
+          <Space>
+            <Tooltip title="Ẩn">
+              <Button 
+                type="text" 
+                icon={<MinusOutlined />} 
+                onClick={onHide}
+                className="action-button" 
+              />
+            </Tooltip>
+            <Tooltip title="Tùy chọn">
+              <Dropdown menu={{ items: dropdownItems }} placement="bottomRight" trigger={['click']}>
+                <Button 
+                  type="text" 
+                  icon={<MoreOutlined />} 
+                  className="action-button"
+                />
+              </Dropdown>
+            </Tooltip>
+            <Tooltip title="Đóng">
+              <Button 
+                type="text" 
+                icon={<CloseOutlined />} 
+                onClick={onClose}
+                className="action-button" 
+              />
+            </Tooltip>
+          </Space>
         </div>
       </div>
 
-      {/* Body */}
       <div className="chat-body" ref={chatBodyRef}>
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "10px" }}>Loading...</div>
-        ) : messages.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "10px" }}>
-            No messages yet.
-          </div>
-        ) : (
-          messages.map((msg, index) => (
+        {groupedMessages.map((item, index) => {
+          if (item.type === 'date') {
+            return (
+              <div key={item.id} className="date-separator">
+                <span>{new Date(item.date).toLocaleDateString()}</span>
+              </div>
+            );
+          }
+          
+          const isSelf = item.sender_id.toString() === currentUserId.toString();
+          const showAvatar = !isSelf && isGroupChat;
+          
+          // Xác định đường dẫn ảnh đúng dựa vào dữ liệu trả về
+          let imageUrl = null;
+          if (item.type === "image") {
+            if (item.image) {
+              imageUrl = item.image.image_url;
+            }
+          }
+          
+          return (
             <div
-              key={msg.messageId || index}
-              className={`chat-message ${msg.isSender ? "sender" : "receiver"}`}
+              key={`msg-${index}`}
+              className={`message-container ${isSelf ? "self" : "other"}`}
             >
-              {!msg.isSender && (
-                <Avatar
-                  src={receiver.avatarUrl || "https://via.placeholder.com/40"}
-                  style={{ marginRight: "8px" }}
-                />
+              {showAvatar && (
+                <div className="message-avatar">
+                  <Avatar 
+                    size={24} 
+                    src={(item.sender?.avatar_url || item.sender?.profilePictureUrl || "https://i.pravatar.cc/150")} 
+                  />
+                </div>
               )}
-              <div className="message-content">
-                {msg.messageType === "TEXT" && (
-                  <span>{msg.messageContent}</span>
+              
+              <div className="message-wrapper">
+                {showAvatar && (
+                  <div className="sender-name">{item.sender?.name}</div>
                 )}
+                
+                <div className={`message-bubble ${isSelf ? "self" : "other"}`}>
+                  {item.type === "text" ? (
+                    <div className="message-content">{item.content}</div>
+                  ) : (
+                    <div className="message-image">
+                      {imageUrl ? (
+                        <>
+                          {imageLoading[index] && (
+                            <div className="image-loading">
+                              <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+                            </div>
+                          )}
+                          <img 
+                            src={imageUrl} 
+                            alt="Shared" 
+                            onClick={() => handlePreviewImage(imageUrl)}
+                            onLoad={() => handleImageLoaded(index)}
+                            onError={() => handleImageError(index)}
+                            style={{ display: imageLoading[index] ? 'none' : 'block' }}
+                          />
+                        </>
+                      ) : (
+                        <div className="image-error">Ảnh không khả dụng</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="message-time">
+                  {formatMessageDate(item.created_at)}
+                </div>
               </div>
             </div>
-          ))
-        )}
+          );
+        })}
+        <div ref={messagesEndRef} />
       </div>
+      
+      <Modal
+        open={previewVisible}
+        footer={null}
+        onCancel={handlePreviewCancel}
+        centered
+        width="auto"
+        bodyStyle={{ padding: 0, backgroundColor: 'transparent' }}
+        style={{ top: 20 }}
+      >
+        <img alt="Preview" style={{ maxWidth: '100%', maxHeight: '90vh' }} src={previewImage} />
+      </Modal>
 
-      {/* Footer */}
       <div className="chat-footer">
-        {isRecordingMode ? (
-          // Giao diện ghi âm
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "8px",
-              backgroundColor: "#d8b6ff",
-              borderRadius: "10px",
-            }}
-          >
-            <Button
-              shape="circle"
-              icon={<CloseOutlined />}
-              style={{ backgroundColor: "white", color: "red" }}
-              onClick={handleCancelRecording}
-            />
-            <Button
-              shape="circle"
-              icon={<StopOutlined />}
-              style={{ backgroundColor: "white", color: "purple" }}
-              onClick={handleStopRecording}
-            />
-            <div
-              style={{
-                flex: 1,
-                backgroundColor: "white",
-                padding: "4px 10px",
-                borderRadius: "10px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <span>0:00</span>
+        {imageFile && (
+          <div className="image-preview">
+            <div className="preview-container">
+              <img
+                src={URL.createObjectURL(imageFile)}
+                alt="Upload Preview"
+              />
+              <Button
+                type="text"
+                icon={<CloseOutlined />}
+                onClick={cancelImageUpload}
+                className="cancel-upload"
+              />
             </div>
-            <Button
-              shape="circle"
-              icon={<ArrowRightOutlined />}
-              style={{ backgroundColor: "white", color: "blue" }}
-              onClick={() => setIsRecordingMode(false)}
-            />
-          </div>
-        ) : (
-          <Flex gap={4} align="center" style={{ height: "60px" }}>
-            {/* Nút ghi âm */}
-            <Tooltip title={isRecording ? "Dừng ghi âm" : "Ghi âm"}>
-              <Button
-                type="text"
-                icon={<FaMicrophone />}
-                onClick={
-                  isRecording ? handleStopRecording : handleStartRecording
-                }
-                style={{
-                  color: isRecording ? "red" : "#000",
-                  fontSize: "20px",
-                  width: "36px",
-                  paddingLeft: "4px",
-                }}
-              />
-            </Tooltip>
-
-            <FileUploadButton
-              onFileChange={(fileMessage) => {
-                const formattedMessage = {
-                  ...fileMessage,
-                  type: "file", // Thêm type để xác định đây là file
-                };
-
-                setChatMessages((prevMessages) => [
-                  formattedMessage,
-                  ...prevMessages,
-                ]);
-                socket.emit("sendFile", {
-                  content: formattedMessage.content,
-                  recipient: message.name,
-                  type: "file", // Gửi type kèm theo
-                });
-              }}
-            />
-
-            <Tooltip title="Sticker">
-              <Button
-                type="text"
-                icon={<RiEmojiStickerLine />}
-                style={{ color: "#000", fontSize: "20px", width: "36px" }}
-                onClick={() => setStickerModalVisible(true)}
-              />
-            </Tooltip>
-
-            <Tooltip title="GIF">
-              <Button
-                type="text"
-                icon={<PiGifFill />}
-                style={{ color: "#000", fontSize: "20px", width: "36px" }}
-                onClick={() => setGifModalVisible(true)}
-              />
-            </Tooltip>
-
-            <Tooltip title="Chọn emoji">
-              <div className="textarea-container">
-                <TextArea
-                  placeholder="Aa"
-                  autoSize={{ minRows: 1, maxRows: 4 }}
-                  className="custom-textarea"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onPressEnter={(e) => {
-                    e.preventDefault(); // Ngăn xuống dòng
-                    handleSendMessage(); // Gửi tin nhắn
-                  }}
-                />
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="upload-progress">
+                <div
+                  className="progress-bar"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
               </div>
-            </Tooltip>
-
-            <Tooltip title="Gửi like">
-              <Button
-                type="text"
-                icon={<AiFillLike />}
-                style={{
-                  color: "#000",
-                  fontSize: "20px",
-                  width: "36px",
-                  paddingRight: "4px",
-                }}
-                onClick={handleSendLike} // Gọi hàm gửi like
-              />
-            </Tooltip>
-          </Flex>
+            )}
+          </div>
         )}
+        
+        <div className="input-container">
+          <Button
+            className="action-icon"
+            icon={<SmileOutlined />}
+            type="text"
+          />
+          <Button 
+            className="action-icon"
+            icon={<PictureOutlined />}
+            onClick={triggerImageUpload}
+            type="text"
+          />
+          <Input
+            className="message-input"
+            placeholder="Nhập tin nhắn..."
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={!!imageFile || loading}
+          />
+          <Button
+            type="primary"
+            icon={<SendOutlined />}
+            onClick={handleSendMessage}
+            loading={loading}
+            disabled={(!messageText.trim() && !imageFile) || loading}
+            className="send-button"
+          />
+        </div>
+        
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          accept="image/*"
+          onChange={handleImageUpload}
+        />
       </div>
-      {/* Modal GIF */}
-      <GifModal
-        visible={gifModalVisible}
-        onClose={() => setGifModalVisible(false)}
-        onSendGif={handleSendGif}
-      />
-
-      <StickerModal
-        visible={stickerModalVisible}
-        onClose={() => setStickerModalVisible(false)}
-        onSendSticker={handleSendSticker}
-      />
     </div>
   );
 };
