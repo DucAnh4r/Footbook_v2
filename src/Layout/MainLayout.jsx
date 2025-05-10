@@ -1,6 +1,7 @@
 import React from "react";
-import { Layout, Avatar, Badge, Tooltip, FloatButton, Typography } from "antd";
+import { Layout, Avatar, Badge, Tooltip, FloatButton, Typography, Button } from "antd";
 import { IoPencilSharp } from "react-icons/io5";
+import { CloseOutlined } from "@ant-design/icons";
 import Header from "./Header"; // Custom header component
 import "./MainLayout.scss";
 import { HeaderProvider } from "../Context/HeaderContext";
@@ -16,6 +17,7 @@ const MainLayout = ({ children }) => {
     hideChat,
     showChat,
     handleNewMessage,
+    removeHiddenChat,
   } = useChat(); // Sử dụng context
 
   const calculatePosition = (index) => {
@@ -33,41 +35,75 @@ const MainLayout = ({ children }) => {
       </HeaderProvider>
       <FloatButton.Group shape="circle" style={{ bottom: "14px", right: "24px" }}>
         {hiddenMessages.map((message) => (
-          <Tooltip
-            key={message.userId}
-            title={
-              <div>
-                <Typography.Text strong>{message.name || "Không có tên"}</Typography.Text>
-                <Typography.Text type="secondary">
-                  {message.message || "Không có nội dung"}
-                </Typography.Text>
-              </div>
-            }
-            color="white"
-            placement="left"
+          <div 
+            key={message.userId} 
+            className="hidden-chat-bubble"
+            style={{ 
+              position: "relative", 
+              marginBottom: "16px", 
+              display: "inline-block" 
+            }}
           >
-            <Badge
-              count={
-                <div
-                  style={{
-                    width: 12,
-                    height: 12,
-                    backgroundColor: "green",
-                    borderRadius: "50%",
-                    border: "2px solid white",
-                  }}
-                />
+            <Tooltip
+              title={
+                <div>
+                  <Typography.Text strong>{message.name || "Không có tên"}</Typography.Text>
+                  <Typography.Text type="secondary">
+                    {message.message || "Không có nội dung"}
+                  </Typography.Text>
+                </div>
               }
-              offset={[-8, 40]}
+              color="white"
+              placement="left"
             >
-              <Avatar
-                src="https://i.pravatar.cc/300"
-                size={48}
-                onClick={() => showChat(message.userId)}
-                style={{ cursor: "pointer" }}
-              />
-            </Badge>
-          </Tooltip>
+              <Badge
+                count={
+                  <div
+                    style={{
+                      width: 12,
+                      height: 12,
+                      backgroundColor: "green",
+                      borderRadius: "50%",
+                      border: "2px solid white",
+                    }}
+                  />
+                }
+                offset={[-8, 40]}
+              >
+                <Avatar
+                  src={message.profilePictureUrl || message.avatar_url || "https://i.pravatar.cc/300"}
+                  size={48}
+                  onClick={() => showChat(message.userId)}
+                  style={{ cursor: "pointer" }}
+                />
+              </Badge>
+            </Tooltip>
+            
+            {/* Nút X để xóa chat thu nhỏ */}
+            <Button
+              type="primary"
+              danger
+              size="small"
+              icon={<CloseOutlined />}
+              style={{
+                position: "absolute",
+                top: -10,
+                right: -10,
+                borderRadius: "50%",
+                width: "22px",
+                height: "22px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 0,
+                zIndex: 10,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                removeHiddenChat(message.userId);
+              }}
+            />
+          </div>
         ))}
         <Tooltip title="Tin nhắn mới" placement="left">
           <FloatButton icon={<IoPencilSharp />} onClick={handleNewMessage} />

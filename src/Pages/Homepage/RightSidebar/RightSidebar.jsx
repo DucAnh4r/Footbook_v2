@@ -5,7 +5,7 @@ import { SearchOutlined, MoreOutlined } from '@ant-design/icons';
 import styles from './RightSidebar.module.scss';
 import { getUserMessageListService, getUserGroupChatsService } from '../../../services/privateMessageService';
 import { getUserIdFromLocalStorage } from '../../../utils/authUtils';
-import ChatWindow from "../../../Pages/Homepage/ChatWindow";
+import { useChat } from '../../../utils/ChatContext'; // Import useChat hook
 
 const { Text } = Typography;
 
@@ -23,10 +23,8 @@ const RightSidebar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const userId = parseInt(getUserIdFromLocalStorage(), 10);
 
-  const [selectedMessages, setSelectedMessages] = useState([]);
-  const [hiddenMessages, setHiddenMessages] = useState([]);
-
-  const MAX_CHAT_WINDOWS = 3; // Giới hạn số lượng cửa sổ chat
+  // Sử dụng ChatContext thay vì state nội bộ
+  const { addChat } = useChat();
 
   const fetchCombinedMessages = async () => {
     try {
@@ -123,7 +121,8 @@ const RightSidebar = () => {
           message: item.last_message?.content || "Nhóm chat",
           type: 'group',
           groupId: item.id,
-          id: item.id
+          id: item.id,
+          status: 'available' // Để duy trì nhất quán
         }
       : {
           userId: item.other_user.id,
@@ -131,58 +130,12 @@ const RightSidebar = () => {
           profilePictureUrl: item.other_user.avatar_url,
           message: item.last_message?.content || "Tin nhắn",
           type: 'dm',
-          conversationId: item.id
+          conversationId: item.id,
+          status: item.other_user?.status || 'offline'
         };
     
-    const isHidden = hiddenMessages.some((m) => m.userId === chatData.userId);
-      
-    if (isHidden) {
-      setHiddenMessages((prev) => prev.filter((m) => m.userId !== chatData.userId));
-      setSelectedMessages((prev) => {
-        const newMessages = [...prev, chatData];
-        if (newMessages.length > MAX_CHAT_WINDOWS) {
-          // Nếu vượt quá giới hạn, ẩn cái cũ nhất
-          const [oldest, ...rest] = newMessages;
-          setHiddenMessages((hidden) => [...hidden, oldest]);
-          return rest;
-        }
-        return newMessages;
-      });
-    } else {
-      const isAlreadyOpen = selectedMessages.some((m) => m.userId === chatData.userId);
-      
-      if (!isAlreadyOpen) {
-        setSelectedMessages((prev) => {
-          const newMessages = [...prev, chatData];
-          if (newMessages.length > MAX_CHAT_WINDOWS) {
-            // Nếu vượt quá giới hạn, ẩn cái cũ nhất
-            const [oldest, ...rest] = newMessages;
-            setHiddenMessages((hidden) => [...hidden, oldest]);
-            return rest;
-          }
-          return newMessages;
-        });
-      }
-    }
-  };
-
-  const calculatePosition = (index) => {
-    const baseBottom = 0;
-    const baseRight = 94;
-    const offset = index * 350;
-    return { bottom: baseBottom, right: baseRight + offset };
-  };
-
-  const handleCloseChat = (id) => {
-    setSelectedMessages((prev) => prev.filter((message) => message.userId !== id));
-  };
-
-  const handleHideChat = (id) => {
-    const messageToHide = selectedMessages.find((m) => m.userId === id);
-    if (messageToHide) {
-      setHiddenMessages((prev) => [...prev, messageToHide]);
-      setSelectedMessages((prev) => prev.filter((m) => m.userId !== id));
-    }
+    // Sử dụng addChat từ ChatContext để thêm chat
+    addChat(chatData);
   };
 
   return (
@@ -292,19 +245,6 @@ const RightSidebar = () => {
             )}
           </>
         )}
-        {selectedMessages.map((message, index) => {
-          const position = calculatePosition(index);
-          return (
-            <ChatWindow
-              key={message.userId}
-              receiverId={message.userId}
-              message={message}
-              onClose={() => handleCloseChat(message.userId)}
-              onHide={() => handleHideChat(message.userId)}
-              position={position}
-            />
-          );
-        })}
       </div>
     </div>
   );
