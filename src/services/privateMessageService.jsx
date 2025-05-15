@@ -2,6 +2,10 @@ import axiosCreate from "../utils/axiosRelease";
 import { uploadMessagesImgToCloudinary } from "../utils/cloudinaryConfig";
 import { domain } from "./api";
 
+export const getConversationBetweenUsers = (user1Id, user2Id) => {
+  return axiosCreate.get(`${domain}/chat/conversation/between/${user1Id}/${user2Id}`);
+};
+
 // Private Message Services (Các chức năng tin nhắn cá nhân đã có)
 export const sendPrivateMessageService = async (data) => {
   const payload = {

@@ -9,6 +9,7 @@ import { getUserMessageListService, getUserGroupChatsService } from '../../servi
 import { getUserIdFromLocalStorage } from '../../utils/authUtils';
 import styles from './MessageLeftSidebar.module.scss';
 import CreateGroupChatModal from '../../Modal/CreateGroupChatModal';
+import CreateMessageModal from '../../Modal/CreateMessageModal';
 
 const { Text, Title } = Typography;
 const { TabPane } = Tabs;
@@ -17,6 +18,7 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
   const [selectedChat, setSelectedChat] = useState(null); // thay vì chỉ selectedChatId
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isGroupChatModalVisible, setIsGroupChatModalVisible] = useState(false);
+  const [isCreateMessageModalVisible, setIsCreateMessageModalVisible] = useState(false);
   const [isRestrictedView, setIsRestrictedView] = useState(false);
   const [loading, setLoading] = useState(true);
   const [list, setList] = useState([]);
@@ -28,6 +30,7 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
   const closeModal = () => setIsModalVisible(false);
 
   const showGroupChatModal = () => setIsGroupChatModalVisible(true);
+  const showCreateMessageModal = () => setIsCreateMessageModalVisible(true);
   const closeGroupChatModal = () => setIsGroupChatModalVisible(false);
 
   const openRestrictedView = () => {
@@ -62,8 +65,8 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
 
       // Gộp và sắp xếp theo thời gian tin nhắn mới nhất
       const combined = [...directMessages, ...groupMessages].sort((a, b) => {
-        const timeA = new Date(a.last_message?.created_at ||  a.created_at).getTime();
-        const timeB = new Date(b.last_message?.created_at ||  b.created_at).getTime();
+        const timeA = new Date(a.last_message?.created_at || a.created_at).getTime();
+        const timeB = new Date(b.last_message?.created_at || b.created_at).getTime();
         return timeB - timeA;
       });
 
@@ -145,10 +148,14 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
   };
 
   const handleGroupChatCreated = () => {
-    // Refresh danh sách nhóm chat khi tạo mới thành công
     fetchGroupChats();
-    // Chuyển sang tab nhóm chat
     setActiveTab('2');
+  };
+
+  const handleMessageSent = (conversation) => {
+    fetchCombinedMessages();
+    setSelectedChat({ id: conversation.id, type: conversation.type });
+    onSelectChat(conversation);
   };
 
   const menu = (
@@ -177,6 +184,17 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
     </Menu>
   );
 
+  const menu2 = (
+    <Menu style={{ padding: '20px 10px' }}>
+      <Menu.Item key="1" icon={<FaCog />} onClick={showCreateMessageModal}>
+        Viết tin nhắn
+      </Menu.Item>
+      <Menu.Item key="2" icon={<FaEnvelope />} onClick={showGroupChatModal}>
+        Tạo nhóm chat
+      </Menu.Item>
+    </Menu>
+  );
+
   if (isRestrictedView) {
     return <RestrictedAccountsView onBack={goBackToMainView} />;
   }
@@ -189,13 +207,15 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
         </Title>
         <div className={styles.headerIcons}>
           <Dropdown overlay={menu} trigger={['click']}>
-            <Tooltip title="Tùy chọn">
+            <Tooltip title="Tùy chọn" placement="bottom">
               <EllipsisOutlined className={styles.icon} />
             </Tooltip>
           </Dropdown>
-          <Tooltip title="Tạo nhóm chat">
-            <EditOutlined className={styles.icon} onClick={showGroupChatModal} />
-          </Tooltip>
+          <Dropdown overlay={menu2} trigger={['click']}>
+            <Tooltip title="Tin nhắn mới" placement="bottom">
+              <EditOutlined className={styles.icon} />
+            </Tooltip>
+          </Dropdown>
         </div>
       </div>
 
@@ -307,6 +327,7 @@ const MessageLeftSidebar = ({ onSelectChat, refetchTrigger }) => {
       </Tabs>
 
       <SettingsMessageModal visible={isModalVisible} onClose={closeModal} />
+      <CreateMessageModal visible={isCreateMessageModalVisible} onClose={() => setIsCreateMessageModalVisible(false)} onSuccess={handleMessageSent}/>
       <CreateGroupChatModal visible={isGroupChatModalVisible} onClose={closeGroupChatModal} onSuccess={handleGroupChatCreated} />
     </div>
   );

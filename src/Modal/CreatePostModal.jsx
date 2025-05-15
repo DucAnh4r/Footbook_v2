@@ -91,6 +91,7 @@ const CreatePostModal = ({ isModalOpen, onClose, userName, onPostCreated }) => {
 
   return (
     <Modal
+      style={{marginTop: "60px"}}
       title={<div className="modal-title">Create post</div>}
       open={isModalOpen}
       onCancel={onClose}

@@ -91,6 +91,13 @@
   padding: 0px !important;
 }
 
+.ant-modal-mask {
+  z-index: 9999 !important;
+}
+
+.ant-modal-wrap {
+  z-index: 10000 !important; 
+}
 // .ant-list-item {
 //   padding: 0px !important;
 // }

@@ -83,7 +83,7 @@ const ProfileContent = ({ userName, UserAvatar }) => {
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fff')}
             >
-              <img style={{width: "50px", height: "50px", borderRadius: "50px"}} src={UserAvatar} alt="" />
+              <img style={{width: "50px", height: "50px", borderRadius: "50px", objectFit: "cover"}} src={UserAvatar} alt="" />
               <Text strong style={{ fontSize: '16px' }}>{userName}</Text>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
