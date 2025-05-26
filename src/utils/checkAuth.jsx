@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAuthDataFromLocalStorage } from "./authUtils";
+import api from "../services/api.jsx"; // Sẽ tạo ở bước tiếp theo
 
 export const checkAuth = () => {
-  const user = localStorage.getItem("user");
-  return !!user; // Trả về true nếu có user, false nếu không
+  const authData = getAuthDataFromLocalStorage();
+  return !!(authData && authData.user && authData.access_token); // Kiểm tra cả user và access_token
 };
 
 export const useAuthCheck = () => {
@@ -11,7 +13,7 @@ export const useAuthCheck = () => {
 
   useEffect(() => {
     if (!checkAuth()) {
-      navigate("/login"); // Chuyển hướng nếu chưa đăng nhập
+      navigate("/login");
     }
   }, [navigate]);
 };
@@ -19,8 +21,13 @@ export const useAuthCheck = () => {
 export const useLogout = () => {
   const navigate = useNavigate();
 
-  return () => {
-    localStorage.removeItem("user");
-    navigate("/login"); // Chuyển hướng sau khi đăng xuất
+  return async () => {
+    try {
+      await api.post('/logout'); // Gọi API logout
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+    localStorage.removeItem("authData");
+    navigate("/login");
   };
 };

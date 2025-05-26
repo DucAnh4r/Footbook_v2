@@ -1,89 +1,82 @@
-import axiosCreate from "../utils/axiosRelease";
-import { domain } from "./api";
+import api from "./api"; // Sử dụng instance axios từ api.jsx
 
 export const createFriendshipService = (Data) => {
   // Gửi lời mời
   const { requester_id, addressee_id } = Data;
-  return axiosCreate.post(
-    `${domain}/relationships/send-request`,
-    {
-        requester_id,
-        addressee_id
-    }
-    
-  );
+  return api.post(`/relationships/send-request`, {
+    requester_id,
+    addressee_id,
+  });
 };
 
 export const acceptFriendshipService = (Data) => {
   const { requester_id, addressee_id } = Data;
-  return axiosCreate.put(`${domain}/relationships/accept-request`, {
-    requester_id, // no
-    addressee_id, // minh
+  return api.put(`/relationships/accept-request`, {
+    requester_id,
+    addressee_id,
   });
 };
 
 export const declineFriendshipService = (Data) => {
-    const { requester_id, addressee_id } = Data;
-    return axiosCreate.put(`${domain}/relationships/decline-request`, {
-      requester_id, // no
-      addressee_id, // minh
-    });
+  const { requester_id, addressee_id } = Data;
+  return api.put(`/relationships/decline-request`, {
+    requester_id,
+    addressee_id,
+  });
 };
 
 export const deleteFriendshipService = (Data) => {
-    const { user_id, friend_id } = Data;
-    return axiosCreate.delete(`${domain}/relationships/unfriend`, {
-      data: {
-        user_id, // mình
-        friend_id, // bạn
-      },
-    });
-  };
-  
+  const { user_id, friend_id } = Data;
+  return api.delete(`/relationships/unfriend`, {
+    data: {
+      user_id,
+      friend_id,
+    },
+  });
+};
 
 export const getFriendshipStatusService = (Data) => {
-  //pending, accept, block
   const { user_id, other_user_id } = Data;
-  return axiosCreate.get(`${domain}/relationships/check-status`, {
+  return api.get(`/relationships/check-status`, {
     params: {
-      user_id, //minh
-      other_user_id, //no
+      user_id,
+      other_user_id,
     },
   });
 };
 
 export const getFriendshipRequestService = (Data) => {
-  //hien thi danh sach pendin
   const { user_id } = Data;
-  return axiosCreate.get(`${domain}/relationships/received-requests`, {
+  return api.get(`/relationships/received-requests`, {
     params: {
-      user_id, 
+      user_id,
     },
   });
 };
 
 export const getSentFriendRequestsService = (Data) => {
-  //hien thi danh sach pendin
   const { user_id } = Data;
-  return axiosCreate.get(`${domain}/relationships/sent-requests`, {
+  return api.get(`/relationships/sent-requests`, {
     params: {
-      user_id, 
+      user_id,
     },
   });
 };
 
 export const countFriendService = (userId) => {
-  //dem so ban
-  return axiosCreate.get(`${domain}/relationships/count?user_id=${userId}`, {});
+  return api.get(`/relationships/count`, {
+    params: {
+      user_id: userId,
+    },
+  });
 };
 
 export const getSuggestedFriendsService = (Data) => {
-  // Lấy danh sách bạn bè gợi ý (ưu tiên bạn chung)
   const { user_id, limit } = Data;
-  return axiosCreate.get(`${domain}/relationships/suggested`, {
+  return api.get(`/relationships/suggested`, {
     params: {
       user_id,
-      limit
+      limit,
     },
   });
 };

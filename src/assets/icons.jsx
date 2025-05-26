@@ -20,7 +20,7 @@ export const navItems = [
 ];
 
 export const iconData = [
-  { name: 'appStore', icon: <IoAppsSharp  style={{ fontSize: '24px' }} />, tooltip: 'App Store' },
+  { name: 'appStore', icon: <IoAppsSharp  style={{ fontSize: '24px' }} />, tooltip: 'Menu' },
   { name: 'messages', icon: <FaFacebookMessenger style={{ fontSize: '20px' }} />, tooltip: 'Messages' },
   { name: 'notifications', icon: <Badge count={1} size="small"><FaBell style={{ fontSize: '25px' }} /></Badge>, tooltip: 'Notifications' }
 ];

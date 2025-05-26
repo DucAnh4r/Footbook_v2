@@ -1,30 +1,28 @@
-import axiosCreate from "../utils/axiosRelease";
-import { domain } from "./api";
-
+/* eslint-disable no-unused-vars */
+import api from './api'; // Sử dụng instance axios từ api.jsx
 
 export const userRegisterService = (userData) => {
-  return axiosCreate.post(`${domain}/api/v1/users/register`, {
-    fullName: userData.fullName,
-    gender: userData.gender,
-    date_of_birth: userData.date_of_birth,
-    password: userData.password,
+  return api.post('/register', {
+    name: userData.fullName, // Backend yêu cầu "name" thay vì "fullName"
     email: userData.email,
-    username: userData.username,
+    password: userData.password,
+    birth_year: userData.date_of_birth ? new Date(userData.date_of_birth).getFullYear() : null,
+    profession: userData.profession || null,
+    auth_provider: 'local', // Backend yêu cầu auth_provider
+    status: 'available', // Backend yêu cầu status
   });
 };
-
 
 export const userLoginService = (Data) => {
-  return axiosCreate.post(`${domain}/api/v1/users/login`, {
-    phone_number: Data.phone_number,
-    password: Data.password
+  return api.post('/login', {
+    email: Data.email, // Backend yêu cầu email thay vì phone_number
+    password: Data.password,
   });
 };
-
 
 export const userSearchService = (Data) => {
   const { keyword, limit, offset } = Data;
-  return axiosCreate.get(`${domain}/users/search`, {
+  return api.get('/users/search', {
     params: {
       keyword,
       limit,
@@ -34,7 +32,10 @@ export const userSearchService = (Data) => {
 };
 
 export const updateBioService = (Data, user_id) => {
-  return axiosCreate.patch(`${domain}/api/v1/users/${user_id}/update-bio`, {
+  // Backend không có endpoint /api/v1/users/{user_id}/update-bio
+  // Sử dụng /update-profile để cập nhật bio (giả sử bio nằm trong profile)
+  return api.post('/update-profile', {
+    user_id,
     bio: Data.bio,
   });
 };
@@ -42,32 +43,27 @@ export const updateBioService = (Data, user_id) => {
 export const updateProfileService = (data, user_id) => {
   const payload = {
     user_id,
-    ...data, // có thể chứa birth_year, profession, address
+    ...data, // Có thể chứa birth_year, profession, address
   };
-
-  return axiosCreate.post(`${domain}/update-profile`, payload);
+  return api.post('/update-profile', payload);
 };
-
 
 export const updateCoverService = (Data, user_id) => {
   const formData = new FormData();
-  formData.append("coverPicture", Data.coverPicture);
-  return axiosCreate.patch(`${domain}/api/v1/users/${user_id}/update-cover-picture`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-};
-
-export const userFindByIdService = (user_id) => {
-  return axiosCreate.get(`${domain}/user/${user_id}`, {
+  formData.append('cover_photo_url', Data.coverPicture); // Backend yêu cầu cover_photo_url
+  return api.post('/update-profile', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   });
 };
 
+export const userFindByIdService = (user_id) => {
+  return api.get(`/user/${user_id}`);
+};
+
 export const userListFriendService = (user_id) => {
-  return axiosCreate.get(`${domain}/relationships/friends`, {
+  return api.get(`/relationships/friends`, {
     params: {
       user_id: user_id
     },

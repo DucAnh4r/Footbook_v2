@@ -1,19 +1,28 @@
 import { userFindByIdService } from "../services/userService";
 
-export const getUserIdFromLocalStorage = () => {
-  const user = localStorage.getItem("user");
-  if (!user) return null;
+export const getAuthDataFromLocalStorage = () => {
+  const authData = localStorage.getItem("authData");
+  if (!authData) return null;
 
   try {
-    const parsedUser = JSON.parse(user);
-    const id = parsedUser?.data?.id;
-
-    // Kiểm tra và ép kiểu sang số nguyên
-    return Number.isInteger(Number(id)) ? parseInt(id, 10) : null;
+    return JSON.parse(authData);
   } catch (error) {
-    console.error("Error parsing user from localStorage:", error);
+    console.error("Error parsing authData from localStorage:", error);
     return null;
   }
+};
+
+export const getUserIdFromLocalStorage = () => {
+  const authData = getAuthDataFromLocalStorage();
+  if (!authData) return null;
+
+  const id = authData?.user?.id;
+  return Number.isInteger(Number(id)) ? parseInt(id, 10) : null;
+};
+
+export const getAccessTokenFromLocalStorage = () => {
+  const authData = getAuthDataFromLocalStorage();
+  return authData?.access_token || null;
 };
 
 export const getUserById = async (userId) => {

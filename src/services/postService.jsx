@@ -1,40 +1,38 @@
 /* eslint-disable react-refresh/only-export-components */
-import axiosCreate from "../utils/axiosRelease";
-import { domain } from "./api";
+import api from "./api"; // Sử dụng instance axios từ api.jsx
 import { uploadToCloudinary } from "../utils/cloudinaryConfig";
 
 export const getPostByIdService = (post_id) => {
-  return axiosCreate.get(`${domain}/post/${post_id}`, {});
+  return api.get(`/post/${post_id}`);
 };
 
 export const getSharedPostByIdService = (post_id) => {
-  return axiosCreate.get(`${domain}/post/shared/${post_id}`, {});
+  return api.get(`/post/shared/${post_id}`);
 };
 
 export const getShareCount = (post_id) => {
-  return axiosCreate.get(`${domain}/post/${post_id}/shares`, {});
-}
+  return api.get(`/post/${post_id}/shares`);
+};
 
 export const getPostByUserIdService = (user_id, limit) => {
-  return axiosCreate.get(
-    `${domain}/post/user/posts?user_id=${user_id}&limit=${limit}`,
-    {}
-  );
+  return api.get(`/post/user/posts`, {
+    params: {
+      user_id,
+      limit,
+    },
+  });
 };
 
 export const getPostListFriendService = (user_id) => {
-  return axiosCreate.get(
-    `http://localhost:8080/api/v1/post/user/${user_id}`,
-    {}
-  );
+  return api.get(`/post/feed/${user_id}`);
 };
 
 export const getImageByUserIdService = (user_id, limit, offset) => {
-  return axiosCreate.get(`${domain}/post/user/images`, {
+  return api.get(`/post/user/images`, {
     params: {
-      user_id: user_id,
-      limit: limit,
-      offset: offset,
+      user_id,
+      limit,
+      offset,
     },
   });
 };
@@ -67,7 +65,7 @@ export const createPostService = async (Data, onUploadProgress) => {
     images: imageUrls,
   };
 
-  return axiosCreate.post(`${domain}/post/create`, payload);
+  return api.post(`/post/create`, payload);
 };
 
 export const sharePostService = async (data) => {
@@ -78,7 +76,7 @@ export const sharePostService = async (data) => {
     privacy: data.privacy,
   };
 
-  return axiosCreate.post(`${domain}/post/share`, payload);
+  return api.post(`/post/share`, payload);
 };
 
 export const updatePostService = async (Data, Post_id, onUploadProgress) => {
@@ -95,24 +93,31 @@ export const updatePostService = async (Data, Post_id, onUploadProgress) => {
   }
 
   const payload = {
+    post_id: Post_id, // Backend yêu cầu post_id trong payload
     content: Data.content,
     privacy: Data.privacy,
     theme: Data.theme,
     images: imageUrls,
   };
 
-  return axiosCreate.put(`${domain}/api/v1/post/update/${Post_id}`, payload);
+  // Backend không có /api/v1/post/update/{Post_id}, dùng /post/update-content
+  return api.put(`/post/update-content`, payload);
 };
 
 export const DeletePostByIdService = (post_id) => {
-  return axiosCreate.delete(`${domain}/api/v1/post/delete/${post_id}`, {});
+  // Backend không có /api/v1/post/delete/{post_id}, dùng /post/delete với body
+  return api.delete(`/post/delete`, {
+    data: {
+      post_id,
+    },
+  });
 };
 
 export const getFeedPostsService = (user_id, limit = 100, offset = 0) => {
-  return axiosCreate.get(`${domain}/post/feed/${user_id}`, {
+  return api.get(`/post/feed/${user_id}`, {
     params: {
-      limit: limit,
-      offset: offset,
+      limit,
+      offset,
     },
   });
 };

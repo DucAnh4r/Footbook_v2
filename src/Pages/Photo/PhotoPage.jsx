@@ -1,37 +1,31 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from "react";
-import { Layout, Row, Col, Avatar, Button, Skeleton } from "antd";
-import { FaEarthAmericas, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
-import { MdZoomIn, MdZoomOut } from "react-icons/md";
-import { AiOutlineFullscreen, AiOutlineLike } from "react-icons/ai";
-import { FaRegComment } from "react-icons/fa";
-import { PiShareFat } from "react-icons/pi";
-import { IoIosSend } from "react-icons/io";
-import CancelIcon from "../../assets/image/PhotoPage/CancelButton.png";
-import HahaIcon from "../../assets/image/Reacts/haha.png";
-import LikeIcon from "../../assets/image/Reacts/like.png";
-import Comment from "./Components/Comment";
-import styles from "./PhotoPage.module.scss";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  addCommentService,
-  countCommentService,
-  getCommentService,
-} from "../../services/commentService";
-import { getPostByIdService } from "../../services/postService";
-import { countPostReactionService } from "../../services/postReactionService";
-import { getUserIdFromLocalStorage } from "../../utils/authUtils";
-import { userFindByIdService } from "../../services/userService";
+import React, { useState, useEffect, useRef } from 'react';
+import { Layout, Row, Col, Avatar, Button, Skeleton } from 'antd';
+import { FaEarthAmericas, FaAngleLeft, FaAngleRight } from 'react-icons/fa6';
+import { MdZoomIn, MdZoomOut } from 'react-icons/md';
+import { AiOutlineFullscreen, AiOutlineLike } from 'react-icons/ai';
+import { FaRegComment } from 'react-icons/fa';
+import { PiShareFat } from 'react-icons/pi';
+import { IoIosSend } from 'react-icons/io';
+import CancelIcon from '../../assets/image/PhotoPage/CancelButton.png';
+import HahaIcon from '../../assets/image/Reacts/haha.png';
+import LikeIcon from '../../assets/image/Reacts/like.png';
+import CommentSection from '../../Components/Comment/CommentSection';
+import styles from './PhotoPage.module.scss';
+import { useNavigate, useParams } from 'react-router-dom';
+import { countCommentService } from '../../services/commentService';
+import { getPostByIdService } from '../../services/postService';
+import { getPostReactionService } from '../../services/postReactionService';
+import { getUserIdFromLocalStorage } from '../../utils/authUtils';
+import { userFindByIdService } from '../../services/userService';
 
 const PhotoPage = () => {
   const navigate = useNavigate();
   const [scale, setScale] = useState(1); // Zoom scale
   const [isFullScreen, setIsFullScreen] = useState(false); // State for fullscreen mode
-  const [getcomment, setGetComment] = useState([]);
   const [post, setPost] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState([]);
-  const [userCommentInfo, setUserCommentInfo] = useState([]);
   const [postReactionCount, setPostReactionCount] = useState([]);
   const [commentCount, setCommentCount] = useState([]);
   const myId = getUserIdFromLocalStorage();
@@ -41,42 +35,59 @@ const PhotoPage = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [start, setStart] = useState({ x: 0, y: 0 });
+  
+  // Refs for container and image elements
+  const containerRef = useRef(null);
+  const imageRef = useRef(null);
+
+  // Log postId and myId for debugging
+  console.log("PhotoPage props:", { postId, myId });
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % post.images.length);
+    setCurrentIndex(prevIndex => (prevIndex + 1) % post.images.length);
+    // Reset position when changing images
+    setPosition({ x: 0, y: 0 });
   };
 
   const handlePrev = () => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + post.images.length) % post.images.length
-    );
+    setCurrentIndex(prevIndex => (prevIndex - 1 + post.images.length) % post.images.length);
+    // Reset position when changing images
+    setPosition({ x: 0, y: 0 });
   };
 
   const handleFullScreenToggle = () => {
-    setIsFullScreen((prev) => {
-      return !prev;
-    });
+    setIsFullScreen(prev => !prev);
+  };
+
+  // Function to calculate drag boundaries
+  const calculateBoundaries = () => {
+    if (!containerRef.current || !imageRef.current) return null;
+    
+    const container = containerRef.current.getBoundingClientRect();
+    const image = imageRef.current.getBoundingClientRect();
+    
+    const scaledImageWidth = image.width * scale;
+    const scaledImageHeight = image.height * scale;
+    
+    const maxX = Math.max(0, (scaledImageWidth - container.width) / 2);
+    const maxY = Math.max(0, (scaledImageHeight - container.height) / 2);
+    
+    return {
+      minX: -maxX,
+      maxX: maxX,
+      minY: -maxY,
+      maxY: maxY
+    };
   };
 
   const fetchPost = async () => {
     try {
       setLoading(true);
       const response = await getPostByIdService(postId);
+      console.log("Fetched post:", response?.data?.post);
       setPost(response?.data?.post || []);
     } catch (error) {
-      console.error("Error fetching posts:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchComment = async () => {
-    try {
-      setLoading(true);
-      const response = await getCommentService(postId);
-      setGetComment(response?.data?.comments || []);
-    } catch (error) {
-      console.error("Error fetching comment:", error);
+      console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
     }
@@ -84,318 +95,250 @@ const PhotoPage = () => {
 
   const fetchUser = async () => {
     try {
-      setLoading(true);
       const response = await userFindByIdService(post.user_id);
+      console.log("Fetched user:", response?.data?.user);
       setUserInfo(response?.data?.user || []);
     } catch (error) {
-      console.error("Error fetching user:", error);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching user:', error);
     }
   };
 
-  const fetchCommnetUser = async () => {
+  const fetchCommentUser = async () => {
     try {
-      setLoading(true);
       const response = await userFindByIdService(myId);
-      setUserCommentInfo(response?.data?.user || []);
+      console.log("Fetched comment user:", response?.data?.user);
     } catch (error) {
-      console.error("Error fetching user:", error);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching comment user:', error);
     }
   };
 
   const countReaction = async () => {
     try {
-      setLoading(true);
-      const response = await countPostReactionService(postId);
-      setPostReactionCount(response?.data?.counts.total|| 0);
+      const response = await getPostReactionService(postId);
+      console.log("Fetched reaction count:", response?.data?.counts?.total);
+      setPostReactionCount(response?.data?.counts?.total || 0);
     } catch (error) {
-      console.error("Error count reaction:", error);
-    } finally {
-      setLoading(false);
+      console.error('Error counting reaction:', error);
     }
   };
 
   const countComment = async () => {
     try {
-      setLoading(true);
       const response = await countCommentService(postId);
+      console.log("Fetched comment count:", response?.data?.comment_count);
       setCommentCount(response?.data?.comment_count || 0);
     } catch (error) {
-      console.error("Error count reaction:", error);
-    } finally {
-      setLoading(false);
+      console.error('Error counting comments:', error);
     }
   };
 
-  const handleOk = async () => {
-    const commentData = {
-      userId: myId,
-      postId: postId,
-      content: comment,
-    };
-
-    await addCommentService(commentData);
-    fetchComment();
-    setComment("");
-    countComment();
-  };
-
   useEffect(() => {
-    fetchPost();
-    fetchComment();
-    countReaction();
-    countComment();
-    fetchCommnetUser();
-  }, [postId]); // Chỉ gọi các fetch ban đầu
+    if (postId) {
+      fetchPost();
+      countReaction();
+      countComment();
+      fetchCommentUser();
+    }
+  }, [postId]);
 
   useEffect(() => {
     if (post.user_id) {
-      fetchUser(); // Gọi fetchUser chỉ khi post.user_id đã được cập nhật
+      fetchUser();
     }
-  }, [post.user_id]); // Theo dõi thay đổi của post.user_id
+  }, [post.user_id]);
+
+  // Reset position when scale changes
+  useEffect(() => {
+    setPosition({ x: 0, y: 0 });
+  }, [scale]);
 
   const handleZoomIn = () => {
-    setScale((prev) => Math.min(prev + 0.5, 3)); // Zoom in, max scale 3
+    setScale(prev => Math.min(prev + 0.5, 3));
   };
 
   const handleZoomOut = () => {
-    setScale((prev) => {
-      const newScale = Math.max(prev - 0.5, 1); // Zoom out, min scale 1
-      return newScale;
-    });
+    setScale(prev => Math.max(prev - 0.5, 1));
   };
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = e => {
+    if (scale <= 1) return; // Only allow dragging when zoomed in
     setIsDragging(true);
     setStart({ x: e.clientX - position.x, y: e.clientY - position.y });
   };
 
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    const x = e.clientX - start.x;
-    const y = e.clientY - start.y;
-    setPosition({ x, y });
+  const handleMouseMove = e => {
+    if (!isDragging || scale <= 1) return;
+    
+    const newX = e.clientX - start.x;
+    const newY = e.clientY - start.y;
+    
+    const boundaries = calculateBoundaries();
+    if (!boundaries) {
+      setPosition({ x: newX, y: newY });
+      return;
+    }
+    
+    // Constrain position within boundaries
+    const constrainedX = Math.min(Math.max(newX, boundaries.minX), boundaries.maxX);
+    const constrainedY = Math.min(Math.max(newY, boundaries.minY), boundaries.maxY);
+    
+    setPosition({ x: constrainedX, y: constrainedY });
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
   };
 
-  const [comment, setComment] = useState("");
+  // Validate props before rendering CommentSection
+  if (!postId) {
+    console.error("No postId provided to PhotoPage");
+    return <div>Invalid post ID</div>;
+  }
 
-  const handleChange = (e) => {
-    setComment(e.target.value);
-  };
+  if (!myId) {
+    console.warn("No userId found. User might not be logged in.");
+  }
 
   return (
     <Layout>
-      <Row className={styles["container"]}>
-        <Col
-          className={`${styles["image-row"]} ${
-            isFullScreen ? styles["fullscreenContainer"] : ""
-          }`}
-        >
+      <Row className={styles['container']}>
+        <Col className={`${styles['image-row']} ${isFullScreen ? styles['fullscreenContainer'] : ''}`}>
           <div
-            className={`${styles["round-button-container"]} ${styles["cancel-button-container"]}`}
+            className={`${styles['round-button-container']} ${styles['cancel-button-container']}`}
             onClick={() => {
               if (window.history.length > 2) {
-                navigate(-1); // Navigate to previous page if available
+                navigate(-1);
               } else {
-                navigate("/"); // Navigate to homepage if no previous page
+                navigate('/');
               }
             }}
           >
-            <img
-              style={{ width: "80%", height: "80%" }}
-              src={CancelIcon}
-              alt=""
-            />
+            <img style={{ width: '80%', height: '80%' }} src={CancelIcon} alt="" />
           </div>
-          <div
-            className={`${styles["round-button-container"]} ${styles["zoomin-button-container"]}`}
-            onClick={handleZoomIn}
-          >
+          <div className={`${styles['round-button-container']} ${styles['zoomin-button-container']}`} onClick={handleZoomIn}>
             <MdZoomIn />
           </div>
-          <div
-            className={`${styles["round-button-container"]} ${styles["zoomout-button-container"]}`}
-            onClick={handleZoomOut}
-          >
+          <div className={`${styles['round-button-container']} ${styles['zoomout-button-container']}`} onClick={handleZoomOut}>
             <MdZoomOut />
           </div>
-          <div
-            className={`${styles["round-button-container"]} ${styles["full-button-container"]}`}
-            onClick={handleFullScreenToggle}
-          >
+          <div className={`${styles['round-button-container']} ${styles['full-button-container']}`} onClick={handleFullScreenToggle}>
             <AiOutlineFullscreen />
           </div>
-          <div
-            className={`${styles["round-button-container"]} ${styles["left-button-container"]}`}
-            onClick={handlePrev}
-          >
-            <FaAngleLeft />
-          </div>
-          <div
-            className={`${styles["round-button-container"]} ${styles["right-button-container"]}`}
-            onClick={handleNext}
-          >
-            <FaAngleRight />
-          </div>
-          <div className={styles["image-container"]}>
-            {post?.images?.length > 0 && (
-              <img
-                src={post?.images[currentIndex].image_url}
-                alt={`Image ${currentIndex + 1}`}
-                className={`${styles.image} disable-select`}
-                style={{
-                  cursor: scale > 1 ? "grab" : "default",
-                  transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                  transition: isDragging ? "none" : "transform 0.3s ease",
-                }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                draggable={false}
+          {post?.images?.length > 1 && (
+            <>
+              <div className={`${styles['round-button-container']} ${styles['left-button-container']}`} onClick={handlePrev}>
+                <FaAngleLeft />
+              </div>
+              <div className={`${styles['round-button-container']} ${styles['right-button-container']}`} onClick={handleNext}>
+                <FaAngleRight />
+              </div>
+            </>
+          )}
+          <div className={styles['image-container']} ref={containerRef}>
+            {loading ? (
+              <Skeleton.Image 
+                style={{ 
+                  width: '100%', 
+                  height: '100%',
+                  minHeight: '400px'
+                }} 
+                active 
               />
+            ) : (
+              post?.images?.length > 0 && (
+                <img
+                  ref={imageRef}
+                  src={post?.images[currentIndex].image_url}
+                  alt={`Image ${currentIndex + 1}`}
+                  className={`${styles.image} disable-select`}
+                  style={{
+                    cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+                    transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+                    transition: isDragging ? 'none' : 'transform 0.3s ease'
+                  }}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  draggable={false}
+                />
+              )
             )}
           </div>
         </Col>
-        <Col className={styles["right-row"]}>
-          <div style={{ padding: "16px" }}>
-            <div className={styles.header}>
-              <Avatar src={userInfo.avatar_url} className={styles.avatar} />
-              <div className={styles.userInfo}>
-                <span className={styles.userName}>{userInfo.name}</span>
-                <span className={styles.time}>
-                  {post.created_at} phút ·{" "}
-                  <FaEarthAmericas style={{ marginLeft: "4px" }} />
-                </span>
-              </div>
-            </div>
-
-            <div className={styles.content}>
-              <p>{post.content}</p>
-            </div>
-
-            <div className={styles.reactionsContainer}>
-              <div className={styles["reactions"]}>
-                <img
-                  src={HahaIcon}
-                  alt="Haha"
-                  className={`${styles["icon"]} ${styles["icon-left"]}`}
-                />
-                <img
-                  src={LikeIcon}
-                  alt="Like"
-                  className={`${styles["icon"]} ${styles["icon-right"]}`}
-                />
-              </div>
-              <span className={styles.reactionCount}>{postReactionCount}</span>
-              <div className={styles.rightFooter}>
-                <span
-                  className={styles.cmtCount}
-                  style={{ marginRight: "10px" }}
-                >
-                  {commentCount} bình luận
-                </span>
-                <span className={styles.shareCount}>1 lượt chia sẻ</span>
-              </div>
-            </div>
-
-            <div className={styles.footer}>
-              <Button
-                icon={<AiOutlineLike />}
-                type="text"
-                className={styles.likeButtonWrapper}
-              >
-                Thích
-              </Button>
-              <Button icon={<FaRegComment />} type="text">
-                Bình luận
-              </Button>
-              <Button icon={<PiShareFat />} type="text">
-                Chia sẻ
-              </Button>
-            </div>
-
-            <div className={styles.commentSection}>
-              {loading ? (
-                // Hiển thị Skeleton khi đang tải dữ liệu
-                Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className={styles.skeletonComment}>
-                    <Skeleton.Avatar
-                      active
-                      size="small"
-                      style={{ marginRight: 10 }}
-                    />
-                    <Skeleton.Input active style={{ width: "80%" }} />
-                  </div>
-                ))
-              ) : getcomment.length > 0 ? (
-                getcomment.map((comment) => (
-                  <Comment
-                    key={comment.id}
-                    commentId={comment.id}
-                    content={comment.content}
-                    createdAt={comment.created_at}
-                    userId={comment.user_id}
-                    childComments={comment.childComments}
-                    postId={postId}
-                  />
-                ))
-              ) : (
-                <p>Không có bình luận nào để hiển thị.</p>
-              )}
-            </div>
-
-            {/* <div className={styles.seeMoreSection}>
-              <p className={styles.seeMoreBtn}>Xem thêm bình luận</p>
-              <p style={{ color: "#65686c" }}>6/84</p>
-            </div> */}
-          </div>
-
-          <div className={styles.writeCommentSection}>
-            <Row>
-              <Col span={4}>
-                <Avatar
-                  src={userCommentInfo.avatar_url}
-                  className={styles.avatar}
-                  style={{ margin: "6px 0 0 6px" }}
-                />
-              </Col>
-              <Col span={20}>
-                <div className={styles.writeCommentContainer}>
-                  <textarea
-                    placeholder="Viết bình luận..."
-                    value={comment}
-                    onChange={handleChange}
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault(); // Ngăn xuống dòng
-                        handleOk(); // Gửi bình luận khi nhấn Enter
-                      }
-                    }}
-                  ></textarea>
-                  <div className={styles.actionCommentContainer}>
-                    {/* Nút gửi bình luận */}
-                    <IoIosSend
-                      className={styles["sendCommentButton"]}
-                      style={{
-                        color: comment ? "blue" : "gray",
-                        cursor: comment ? "pointer" : "not-allowed",
-                      }}
-                      onClick={() => {
-                        if (comment.trim()) handleOk(); // Chỉ gửi nếu comment không rỗng
-                      }}
-                    />
+        <Col className={styles['right-row']}>
+          <div>
+            {loading ? (
+              <>
+                <div className={styles.header}>
+                  <Skeleton.Avatar active size={40} />
+                  <div className={styles.userInfo} style={{ marginLeft: '12px' }}>
+                    <Skeleton active title={{ width: 120 }} paragraph={false} />
+                    <Skeleton active title={{ width: 80 }} paragraph={false} />
                   </div>
                 </div>
-              </Col>
-            </Row>
+                <div className={styles.content} style={{ marginTop: '16px' }}>
+                  <Skeleton active paragraph={{ rows: 2 }} title={false} />
+                </div>
+                <div className={styles.reactionsContainer} style={{ marginTop: '16px' }}>
+                  <Skeleton active title={{ width: 100 }} paragraph={false} />
+                </div>
+                <div className={styles.footer} style={{ marginTop: '16px' }}>
+                  <Skeleton.Button active size="small" style={{ marginRight: '8px' }} />
+                  <Skeleton.Button active size="small" style={{ marginRight: '8px' }} />
+                  <Skeleton.Button active size="small" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.header}>
+                  <Avatar src={userInfo.avatar_url} className={styles.avatar} />
+                  <div className={styles.userInfo}>
+                    <span className={styles.userName}>{userInfo.name}</span>
+                    <span className={styles.time}>
+                      {post.created_at} phút · <FaEarthAmericas style={{ marginLeft: '4px' }} />
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.content}>
+                  <p>{post.content}</p>
+                </div>
+
+                <div className={styles.reactionsContainer}>
+                  <div className={styles['reactions']}>
+                    <img src={HahaIcon} alt="Haha" className={`${styles['icon']} ${styles['icon-left']}`} />
+                    <img src={LikeIcon} alt="Like" className={`${styles['icon']} ${styles['icon-right']}`} />
+                  </div>
+                  <span className={styles.reactionCount}>{postReactionCount}</span>
+                  <div className={styles.rightFooter}>
+                    <span className={styles.cmtCount} style={{ marginRight: '10px' }}>
+                      {commentCount} bình luận
+                    </span>
+                    <span className={styles.shareCount}>1 lượt chia sẻ</span>
+                  </div>
+                </div>
+
+                <div className={styles.footer}>
+                  <Button icon={<AiOutlineLike />} type="text" className={styles.likeButtonWrapper}>
+                    Thích
+                  </Button>
+                  <Button icon={<FaRegComment />} type="text">
+                    Bình luận
+                  </Button>
+                  <Button icon={<PiShareFat />} type="text">
+                    Chia sẻ
+                  </Button>
+                </div>
+
+                <CommentSection
+                  postId={postId}
+                  userId={myId}
+                  userInfo={userInfo}
+                  isModalOpen={true}
+                />
+              </>
+            )}
           </div>
         </Col>
       </Row>

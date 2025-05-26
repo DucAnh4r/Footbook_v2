@@ -1,9 +1,8 @@
-import axiosCreate from "../utils/axiosRelease";
+import api from "./api"; // Sử dụng instance axios từ api.jsx
 import { uploadMessagesImgToCloudinary } from "../utils/cloudinaryConfig";
-import { domain } from "./api";
 
 export const getConversationBetweenUsers = (user1Id, user2Id) => {
-  return axiosCreate.get(`${domain}/chat/conversation/between/${user1Id}/${user2Id}`);
+  return api.get(`/chat/conversation/between/${user1Id}/${user2Id}`);
 };
 
 // Private Message Services (Các chức năng tin nhắn cá nhân đã có)
@@ -24,20 +23,22 @@ export const sendPrivateMessageService = async (data) => {
     payload.image_url = imageUrl;
   }
 
-  return axiosCreate.post(`${domain}/chat/send`, payload);
+  return api.post(`/chat/send`, payload);
 };
 
 export const getMessageHistoryService = (chatId) => {
-  return axiosCreate.get(`${domain}/chat/conversation/${chatId}`);
+  return api.get(`/chat/conversation/${chatId}`);
 };
 
 export const getUserMessageListService = (userId) => {
-  return axiosCreate.get(`${domain}/chat/user/${userId}/conversations`);
+  return api.get(`/chat/user/${userId}/conversations`);
 };
 
 export const deleteMessageService = (data, message_id) => {
   const { userId } = data;
-  return axiosCreate.delete(`${domain}/api/v1/private-message/delete/${message_id}`, {
+  // Backend không có /api/v1/private-message/delete/{message_id}
+  // Hiện tại backend chưa có API xóa tin nhắn, tạm thời để nguyên
+  return api.delete(`/api/v1/private-message/delete/${message_id}`, {
     params: {
       userId,
     },
@@ -59,12 +60,11 @@ export const createGroupChatService = async (data) => {
     const avatarUrl = await uploadMessagesImgToCloudinary(data.avatar_file, data.onUploadProgress);
     if (!avatarUrl) throw new Error("Failed to upload group avatar to cloud");
     payload.avatar_url = avatarUrl;
-  }
-  else {
-    payload.avatar_url = "https://res.cloudinary.com/dzkzebsn7/image/upload/v1746200508/group-chat-icon-for-online-messaging-vector_ovjkhx.jpg"
+  } else {
+    payload.avatar_url = "https://res.cloudinary.com/dzkzebsn7/image/upload/v1746200508/group-chat-icon-for-online-messaging-vector_ovjkhx.jpg";
   }
 
-  return axiosCreate.post(`${domain}/group-chat/create`, payload);
+  return api.post(`/group-chat/create`, payload);
 };
 
 // Gửi tin nhắn nhóm
@@ -84,22 +84,22 @@ export const sendGroupMessageService = async (data) => {
     payload.image_url = imageUrl;
   }
 
-  return axiosCreate.post(`${domain}/group-chat/send`, payload);
+  return api.post(`/group-chat/send`, payload);
 };
 
 // Lấy danh sách tin nhắn của một nhóm chat
 export const getGroupMessagesService = (groupId) => {
-  return axiosCreate.get(`${domain}/group-chat/${groupId}/messages`);
+  return api.get(`/group-chat/${groupId}/messages`);
 };
 
 // Lấy danh sách nhóm chat của một user
 export const getUserGroupChatsService = (userId) => {
-  return axiosCreate.get(`${domain}/group-chat/user/${userId}/groups`);
+  return api.get(`/group-chat/user/${userId}/groups`);
 };
 
 // Thêm thành viên vào nhóm chat
 export const addGroupMemberService = (groupChatId, userId) => {
-  return axiosCreate.post(`${domain}/group-chat/add-member`, {
+  return api.post(`/group-chat/members/add`, {
     group_chat_id: groupChatId,
     user_id: userId,
   });
@@ -107,7 +107,7 @@ export const addGroupMemberService = (groupChatId, userId) => {
 
 // Xóa thành viên khỏi nhóm chat
 export const removeGroupMemberService = (groupChatId, userId) => {
-  return axiosCreate.post(`${domain}/group-chat/remove-member`, {
+  return api.post(`/group-chat/members/remove`, {
     group_chat_id: groupChatId,
     user_id: userId,
   });
@@ -115,7 +115,7 @@ export const removeGroupMemberService = (groupChatId, userId) => {
 
 // Lấy danh sách thành viên của nhóm chat
 export const getGroupMembersService = (groupId) => {
-  return axiosCreate.get(`${domain}/group-chat/${groupId}/members`);
+  return api.get(`/group-chat/${groupId}/members`);
 };
 
 // Cập nhật thông tin nhóm chat
@@ -138,5 +138,5 @@ export const updateGroupChatService = async (data) => {
     payload.avatar_url = data.avatar_url;
   }
 
-  return axiosCreate.post(`${domain}/group-chat/update`, payload);
+  return api.put(`/group-chat/update`, payload);
 };

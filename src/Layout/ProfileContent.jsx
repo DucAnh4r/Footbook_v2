@@ -1,4 +1,3 @@
-// /src/components/ProfileContent.jsx
 import React, { useState } from 'react';
 import { Avatar, Button, Divider, Input, Radio, Modal, List, Typography, Space } from 'antd';
 import {
@@ -8,6 +7,7 @@ import {
 } from "react-icons/fa";
 import { MdOutlineArrowForwardIos } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';
+import { useLogout } from '../utils/checkAuth';
 
 const { Text, Title } = Typography;
 
@@ -33,11 +33,13 @@ const ProfileContent = ({ userName, UserAvatar }) => {
   const [singleKeyShortcuts, setSingleKeyShortcuts] = useState('off'); // 'off', 'on'
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-
   const navigate = useNavigate();
+  const handleLogout = useLogout(); // Sử dụng hook useLogout từ checkAuth.jsx
+
   const handleProfileClick = () => {
     navigate('/profile');
   };
+
   const handleBackClick = () => {
     const viewMapping = {
       languageList: 'language',
@@ -45,6 +47,23 @@ const ProfileContent = ({ userName, UserAvatar }) => {
       keyboard: 'accessibility'
     };
     setView(viewMapping[view] || 'main');
+  };
+
+  // Hàm hiển thị modal xác nhận đăng xuất
+  const showLogoutConfirm = () => {
+    Modal.confirm({
+      title: 'Xác nhận đăng xuất',
+      content: 'Bạn có chắc chắn muốn đăng xuất không?',
+      okText: 'Đăng xuất',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk() {
+        handleLogout(); // Gọi hàm đăng xuất
+      },
+      onCancel() {
+        // Không làm gì nếu người dùng hủy
+      },
+    });
   };
 
   const renderBackButton = (title) => (
@@ -66,7 +85,7 @@ const ProfileContent = ({ userName, UserAvatar }) => {
             width: '100%',
           }}
         >
-          <Space direction="vertical" style={{ width: '100%', }}>
+          <Space direction="vertical" style={{ width: '100%' }}>
             <div
               style={{
                 width: '100%',
@@ -77,13 +96,12 @@ const ProfileContent = ({ userName, UserAvatar }) => {
                 borderRadius: '10px',
                 cursor: 'pointer',
                 transition: 'background-color 0.3s ease', // Hover effect
-
               }}
               onClick={handleProfileClick}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fff')}
             >
-              <img style={{width: "50px", height: "50px", borderRadius: "50px", objectFit: "cover"}} src={UserAvatar} alt="" />
+              <img style={{ width: "50px", height: "50px", borderRadius: "50px", objectFit: "cover" }} src={UserAvatar} alt="" />
               <Text strong style={{ fontSize: '16px' }}>{userName}</Text>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -99,12 +117,13 @@ const ProfileContent = ({ userName, UserAvatar }) => {
               { text: 'Trợ giúp & hỗ trợ', icon: <FaQuestionCircle />, view: 'helpSupport' },
               { text: 'Màn hình & trợ năng', icon: <FaMoon />, view: 'accessibility' },
               { text: 'Đóng góp ý kiến', icon: <FaCommentDots /> },
-              { text: 'Đăng xuất', icon: <FaSignOutAlt /> }
+              { text: 'Đăng xuất', icon: <FaSignOutAlt />, action: showLogoutConfirm } // Thêm action cho đăng xuất
             ]}
-            renderItem={({ text, icon, view }) => (
-              <List.Item onClick={() => view && setView(view)}
+            renderItem={({ text, icon, view, action }) => (
+              <List.Item onClick={action || (view && (() => setView(view)))}
                 style={{
-                  padding: '0px', cursor: 'pointer',
+                  padding: '0px',
+                  cursor: 'pointer',
                   borderRadius: '10px'
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
@@ -150,7 +169,6 @@ const ProfileContent = ({ userName, UserAvatar }) => {
             Quyền riêng tư · Điều khoản · Quảng cáo · Lựa chọn quảng cáo · Cookie · Xem thêm · Meta © 2024
           </Text>
         </div>
-
       )}
 
       {view === 'settings' && (
@@ -165,7 +183,8 @@ const ProfileContent = ({ userName, UserAvatar }) => {
             renderItem={({ text, icon, view }) => (
               <List.Item onClick={() => view && setView(view)}
                 style={{
-                  padding: '0px', cursor: 'pointer',
+                  padding: '0px',
+                  cursor: 'pointer',
                   borderRadius: '10px'
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
@@ -196,7 +215,6 @@ const ProfileContent = ({ userName, UserAvatar }) => {
             )}
           />
         </div>
-
       )}
 
       {view === 'language' && (
@@ -218,11 +236,8 @@ const ProfileContent = ({ userName, UserAvatar }) => {
               borderRadius: '10px'
             }}
             onClick={() => setView('languageList')}
-
-
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fff')}>
-
             <span style={{ display: 'flex', alignItems: 'center' }}>
               <FaGlobe style={{ marginRight: '8px', fontSize: '20px', color: '#333' }} />
               <div style={{ display: 'flex' }}>
@@ -233,7 +248,6 @@ const ProfileContent = ({ userName, UserAvatar }) => {
             <MdOutlineArrowForwardIos style={{ fontSize: '16px', color: '#888' }} />
           </button>
         </div>
-
       )}
 
       {view === 'languageList' && (
@@ -250,11 +264,13 @@ const ProfileContent = ({ userName, UserAvatar }) => {
               <List.Item
                 onClick={() => setSelectedLanguage(language.name)}
                 style={{
-                  cursor: 'pointer', padding: '10px', borderBottom: '1px solid #ddd', borderRadius: '10px'
+                  cursor: 'pointer',
+                  padding: '10px',
+                  borderBottom: '1px solid #ddd',
+                  borderRadius: '10px'
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fff')}>
-
                 <Space
                   style={{ width: '100%', justifyContent: 'space-between', padding: '0px 10px' }}
                 >
@@ -273,7 +289,6 @@ const ProfileContent = ({ userName, UserAvatar }) => {
             )}
           />
         </div>
-
       )}
 
       {view === 'helpSupport' && (
@@ -297,7 +312,9 @@ const ProfileContent = ({ userName, UserAvatar }) => {
             renderItem={({ text, icon }) => (
               <List.Item
                 style={{
-                  padding: '0px', cursor: 'pointer', borderRadius: '10px'
+                  padding: '0px',
+                  cursor: 'pointer',
+                  borderRadius: '10px'
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f0f0f0')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fff')}>
@@ -324,7 +341,6 @@ const ProfileContent = ({ userName, UserAvatar }) => {
             )}
           />
         </div>
-
       )}
 
       {view === 'accessibility' && (
@@ -352,7 +368,6 @@ const ProfileContent = ({ userName, UserAvatar }) => {
             <MdOutlineArrowForwardIos style={{ fontSize: '16px', color: '#888' }} />
           </button>
         </div>
-
       )}
 
       {view === 'keyboard' && (
@@ -378,7 +393,6 @@ const ProfileContent = ({ userName, UserAvatar }) => {
             </Radio.Group>
           </div>
         </div>
-
       )}
 
       <Modal

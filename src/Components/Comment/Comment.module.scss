@@ -1,0 +1,397 @@
+// CSS Variables for consistency
+$primary-color: #1877f2;
+$hover-color: #1658c7;
+$comment-bg: #dedede; // Parent comment background
+$border-color: #e4e6eb;
+$text-color: #1c1e21;
+$secondary-text: #65676b;
+$hover-bg: #f5f6f8;
+$shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+$shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.1);
+$font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+.commentContainer {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 0;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: $hover-bg;
+  }
+}
+
+.avatarCol {
+  padding-top: 10px;
+  flex: 0 0 40px;
+}
+
+.contentCol {
+  padding: 0 10px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid $border-color;
+
+  &:hover {
+    cursor: pointer;
+    filter: brightness(0.95);
+    transition: filter 0.2s ease;
+  }
+}
+
+.commentBox {
+  width: 100%;
+  border-radius: 18px;
+  background-color: $comment-bg;
+  padding: 10px;
+  box-shadow: $shadow;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: $shadow-hover;
+  }
+}
+
+.name {
+  font-weight: 600;
+  font-size: 14px;
+  color: $text-color;
+  margin-top: 0;
+  margin-bottom: 4px;
+  line-height: 1.2;
+
+  &:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
+.commentBox p:not(.name) {
+  margin: 0;
+  font-size: 14px;
+  color: $text-color;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.optionBox {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 6px;
+  padding: 0 8px;
+  font-size: 12px;
+  color: $secondary-text;
+}
+
+.optionBox p {
+  margin: 0;
+  font-weight: 500;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $primary-color;
+    cursor: pointer;
+  }
+}
+
+.replyLink:hover {
+  color: $primary-color;
+  cursor: pointer;
+}
+
+.replyInput {
+  margin-left: 0px;
+  width: 100%;
+}
+
+.replyInputContainer {
+  width: 100%;
+  border-radius: 18px;
+  background-color: #f0f2f5;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: $shadow;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: $shadow-hover;
+  }
+}
+
+.replyTextarea {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  width: 100%;
+  resize: none;
+  font-size: 14px;
+  font-family: $font-family;
+  min-height: 32px;
+  line-height: 1.5;
+  padding: 6px 0;
+  color: $text-color;
+  transition: min-height 0.2s ease;
+
+  &:focus {
+    min-height: 48px;
+    background-color: transparent;
+  }
+
+  &::placeholder {
+    color: #8d949e;
+  }
+}
+
+.replyButton {
+  height: 32px;
+  font-size: 14px;
+  padding: 0 20px;
+  border-radius: 16px;
+  background-color: $primary-color;
+  border: none;
+  color: white;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: $hover-color;
+  }
+
+  &:disabled {
+    background-color: #e4e6eb;
+    color: #bcc0c4;
+    cursor: not-allowed;
+  }
+}
+
+.showReplies {
+  margin-left: 48px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.viewRepliesButton {
+  color: $primary-color;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $hover-color;
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: none;
+    text-decoration: underline;
+  }
+}
+
+.childComments {
+  margin-left: 20px;
+  padding-left: 12px;
+  border-left: 2px solid $border-color;
+}
+
+// Reply Comment Styles (aligned with parent comment)
+.replyContainer {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 0;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: $hover-bg;
+  }
+}
+
+.replyAvatarCol {
+  padding-top: 10px;
+  flex: 0 0 40px;
+}
+
+.replyAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid $border-color;
+
+  &:hover {
+    cursor: pointer;
+    filter: brightness(0.95);
+    transition: filter 0.2s ease;
+  }
+}
+
+.replyBox {
+  width: 100%;
+  border-radius: 18px;
+  background-color: $comment-bg;
+  padding: 10px;
+  box-shadow: $shadow;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: $shadow-hover;
+  }
+}
+
+.replyName {
+  font-weight: 600;
+  font-size: 14px;
+  color: $text-color;
+  margin-top: 0;
+  margin-bottom: 4px;
+  line-height: 1.2;
+
+  &:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
+.replyBox p:not(.replyName) {
+  margin: 0;
+  font-size: 14px;
+  color: $text-color;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.replyOptions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 6px;
+  padding: 0 8px;
+  font-size: 12px;
+  color: $secondary-text;
+}
+
+.replyOptions p {
+  margin: 0;
+  font-weight: 500;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $primary-color;
+    cursor: pointer;
+  }
+}
+
+.error {
+  margin-left: 48px;
+  font-size: 12px;
+  color: #d32f2f;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.loadingText,
+.noReplies {
+  margin-left: 48px;
+  font-size: 13px;
+  color: $secondary-text;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .commentContainer {
+    padding: 0 4px;
+    margin-bottom: 12px;
+  }
+
+  .container,
+  .replyContainer {
+    padding: 6px 0;
+  }
+
+  .avatarCol,
+  .replyAvatarCol {
+    flex: 0 0 36px;
+  }
+
+  .avatar,
+  .replyAvatar {
+    width: 36px;
+    height: 36px;
+    margin-right: 8px;
+  }
+
+  .commentBox,
+  .replyBox {
+    padding: 10px 12px;
+    border-radius: 14px;
+  }
+
+  .name,
+  .replyName {
+    font-size: 13px;
+  }
+
+  .commentBox p:not(.name),
+  .replyBox p:not(.replyName) {
+    font-size: 13px;
+  }
+
+  .optionBox,
+  .replyOptions {
+    gap: 12px;
+    font-size: 11px;
+  }
+
+  .replyInput,
+  .childComments,
+  .showReplies,
+  .error,
+  .loadingText,
+  .noReplies {
+    width: 100%;
+  }
+
+  .replyInputContainer {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .replyTextarea {
+    font-size: 13px;
+    min-height: 28px;
+
+    &:focus {
+      min-height: 40px;
+    }
+  }
+
+  .replyButton {
+    height: 28px;
+    font-size: 13px;
+    padding: 0 16px;
+  }
+
+  .viewRepliesButton {
+    font-size: 12px;
+  }
+}

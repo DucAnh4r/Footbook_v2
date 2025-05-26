@@ -3,8 +3,6 @@ import styles from './AboutSection.module.scss';
 import { IoSchool, IoHome, IoEarth } from 'react-icons/io5';
 import { FaBirthdayCake } from "react-icons/fa";
 import { MdWork } from "react-icons/md";
-import EditFeaturedModal from '../../../../../Modal/EditFeaturedModal';
-import { getUserIdFromLocalStorage } from '../../../../../utils/authUtils';
 
 const AboutSection = ({ userInfo }) => {
   // Mảng chứa các đối tượng với URL hình ảnh và tên bộ sưu tập
@@ -28,17 +26,6 @@ const AboutSection = ({ userInfo }) => {
   ];
 
   const [startIndex, setStartIndex] = useState(0);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const handleOpenModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-  };
-
-  const userId = getUserIdFromLocalStorage();
 
   // Hiển thị 3 hình ảnh mỗi lần
   const visibleImages = galleryImages.slice(startIndex, startIndex + 3);
@@ -93,12 +80,8 @@ const AboutSection = ({ userInfo }) => {
           <button onClick={handleNext} className={styles.arrowButton}>{">"}</button>
         )}
       </div>
-      <button className={styles.editHighlightButton} onClick={handleOpenModal}>Thêm phần Đáng chú ý</button>
-      <EditFeaturedModal
-        isVisible={isModalVisible}
-        onClose={handleCloseModal}
-        userId={userId}
-      />
+      <button className={styles.editHighlightButton}>Thêm phần Đáng chú ý</button>
+      
     </div>
   );
 };
