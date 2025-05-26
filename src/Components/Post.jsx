@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Avatar, Button, Dropdown, Menu, Tooltip } from "antd";
+import { Avatar, Button, Dropdown, Menu, Tooltip, Modal } from "antd";
 import { FaRegComment } from "react-icons/fa";
 import { PiShareFat } from "react-icons/pi";
 import { FaEarthAmericas } from "react-icons/fa6";
@@ -23,7 +23,6 @@ import styles from "./Post.module.scss";
 import CommentModal from "../Modal/CommentModal";
 import ShareModal from "../Modal/ShareModal";
 import ReactionIconsBox from "./ReactionIconsBox";
-import Toastify from "../assets/Toastify";
 
 // Assets
 import HahaIcon from "../assets/image/Reacts/haha.png";
@@ -35,14 +34,16 @@ import AngryIcon from "../assets/image/Reacts/angry.png";
 // Utils
 import { getUserIdFromLocalStorage } from "../utils/authUtils";
 import { reactionConfig } from "../assets/Config";
+import { toastError, toastSuccess } from "../utils/toastNotifier";
 
-const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, user }) => {
+const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, user, onPostDeleted }) => {
   const navigate = useNavigate();
   const currentUserId = getUserIdFromLocalStorage();
   
   // Modal states
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   
   // Reaction states
   const [isReactionBoxVisible, setIsReactionBoxVisible] = useState(false);
@@ -54,6 +55,7 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
   const [commentCount, setCommentCount] = useState(0);
   const [shareCount, setShareCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Get all reaction users - Memoized for performance
   const reactionUsers = useMemo(() => {
@@ -82,7 +84,7 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
       
       setPostReactionCount(reactionsResponse?.data?.counts?.total || 0);
       setReactions(reactionsResponse?.data?.reactions || []);
-      setCommentCount(commentCountResponse || 0);
+      setCommentCount(commentCountResponse.total_comment_count || 0);
       setShareCount(shareCountResponse?.data?.share_count || 0);
       
       // Find user's current reaction
@@ -152,23 +154,35 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
   
   // Handle post deletion
   const handleDeletePost = useCallback(async () => {
+    setDeleteLoading(true);
     try {
-      const response = await DeletePostByIdService(postId);
-      if (response?.data?.success) {
-        Toastify("Xóa bài viết thành công!", "success");
+      const response = await DeletePostByIdService(postId, currentUserId);
+      if (response?.status === 200 && response?.data?.message) {
+        toastSuccess("Xóa bài viết thành công!");
+        setIsDeleteConfirmOpen(false);
+        // Gọi callback để thông báo cho Homepage
+        onPostDeleted(postId);
       } else {
-        Toastify("Không thể xóa bài viết. Vui lòng thử lại.", "error");
+        toastError("Không thể xóa bài viết. Vui lòng thử lại.");
       }
     } catch (error) {
       console.error("Lỗi khi xóa bài viết:", error);
-      Toastify("Đã xảy ra lỗi khi xóa bài viết.", "error");
+      toastError("Đã xảy ra lỗi khi xóa bài viết.");
+    } finally {
+      setDeleteLoading(false);
     }
-  }, [postId]);
+  }, [postId, currentUserId, onPostDeleted]);
   
   // Navigate to photo detail page
   const handleImageClick = useCallback((id) => {
+    if (deleteLoading) return; // Prevent navigation during deletion
     navigate(`/photo/${id}`);
-  }, [navigate]);
+  }, [navigate, deleteLoading]);
+
+  // Show delete confirmation
+  const showDeleteConfirm = useCallback(() => {
+    setIsDeleteConfirmOpen(true);
+  }, []);
 
   return (
     <>
@@ -185,17 +199,21 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
             </span>
           </div>
           
-          {/* Post options menu - only show delete for post owner */}
+          {/* Post options menu - only show for post owner */}
           {userId === currentUserId ? (
             <Dropdown
               overlay={
                 <Menu>
-                  <Menu.Item key="1" onClick={() => handleDeletePost(postId)}>
+                  <Menu.Item key="1" onClick={showDeleteConfirm} disabled={deleteLoading}>
                     Xóa bài viết
+                  </Menu.Item>
+                  <Menu.Item key="2" onClick={() => console.log("Edit post clicked")} disabled={deleteLoading}>
+                    Chỉnh sửa bài viết
                   </Menu.Item>
                 </Menu>
               }
               trigger={["click"]}
+              disabled={deleteLoading}
             >
               <div className={styles.optionContainer}>
                 <BsThreeDots />
@@ -223,6 +241,7 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
                   className={styles.mainImage}
                   onClick={() => handleImageClick(postId)}
                   loading="lazy" // Lazy loading for better performance
+                  style={{ pointerEvents: deleteLoading ? "none" : "auto" }}
                 />
               ))}
             </div>
@@ -233,6 +252,7 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
             <button
               onClick={() => setIsCommentModalOpen(true)}
               className={styles.viewMoreButton}
+              disabled={deleteLoading}
             >
               Xem tất cả
             </button>
@@ -276,7 +296,7 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
           {/* Like Button with Reaction Hover Box */}
           <div 
             className={styles.reactionButtonContainer}
-            onMouseEnter={() => setIsReactionBoxVisible(true)}
+            onMouseEnter={() => !deleteLoading && setIsReactionBoxVisible(true)}
             onMouseLeave={() => setIsReactionBoxVisible(false)}
           >
             <Button
@@ -287,6 +307,7 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
               style={{
                 color: reactionConfig[selectedReaction].color,
               }}
+              disabled={deleteLoading}
             >
               {reactionConfig[selectedReaction].text}
             </Button>
@@ -315,10 +336,11 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
             icon={<FaRegComment />}
             type="text"
             onClick={() => {
-              if (!isModalOpen) {
+              if (!isModalOpen && !deleteLoading) {
                 setIsCommentModalOpen(true);
               }
             }}
+            disabled={deleteLoading}
           >
             Bình luận
           </Button>
@@ -327,14 +349,32 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
           <Button
             icon={<PiShareFat />}
             type="text"
-            onClick={() => setIsShareModalOpen(true)}
+            onClick={() => !deleteLoading && setIsShareModalOpen(true)}
+            disabled={deleteLoading}
           >
             Chia sẻ
           </Button>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title="Xác nhận xóa bài viết"
+        open={isDeleteConfirmOpen}
+        onOk={handleDeletePost}
+        onCancel={() => setIsDeleteConfirmOpen(false)}
+        okText="Xóa"
+        cancelText="Hủy"
+        confirmLoading={deleteLoading}
+        okButtonProps={{ danger: true, disabled: deleteLoading }}
+        cancelButtonProps={{ disabled: deleteLoading }}
+        closable={!deleteLoading}
+        maskClosable={!deleteLoading}
+      >
+        <p>Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.</p>
+      </Modal>
+
+      {/* Other Modals */}
       {isCommentModalOpen && (
         <CommentModal
           type="post"

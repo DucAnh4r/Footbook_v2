@@ -104,11 +104,12 @@ export const updatePostService = async (Data, Post_id, onUploadProgress) => {
   return api.put(`/post/update-content`, payload);
 };
 
-export const DeletePostByIdService = (post_id) => {
+export const DeletePostByIdService = (post_id, user_id) => {
   // Backend không có /api/v1/post/delete/{post_id}, dùng /post/delete với body
   return api.delete(`/post/delete`, {
     data: {
       post_id,
+      user_id,
     },
   });
 };

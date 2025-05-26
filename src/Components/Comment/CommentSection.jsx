@@ -32,12 +32,8 @@ const CommentSection = ({ postId, userId, userInfo, isModalOpen }) => {
         getCommentService(postId),
         countCommentService(postId),
       ]);
-
-      console.log("Fetched comments:", commentResponse?.data?.comments);
-      console.log("Fetched comment count:", countResponse);
-
       setComments(commentResponse?.data?.comments || []);
-      setCommentCount(countResponse || 0);
+      setCommentCount(countResponse.total_comment_count || 0);
     } catch (error) {
       console.error("Error fetching comments or count:", error);
       setError("Failed to load comments. Please try again.");

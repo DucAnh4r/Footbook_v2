@@ -5,6 +5,7 @@ $shadow-color: rgba(0, 0, 0, 0.2);
 $border-radius: 20px;
 $padding-base: 12px;
 $font-family: 'Arial', sans-serif;
+@use "sass:color";
 
 // Comments Section
 .commentsSection {
@@ -65,7 +66,7 @@ $font-family: 'Arial', sans-serif;
   transition: all 0.3s ease;
 
   &:hover {
-    background-color: darken($background-color, 5%);
+    background-color: color.adjust($background-color, $lightness: -5%);
   }
 
   textarea {

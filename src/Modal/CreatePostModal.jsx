@@ -9,6 +9,7 @@ import AudienceModal from "./AudienceModal";
 import GifModal from "./GifModal";
 import { createPostService } from "../services/postService";
 import { getUserIdFromLocalStorage } from "../utils/authUtils";
+import { toastSuccess } from "../utils/toastNotifier";
 
 // Theme options
 const themes = [
@@ -60,6 +61,7 @@ const CreatePostModal = ({ isModalOpen, onClose, userName, onPostCreated }) => {
       };
 
       await createPostService(postData);
+      toastSuccess("Tạo bài viết thành công!");
       onPostCreated();
       onClose();
     } catch (error) {
@@ -255,7 +257,7 @@ const CreatePostModal = ({ isModalOpen, onClose, userName, onPostCreated }) => {
                       setGifModalVisible(true);
                       setSelectedTheme(themes[0]);
                     }}
-                    disabled={selectedTheme.id !== 0 || showUpload}
+                    disabled={selectedTheme.id !== 0}
                   />
                 </div>
               </div>

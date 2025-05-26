@@ -20,12 +20,10 @@ export const getCommentService = (postId) => {
 
 export const countCommentService = async (postId) => {
   try {
-    console.log("Calling countCommentService for postId:", postId);
     const response = await api.get(`/comments/count`, {
       params: { post_id: postId },
     });
-    console.log("countCommentService response:", response?.data?.count);
-    return response?.data?.count || 0;
+    return response?.data || 0;
   } catch (error) {
     console.error("Lỗi khi đếm comment:", error);
     return 0;

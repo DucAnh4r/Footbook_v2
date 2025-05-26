@@ -16,7 +16,7 @@ import { Badge } from 'antd';
 export const navItems = [
   { key: 'home', icon: <GoHomeFill   />, selectedIcon: <GoHomeFill   style={{ fontSize: '30px', color: '#1877f2' }} />, tooltip: 'Home', path: '/' },
   { key: 'friends', icon: <FaUserGroup   />, selectedIcon: <FaUserGroup   style={{ fontSize: '32px', color: '#1877f2' }} />, tooltip: 'Friend', path: '/friends' },
-  { key: 'groups', icon: <MdGroups  style={{fontSize: '30px'}} />,selectedIcon: <MdGroups  style={{ fontSize: '36px', color: '#1877f2' }} />, tooltip: 'Group', path: '/groups' }
+  // { key: 'groups', icon: <MdGroups  style={{fontSize: '30px'}} />,selectedIcon: <MdGroups  style={{ fontSize: '36px', color: '#1877f2' }} />, tooltip: 'Group', path: '/groups' }
 ];
 
 export const iconData = [
