@@ -37,7 +37,7 @@ const HomePageSearch = () => {
       const response = await userSearchService({
         keyword: searchQuery,
         page: 0,
-        size: 100,
+        size: 100
       });
       setSearchResults(response.data?.results || []); // Truy cập `data` trong response
     } catch (err) {
@@ -48,7 +48,7 @@ const HomePageSearch = () => {
   };
 
   const navigate = useNavigate(); // Sử dụng useNavigate hook
-  const handleUserClick = (userId) => {
+  const handleUserClick = userId => {
     if (userId) {
       navigate(`/friendprofile/${userId}`);
     }
@@ -66,7 +66,7 @@ const HomePageSearch = () => {
           top: '64px',
           left: '0',
           zIndex: '100',
-          boxShadow: '4px 0 10px rgba(0, 0, 0, 0.1)',
+          boxShadow: '4px 0 10px rgba(0, 0, 0, 0.1)'
         }}
         className="scroll-on-hover"
       >
@@ -99,17 +99,9 @@ const HomePageSearch = () => {
             <List
               itemLayout="horizontal"
               dataSource={searchResults}
-              renderItem={(user) => (
+              renderItem={user => (
                 <List.Item>
-                  <List.Item.Meta onClick={() => handleUserClick(user.userId)} className={styles.userItem}
-                    avatar={
-                      <Avatar className={styles.avatar}
-                        src={user.avatar_url || 'https://via.placeholder.com/150'}
-                        alt={user.name}
-                      />
-                    }
-                    title={<span className={styles.userName}>{user.name}</span>}
-                  />
+                  <List.Item.Meta onClick={() => handleUserClick(user.userId)} className={styles.userItem} avatar={<Avatar className={styles.avatar} src={user.avatar_url || 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150'} alt={user.name} />} title={<span className={styles.userName}>{user.name}</span>} />
                 </List.Item>
               )}
             />

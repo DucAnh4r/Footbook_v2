@@ -29,6 +29,11 @@ const Posts = ({ friendId }) => {
     }
   };
 
+  // Hàm xử lý khi bài viết bị xóa
+  const onPostDeleted = (postId) => {
+    setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+  };
+
   useEffect(() => {
     fetchPosts();
   }, [friendId]); // Gọi lại API khi friendId thay đổi
@@ -50,26 +55,29 @@ const Posts = ({ friendId }) => {
           ) : posts.length > 0 ? (
             posts.map((post) => (
               post.share ? (
-                <SharedPost
-                  key={post.post_id}
-                  postId={post.post_id}
-                  content={post.content}
-                  createdAt={post.create_at}
-                  userId={post.user_id}
-                  images={post.images}
-                  shareId={post.share}
-                  
-                />
+                <SharedPost 
+                                    key={post.id} 
+                                    postId={post.id} 
+                                    content={post.content} 
+                                    createdAt={post.created_at} 
+                                    userId={post.user_id} 
+                                    images={post.images} 
+                                    shareId={post.shareId} 
+                                    user={post.user} 
+                                    onPostDeleted={onPostDeleted} // Truyền callback
+                                  />
               ) : (
-                <Post
-                  key={post.id}
-                  postId={post.id}
-                  content={post.content}
-                  createdAt={post.created_at}
-                  userId={post.user.id}
-                  images={post.images}
-                  isModalOpen={false}
-                />
+                <Post 
+                                    key={post.id} 
+                                    postId={post.id} 
+                                    content={post.content} 
+                                    createdAt={post.created_at} 
+                                    userId={post.user.id} 
+                                    images={post.images} 
+                                    isModalOpen={false} 
+                                    user={post.user} 
+                                    onPostDeleted={onPostDeleted} // Truyền callback
+                                  />
               )
             ))
           ) : (

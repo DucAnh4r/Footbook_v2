@@ -4,10 +4,10 @@ import styles from './MembersCard.module.scss';
 
 const MembersCard = () => {
   const members = [
-    { id: 1, name: 'Nguyễn Huy Hoàng', role: 'Quản trị viên', avatar: 'https://via.placeholder.com/50' },
-    { id: 2, name: 'Bạn A', role: '', avatar: 'https://via.placeholder.com/50' },
-    { id: 3, name: 'Bạn B', role: '', avatar: 'https://via.placeholder.com/50' },
-    { id: 4, name: 'Bạn C', role: '', avatar: 'https://via.placeholder.com/50' },
+    { id: 1, name: 'Nguyễn Huy Hoàng', role: 'Quản trị viên', avatar: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/50' },
+    { id: 2, name: 'Bạn A', role: '', avatar: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/50' },
+    { id: 3, name: 'Bạn B', role: '', avatar: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/50' },
+    { id: 4, name: 'Bạn C', role: '', avatar: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/50' }
   ];
 
   return (
@@ -16,7 +16,7 @@ const MembersCard = () => {
         <span>Thành viên - 420,1K</span>
       </div>
       <Row gutter={[16, 16]} className={styles.membersList}>
-        {members.map((member) => (
+        {members.map(member => (
           <Col key={member.id} span={6} className={styles.memberItem}>
             <Avatar size={50} src={member.avatar} />
             <div className={styles.memberInfo}>

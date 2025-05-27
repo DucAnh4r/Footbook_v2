@@ -30,10 +30,7 @@ const RightSidebar = () => {
     try {
       setLoading(true);
 
-      const [dmRes, groupRes] = await Promise.all([
-        getUserMessageListService(userId.toString()), 
-        getUserGroupChatsService(userId.toString())
-      ]);
+      const [dmRes, groupRes] = await Promise.all([getUserMessageListService(userId.toString()), getUserGroupChatsService(userId.toString())]);
 
       const directMessages = (dmRes?.data?.conversations || []).map(conversation => ({
         ...conversation,
@@ -63,35 +60,35 @@ const RightSidebar = () => {
       setGroupMessages(sortedGroupMessages);
       setFilteredGroupMessages(sortedGroupMessages);
     } catch (error) {
-      console.error("Error fetching combined messages:", error);
+      console.error('Error fetching combined messages:', error);
     } finally {
       setLoading(false);
     }
   };
-  
+
   // Hàm xử lý tìm kiếm
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    
+
     if (!query) {
       setFilteredDirectMessages(directMessages);
       setFilteredGroupMessages(groupMessages);
       return;
     }
-    
+
     // Lọc tin nhắn cá nhân
     const filteredDMs = directMessages.filter(item => {
       const name = item.other_user?.name?.toLowerCase();
       return name && name.includes(query);
     });
-    
+
     // Lọc nhóm chat
     const filteredGroups = groupMessages.filter(item => {
       const name = item.name?.toLowerCase();
       return name && name.includes(query);
     });
-    
+
     setFilteredDirectMessages(filteredDMs);
     setFilteredGroupMessages(filteredGroups);
   };
@@ -101,7 +98,7 @@ const RightSidebar = () => {
   }, []);
 
   // Chỉ trả về trạng thái online thay vì nội dung tin nhắn
-  const getUserStatus = (item) => {
+  const getUserStatus = item => {
     if (item.type === 'dm') {
       return item.other_user?.status === 'available' ? 'Đang hoạt động' : 'Ngoại tuyến';
     } else {
@@ -109,16 +106,16 @@ const RightSidebar = () => {
     }
   };
 
-  const handleMessageClick = (item) => {
+  const handleMessageClick = item => {
     const isGroup = item.type === 'group';
-    
+
     // Cấu trúc dữ liệu chuẩn cho cả hai loại chat
-    const chatData = isGroup 
+    const chatData = isGroup
       ? {
           userId: `group-${item.id}`, // Tạo định danh duy nhất cho nhóm
           name: item.name,
           profilePictureUrl: item.avatar_url,
-          message: item.last_message?.content || "Nhóm chat",
+          message: item.last_message?.content || 'Nhóm chat',
           type: 'group',
           groupId: item.id,
           id: item.id,
@@ -128,12 +125,12 @@ const RightSidebar = () => {
           userId: item.other_user.id,
           name: item.other_user.name,
           profilePictureUrl: item.other_user.avatar_url,
-          message: item.last_message?.content || "Tin nhắn",
+          message: item.last_message?.content || 'Tin nhắn',
           type: 'dm',
           conversationId: item.id,
           status: item.other_user?.status || 'offline'
         };
-    
+
     // Sử dụng addChat từ ChatContext để thêm chat
     addChat(chatData);
   };
@@ -142,21 +139,14 @@ const RightSidebar = () => {
     <div className={styles['container']}>
       <div className={styles['friend-list-container']}>
         <div className={styles['flex-between']}>
-          <span style={{ fontSize: '16px', fontWeight: 500, color: '#65686c' }}>
-            Người liên hệ
-          </span>
+          <span style={{ fontSize: '16px', fontWeight: 500, color: '#65686c' }}>Người liên hệ</span>
           <div>
             <SearchOutlined className={styles['icon']} />
             <MoreOutlined style={{ transform: 'rotate(90deg)' }} className={styles['icon']} />
           </div>
         </div>
 
-        <Input
-          placeholder="Tìm kiếm..."
-          style={{ margin: '10px 0', borderRadius: '20px' }}
-          value={searchQuery}
-          onChange={handleSearch}
-        />
+        <Input placeholder="Tìm kiếm..." style={{ margin: '10px 0', borderRadius: '20px' }} value={searchQuery} onChange={handleSearch} />
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -170,23 +160,23 @@ const RightSidebar = () => {
                 <List
                   itemLayout="horizontal"
                   dataSource={filteredDirectMessages}
-                  renderItem={(item) => {
+                  renderItem={item => {
                     const avatarSrc = item.other_user?.avatar_url;
                     const title = item.other_user?.name;
-                    
+
                     return (
                       <List.Item
                         style={{
                           padding: '8px',
                           borderBottom: '1px solid #f0f0f0',
-                          cursor: 'pointer',
+                          cursor: 'pointer'
                         }}
                         onClick={() => handleMessageClick(item)}
                       >
                         <List.Item.Meta
                           avatar={
                             <Badge dot={item.other_user?.status === 'available'} color="green" offset={[-2, 30]}>
-                              <Avatar src={avatarSrc || 'https://via.placeholder.com/40'} />
+                              <Avatar src={avatarSrc || 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/40'} />
                             </Badge>
                           }
                           title={<Text strong>{truncateText(title, 30)}</Text>}
@@ -207,42 +197,35 @@ const RightSidebar = () => {
             {filteredGroupMessages.length > 0 && (
               <>
                 <div className={styles['flex-between']} style={{ marginTop: '20px', paddingTop: '10px', borderTop: '1px solid #e6e6e6' }}>
-                  <span style={{ fontSize: '16px', fontWeight: 500, color: '#65686c' }}>
-                    Nhóm chat
-                  </span>
+                  <span style={{ fontSize: '16px', fontWeight: 500, color: '#65686c' }}>Nhóm chat</span>
                 </div>
-                
+
                 <List
                   itemLayout="horizontal"
                   dataSource={filteredGroupMessages}
-                  renderItem={(item) => {
+                  renderItem={item => {
                     const avatarSrc = item.avatar_url;
                     const title = item.name;
-                    
+
                     return (
                       <List.Item
                         style={{
                           padding: '8px',
                           borderBottom: '1px solid #f0f0f0',
-                          cursor: 'pointer',
+                          cursor: 'pointer'
                         }}
                         onClick={() => handleMessageClick(item)}
                       >
-                        <List.Item.Meta
-                          avatar={<Avatar src={avatarSrc || 'https://via.placeholder.com/40'} />}
-                          title={<Text strong>{truncateText(title, 30)}</Text>}
-                        />
+                        <List.Item.Meta avatar={<Avatar src={avatarSrc || 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/40'} />} title={<Text strong>{truncateText(title, 30)}</Text>} />
                       </List.Item>
                     );
                   }}
                 />
               </>
             )}
-            
+
             {/* Hiển thị thông báo khi không có kết quả */}
-            {filteredDirectMessages.length === 0 && filteredGroupMessages.length === 0 && (
-              <Text type="secondary">Không có kết quả</Text>
-            )}
+            {filteredDirectMessages.length === 0 && filteredGroupMessages.length === 0 && <Text type="secondary">Không có kết quả</Text>}
           </>
         )}
       </div>

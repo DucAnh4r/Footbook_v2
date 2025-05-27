@@ -148,7 +148,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
   };
 
   const getCurrentUserAvatar = () => {
-    return currentUser?.avatar_url || 'https://via.placeholder.com/40';
+    return currentUser?.avatar_url || 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/40';
   };
 
   const getSenderAvatar = senderId => {
@@ -156,7 +156,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
       return getCurrentUserAvatar();
     }
     const member = groupMembers.find(member => Number(member.id) === Number(senderId));
-    return member?.avatar_url || 'https://via.placeholder.com/40';
+    return member?.avatar_url || 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/40';
   };
 
   const getSenderName = senderId => {
@@ -167,22 +167,26 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
     return member?.name || 'Unknown user';
   };
 
-  const formatMessageDate = (dateString) => {
+  const formatMessageDate = dateString => {
     const messageDate = new Date(dateString);
     const today = new Date();
     if (messageDate.toDateString() === today.toDateString()) {
       return messageDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
+        hour: '2-digit',
+        minute: '2-digit'
       });
     } else {
-      return messageDate.toLocaleDateString([], {
-        month: "short",
-        day: "numeric",
-      }) + ' ' + messageDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      return (
+        messageDate.toLocaleDateString([], {
+          month: 'short',
+          day: 'numeric'
+        }) +
+        ' ' +
+        messageDate.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      );
     }
   };
 
@@ -211,7 +215,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
       <div className={styles.header}>
         {isGroupChat ? (
           <Space>
-            <Avatar src={selectedChat?.avatar_url || 'https://via.placeholder.com/40'} />
+            <Avatar src={selectedChat?.avatar_url || 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/40'} />
             <div>
               <Text strong>{selectedChat?.name || 'Group Chat'}</Text>
               <div>
@@ -224,7 +228,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
         ) : (
           <Space>
             <Badge dot={selectedChat?.other_user?.status === 'available'} color="green" offset={[-2, 30]}>
-              <Avatar src={selectedChat?.other_user?.avatar_url || 'https://via.placeholder.com/40'} />
+              <Avatar src={selectedChat?.other_user?.avatar_url || 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/40'} />
             </Badge>
             <Text strong>{selectedChat?.other_user?.name || 'Select a chat'}</Text>
           </Space>
@@ -273,7 +277,7 @@ const Messagepage = ({ selectedChat, toggleRightSidebar, onSentMessage }) => {
                   </>
                 ) : (
                   <>
-                    <Avatar src={isGroupChat ? getSenderAvatar(item.sender_id) : selectedChat?.other_user?.avatar_url || 'https://via.placeholder.com/40'} className={styles.messageAvatar} />
+                    <Avatar src={isGroupChat ? getSenderAvatar(item.sender_id) : selectedChat?.other_user?.avatar_url || 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/40'} className={styles.messageAvatar} />
                     <div className={styles.messageWrapper}>
                       {isGroupChat && <div className={styles.senderName}>{getSenderName(item.sender_id)}</div>}
                       <div className={styles.messageContent}>

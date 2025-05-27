@@ -22,6 +22,7 @@ import { DeletePostByIdService, getShareCount } from "../services/postService";
 import styles from "./Post.module.scss";
 import CommentModal from "../Modal/CommentModal";
 import ShareModal from "../Modal/ShareModal";
+import EditPostModal from "../Modal/EditPostModal";
 import ReactionIconsBox from "./ReactionIconsBox";
 
 // Assets
@@ -36,7 +37,7 @@ import { getUserIdFromLocalStorage } from "../utils/authUtils";
 import { reactionConfig } from "../assets/Config";
 import { toastError, toastSuccess } from "../utils/toastNotifier";
 
-const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, user, onPostDeleted }) => {
+const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, user, onPostDeleted, privacy }) => {
   const navigate = useNavigate();
   const currentUserId = getUserIdFromLocalStorage();
   
@@ -44,6 +45,7 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   // Reaction states
   const [isReactionBoxVisible, setIsReactionBoxVisible] = useState(false);
@@ -102,7 +104,7 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
   // Load data on mount and when modals change
   useEffect(() => {
     fetchData();
-  }, [fetchData, isCommentModalOpen]);
+  }, [fetchData, isCommentModalOpen, isEditModalOpen]);
   
   // Handle reaction updates
   const handleReactionAdded = useCallback(async (reactionType) => {
@@ -184,6 +186,11 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
     setIsDeleteConfirmOpen(true);
   }, []);
 
+  // Show edit modal
+  const showEditModal = useCallback(() => {
+    setIsEditModalOpen(true);
+  }, []);
+
   return (
     <>
       <ToastContainer />
@@ -207,7 +214,7 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
                   <Menu.Item key="1" onClick={showDeleteConfirm} disabled={deleteLoading}>
                     Xóa bài viết
                   </Menu.Item>
-                  <Menu.Item key="2" onClick={() => console.log("Edit post clicked")} disabled={deleteLoading}>
+                  <Menu.Item key="2" onClick={showEditModal} disabled={deleteLoading}>
                     Chỉnh sửa bài viết
                   </Menu.Item>
                 </Menu>
@@ -373,6 +380,17 @@ const Post = ({ content, createdAt, userId, images = [], postId, isModalOpen, us
       >
         <p>Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.</p>
       </Modal>
+
+      {/* Edit Post Modal */}
+      <EditPostModal
+        isModalOpen={isEditModalOpen}
+        onCancel={() => setIsEditModalOpen(false)}
+        postId={postId}
+        userId={userId}
+        initialContent={content}
+        initialPrivacy={privacy}
+        initialImages={images}
+      />
 
       {/* Other Modals */}
       {isCommentModalOpen && (

@@ -11,37 +11,38 @@ const notifications = [
     name: 'Brawlhalla Online Việt Nam:',
     description: 'Danh sách những nhân vật được chia ra hai team như sau',
     time: '5 giờ',
-    unread: true,
+    unread: true
   },
   {
     id: 2,
     name: 'Liên chi Đoàn Khoa Công nghệ thông tin:',
     description: 'Trường Đại học Xây dựng Hà Nội đã nhắc đến bạn...',
     time: '3 ngày',
-    unread: false,
+    unread: false
   },
   {
     id: 3,
     name: 'SmallGym 💪 Đơn Giản Là Đam Mê:',
     description: 'Sau 3 tháng lăn lội 🏋️‍♂️😂',
     time: '4 ngày',
-    unread: true,
+    unread: true
   },
   {
     id: 4,
     name: 'Facebook:',
     description: 'Chúng tôi nhận thấy có lượt đăng nhập mới từ thiết bị/vị trí mà bạn không hay dùng...',
     time: '4 ngày',
-    unread: false,
-  },
-
+    unread: false
+  }
 ];
 
 const NotificationContent = () => (
   <div className={styles.container}>
     {/* Header */}
     <div className={styles.header}>
-      <Text strong style={{ fontSize: '20px' }}>Thông báo</Text>
+      <Text strong style={{ fontSize: '20px' }}>
+        Thông báo
+      </Text>
       <Button type="text" icon={<BellOutlined />} />
     </div>
 
@@ -61,7 +62,7 @@ const NotificationContent = () => (
             <List.Item.Meta
               avatar={
                 <Badge dot={unread} offset={[-4, 4]} style={{ backgroundColor: '#1890ff' }}>
-                  <Avatar src="https://via.placeholder.com/40" size="large" />
+                  <Avatar src="https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/40" size="large" />
                 </Badge>
               }
               title={<Text className={styles.title}>{name}</Text>}

@@ -16,6 +16,7 @@ import Posts from './Tabs/Posts/Posts.jsx';
 import Photos from './Tabs/Photos/Photos.jsx';
 import { useChat } from '../../../utils/ChatContext.jsx';
 import { FaComment, FaUserFriends } from 'react-icons/fa';
+import Friends from './Tabs/Friends/Friends.jsx';
 
 const FriendProfilePage = ({ userId2: propUserId2, type }) => {
   useAuthCheck();
@@ -235,10 +236,10 @@ const FriendProfilePage = ({ userId2: propUserId2, type }) => {
         return <Posts friendId={userId2} />;
       // case "2":
       //   return <Introduction />;
-      // case "3":
-      //   return <Friends />;
+      case "3":
+        return <Friends friendId={userId2} />;
       case '4':
-        return <Photos />;
+        return <Photos userId={userId2} userName={friendInfo.name} />;
       // case "5":
       //   return <Videos />;
       case '6':

@@ -18,23 +18,22 @@ const Photos = () => {
       setLoading(true);
       const response = await getImageByUserIdService(user_id, 20, 0);
       setImages(response?.data?.images || []);
-
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleImageClick = (postId) => {
+  const handleImageClick = postId => {
     navigate(`/photo/${postId}`);
-  }
+  };
 
   useEffect(() => {
     fetchUserImages();
   }, []);
 
-  const renderPhotoCard = (photo) => (
+  const renderPhotoCard = photo => (
     <div
       key={photo.imageId}
       style={{
@@ -43,16 +42,10 @@ const Photos = () => {
         height: '100%',
         marginBottom: '16px',
         borderRadius: '8px',
-        overflow: 'hidden',
+        overflow: 'hidden'
       }}
     >
-      <img
-        alt="example"
-        src={photo.image_url}
-        onError={(e) => e.target.src = "https://via.placeholder.com/150"} 
-        style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
-        onClick={() => handleImageClick(photo.post_id)}
-      />
+      <img alt="example" src={photo.image_url} onError={e => (e.target.src = 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150')} style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => handleImageClick(photo.post_id)} />
 
       {photo.editable && (
         <Button
@@ -64,13 +57,12 @@ const Photos = () => {
             right: '8px',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             color: '#fff',
-            borderRadius: '50%',
+            borderRadius: '50%'
           }}
         />
       )}
     </div>
   );
-
 
   return (
     <div style={{ padding: '20px', margin: 'auto' }}>
@@ -94,12 +86,12 @@ const Photos = () => {
         </div>
       </Row>
       <Tabs defaultActiveKey="tagged">
-        <TabPane tab="Ảnh có mặt bạn" key="tagged">
+        <TabPane tab="Ảnh của bạn" key="tagged">
           {loading ? (
-            <div style={{ textAlign: "center", marginTop: "20px" }}>Đang tải ảnh...</div>
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>Đang tải ảnh...</div>
           ) : (
             <Row gutter={16}>
-              {images.map((photo) => (
+              {images.map(photo => (
                 <Col span={6} key={photo.imageId}>
                   {renderPhotoCard(photo)}
                 </Col>
@@ -107,15 +99,11 @@ const Photos = () => {
             </Row>
           )}
         </TabPane>
-        <TabPane tab="Ảnh của bạn" key="yourPhotos">
-          <Row gutter={16}>
-            {/* Add your own photos here */}
-          </Row>
+        <TabPane tab="Ảnh có mặt bạn" key="yourPhotos">
+          <Row gutter={16}>{/* Add your own photos here */}</Row>
         </TabPane>
         <TabPane tab="Album" key="albums">
-          <Row gutter={16}>
-            {/* Add albums here */}
-          </Row>
+          <Row gutter={16}>{/* Add albums here */}</Row>
         </TabPane>
       </Tabs>
     </div>

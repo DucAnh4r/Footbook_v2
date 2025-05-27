@@ -17,7 +17,7 @@ const FriendRequestItem = ({
 
   const id = user.id || user.senderId;
   const name = user.name || user.fullName;
-  const profileImage = user.avatar_url || user.image || user.profilePictureUrl || 'https://via.placeholder.com/150';
+  const profileImage = user.avatar_url || user.image || user.profilePictureUrl || 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150';
 
   const createdAt = user.created_at || user.sentAt;
   const formattedDate = createdAt;

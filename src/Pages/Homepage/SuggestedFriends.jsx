@@ -4,17 +4,17 @@ import { Avatar, Button, Card } from 'antd';
 import { LeftOutlined, RightOutlined, CloseOutlined, UserAddOutlined } from '@ant-design/icons';
 
 const suggestedFriends = [
-  { name: 'Phương Linh', image: 'https://via.placeholder.com/150' },
-  { name: 'Luqman', image: 'https://via.placeholder.com/150', followers: '123 người theo dõi' },
-  { name: 'Vo Hang', image: 'https://via.placeholder.com/150' },
-  { name: 'Lê Thành', image: 'https://via.placeholder.com/150' },
-  { name: 'Lê Thành', image: 'https://via.placeholder.com/150' },
-  { name: 'Lê Thành', image: 'https://via.placeholder.com/150' },
-  { name: 'Lê Thành', image: 'https://via.placeholder.com/150' },
-  { name: 'Lê Thành', image: 'https://via.placeholder.com/150' },
-  { name: 'Lê Thành', image: 'https://via.placeholder.com/150' },
-  { name: 'Lê Thành', image: 'https://via.placeholder.com/150' },
-  { name: 'Lê Thành', image: 'https://via.placeholder.com/150' },
+  { name: 'Phương Linh', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150' },
+  { name: 'Luqman', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150', followers: '123 người theo dõi' },
+  { name: 'Vo Hang', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150' },
+  { name: 'Lê Thành', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150' },
+  { name: 'Lê Thành', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150' },
+  { name: 'Lê Thành', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150' },
+  { name: 'Lê Thành', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150' },
+  { name: 'Lê Thành', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150' },
+  { name: 'Lê Thành', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150' },
+  { name: 'Lê Thành', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150' },
+  { name: 'Lê Thành', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150' }
   // Add more friends here if needed
 ];
 
@@ -34,12 +34,16 @@ const SuggestedFriends = () => {
               <span style={styles.friendName}>{friend.name}</span>
               {friend.followers && <span style={styles.followers}>{friend.followers}</span>}
             </div>
-            <Button type="primary" icon={<UserAddOutlined />} style={styles.addButton}>Thêm bạn bè</Button>
+            <Button type="primary" icon={<UserAddOutlined />} style={styles.addButton}>
+              Thêm bạn bè
+            </Button>
           </Card>
         ))}
       </div>
       <div style={styles.footer}>
-        <a href="#" style={styles.seeAllLink}>Xem tất cả</a>
+        <a href="#" style={styles.seeAllLink}>
+          Xem tất cả
+        </a>
       </div>
     </div>
   );
@@ -55,24 +59,23 @@ const styles = {
     padding: '16px',
     marginBottom: '16px',
     margin: '10px auto'
-
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: '16px',
+    paddingBottom: '16px'
   },
   title: {
     fontWeight: 'bold',
-    fontSize: '16px',
+    fontSize: '16px'
   },
   friendList: {
     display: 'flex',
     gap: '16px',
     overflowX: 'auto',
     paddingBottom: '8px',
-    flexWrap: 'nowrap',
+    flexWrap: 'nowrap'
   },
   card: {
     minWidth: '130px',
@@ -81,13 +84,13 @@ const styles = {
     borderRadius: '8px',
     position: 'relative',
     textAlign: 'center',
-    flexShrink: 0,
+    flexShrink: 0
   },
   cardBody: {
     padding: '8px',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   closeIcon: {
     position: 'absolute',
@@ -95,22 +98,22 @@ const styles = {
     right: '8px',
     fontSize: '12px',
     color: 'gray',
-    cursor: 'pointer',
+    cursor: 'pointer'
   },
   avatar: {
-    marginBottom: '8px',
+    marginBottom: '8px'
   },
   friendInfo: {
     textAlign: 'center',
-    marginBottom: '8px',
+    marginBottom: '8px'
   },
   friendName: {
     fontWeight: 'bold',
-    fontSize: '14px',
+    fontSize: '14px'
   },
   followers: {
     fontSize: '12px',
-    color: 'gray',
+    color: 'gray'
   },
   addButton: {
     fontSize: '12px',
@@ -118,18 +121,18 @@ const styles = {
     width: '100%',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   footer: {
     textAlign: 'center',
-    marginTop: '8px',
+    marginTop: '8px'
   },
   seeAllLink: {
     color: '#1877f2',
     fontWeight: 'bold',
     fontSize: '14px',
-    textDecoration: 'none',
-  },
+    textDecoration: 'none'
+  }
 };
 
 export default SuggestedFriends;

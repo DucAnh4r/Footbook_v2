@@ -4,8 +4,8 @@ import { Avatar, Button } from 'antd';
 
 const stories = [
   { name: 'Tạo tin', isCreate: true },
-  { name: 'Phạm Hoàng Thọ', image: 'https://via.placeholder.com/150', profilePic: 'https://via.placeholder.com/30', isActive: true },
-  { name: 'Guga Foods', image: 'https://via.placeholder.com/150', profilePic: 'https://via.placeholder.com/30' },
+  { name: 'Phạm Hoàng Thọ', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150', profilePic: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/30', isActive: true },
+  { name: 'Guga Foods', image: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150', profilePic: 'https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/30' }
   // Add more stories here if needed
 ];
 
@@ -17,7 +17,7 @@ const StoryList = () => {
           {story.isCreate ? (
             <div style={styles.createStory}>
               <div style={styles.createStoryBackground}>
-                <Avatar size={40} icon={<img src="https://via.placeholder.com/150" alt="create story" />} />
+                <Avatar size={40} icon={<img src="https://https://cdn.vectorstock.com/i/500p/29/53/gray-silhouette-avatar-for-male-profile-picture-vector-56412953.jpg.com/150" alt="create story" />} />
               </div>
               <Button style={styles.createButton}>+</Button>
               <div style={styles.storyLabel}>Tạo tin</div>
@@ -58,14 +58,14 @@ const styles = {
     borderRadius: '8px',
     overflow: 'hidden',
     boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
   },
   createStory: {
     position: 'relative',
     height: '170px',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   createStoryBackground: {
     width: '100%',
@@ -73,7 +73,7 @@ const styles = {
     backgroundColor: '#f0f2f5',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   createButton: {
     position: 'absolute',
@@ -87,28 +87,28 @@ const styles = {
     fontSize: '18px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   storyLabel: {
     padding: '10px 0',
     fontWeight: '500',
-    fontSize: '12px',
+    fontSize: '12px'
   },
   storyContent: {
     height: '170px',
-    position: 'relative',
+    position: 'relative'
   },
   storyImage: {
     width: '100%',
     height: '100%',
-    objectFit: 'cover',
+    objectFit: 'cover'
   },
   profileContainer: {
     position: 'absolute',
     top: '8px',
     left: '8px',
     borderRadius: '50%',
-    border: '2px solid #1877f2',
+    border: '2px solid #1877f2'
   },
   activeIndicator: {
     position: 'absolute',
@@ -118,7 +118,7 @@ const styles = {
     height: '8px',
     backgroundColor: '#00ff00',
     borderRadius: '50%',
-    border: '1px solid white',
+    border: '1px solid white'
   },
   storyName: {
     position: 'absolute',
@@ -128,8 +128,8 @@ const styles = {
     color: '#fff',
     padding: '4px 0',
     fontSize: '12px',
-    fontWeight: '500',
-  },
+    fontWeight: '500'
+  }
 };
 
 export default StoryList;

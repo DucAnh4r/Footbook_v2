@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import api from "./api"; // Sử dụng instance axios từ api.jsx
+import api from "./api";
 import { uploadToCloudinary } from "../utils/cloudinaryConfig";
 
 export const getPostByIdService = (post_id) => {
@@ -40,7 +40,6 @@ export const getImageByUserIdService = (user_id, limit, offset) => {
 export const createPostService = async (Data, onUploadProgress) => {
   let imageUrls = [];
 
-  // Nếu là ảnh, upload lên Cloudinary như bình thường
   if (Array.isArray(Data.images)) {
     for (let img of Data.images) {
       const url = await uploadToCloudinary(img, onUploadProgress);
@@ -51,12 +50,10 @@ export const createPostService = async (Data, onUploadProgress) => {
     if (url) imageUrls.push(url);
   }
 
-  // Nếu có GIF được chọn (được truyền qua Data.gif), push trực tiếp vào mảng imageUrls
   if (Data.gif) {
-    imageUrls.push(Data.gif); // Không cần upload vì GIF đã có URL sẵn
+    imageUrls.push(Data.gif);
   }
 
-  // Tạo payload để gửi lên server
   const payload = {
     user_id: Data.userId,
     content: Data.content,
@@ -84,28 +81,35 @@ export const updatePostService = async (Data, Post_id, onUploadProgress) => {
 
   if (Array.isArray(Data.images)) {
     for (let img of Data.images) {
-      const url = await uploadToCloudinary(img, onUploadProgress);
-      if (url) imageUrls.push(url);
+      if (typeof img === "string") {
+        imageUrls.push(img);
+      } else {
+        const url = await uploadToCloudinary(img, onUploadProgress);
+        if (url) imageUrls.push(url);
+      }
     }
   } else if (Data.images) {
-    const url = await uploadToCloudinary(Data.images, onUploadProgress);
-    if (url) imageUrls.push(url);
+    if (typeof Data.images === "string") {
+      imageUrls.push(Data.images);
+    } else {
+      const url = await uploadToCloudinary(Data.images, onUploadProgress);
+      if (url) imageUrls.push(url);
+    }
   }
 
   const payload = {
-    post_id: Post_id, // Backend yêu cầu post_id trong payload
+    post_id: Post_id,
+    user_id: Data.userId,
     content: Data.content,
     privacy: Data.privacy,
     theme: Data.theme,
     images: imageUrls,
   };
 
-  // Backend không có /api/v1/post/update/{Post_id}, dùng /post/update-content
   return api.put(`/post/update-content`, payload);
 };
 
 export const DeletePostByIdService = (post_id, user_id) => {
-  // Backend không có /api/v1/post/delete/{post_id}, dùng /post/delete với body
   return api.delete(`/post/delete`, {
     data: {
       post_id,
