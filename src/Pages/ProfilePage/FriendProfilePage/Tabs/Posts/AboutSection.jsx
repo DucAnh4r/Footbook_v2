@@ -5,22 +5,22 @@ import { IoSchool, IoHome, IoEarth } from 'react-icons/io5';
 const AboutSection = () => {
   // Mảng chứa các đối tượng với URL hình ảnh và tên bộ sưu tập
   const galleryImages = [
-    {
-      url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwXRsEwpFFX0OKKI2dQwdnS3hsLq_2Bogf2g&s",
-      label: "Bộ sưu tập 1"
-    },
-    {
-      url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwXRsEwpFFX0OKKI2dQwdnS3hsLq_2Bogf2g&s",
-      label: "Bộ sưu tập 2"
-    },
-    {
-      url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwXRsEwpFFX0OKKI2dQwdnS3hsLq_2Bogf2g&s",
-      label: "Bộ sưu tập 3"
-    },
-    {
-      url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwXRsEwpFFX0OKKI2dQwdnS3hsLq_2Bogf2g&s",
-      label: "Bộ sưu tập 4"
-    }
+    // {
+    //   url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwXRsEwpFFX0OKKI2dQwdnS3hsLq_2Bogf2g&s",
+    //   label: "Bộ sưu tập 1"
+    // },
+    // {
+    //   url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwXRsEwpFFX0OKKI2dQwdnS3hsLq_2Bogf2g&s",
+    //   label: "Bộ sưu tập 2"
+    // },
+    // {
+    //   url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwXRsEwpFFX0OKKI2dQwdnS3hsLq_2Bogf2g&s",
+    //   label: "Bộ sưu tập 3"
+    // },
+    // {
+    //   url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwXRsEwpFFX0OKKI2dQwdnS3hsLq_2Bogf2g&s",
+    //   label: "Bộ sưu tập 4"
+    // }
   ];
 
   const [startIndex, setStartIndex] = useState(0);
@@ -48,24 +48,34 @@ const AboutSection = () => {
       <div className={styles.infoList}>
         <div className={styles.infoItem}>
           <IoSchool size={20} className={styles.icon} />
-          <span>Học Công Nghệ Thông Tin tại <strong>Trường Đại học Xây dựng Hà Nội</strong> - Hanoi University of Civil Engineering</span>
+          <span>
+            Học Công Nghệ Thông Tin tại <strong>Trường Đại học Xây dựng Hà Nội</strong> - Hanoi University of Civil Engineering
+          </span>
         </div>
         <div className={styles.infoItem}>
           <IoSchool size={20} className={styles.icon} />
-          <span>Đã học tại <strong>THPT Lý Thường Kiệt</strong></span>
+          <span>
+            Đã học tại <strong>THPT Lý Thường Kiệt</strong>
+          </span>
         </div>
         <div className={styles.infoItem}>
           <IoHome size={20} className={styles.icon} />
-          <span>Sống tại <strong>Hà Nội</strong></span>
+          <span>
+            Sống tại <strong>Hà Nội</strong>
+          </span>
         </div>
-        <div className={styles.infoItem}>
+        {/* <div className={styles.infoItem}>
           <IoEarth size={20} className={styles.icon} />
-          <span>Có <strong>171 người</strong> theo dõi</span>
-        </div>
+          <span>
+            Có <strong>171 người</strong> theo dõi
+          </span>
+        </div> */}
       </div>
       <div className={styles.gallery}>
         {startIndex > 0 && (
-          <button onClick={handlePrev} className={styles.arrowButton}>{"<"}</button>
+          <button onClick={handlePrev} className={styles.arrowButton}>
+            {'<'}
+          </button>
         )}
         {visibleImages.map((item, index) => (
           <div key={index} className={styles.galleryItem}>
@@ -74,7 +84,9 @@ const AboutSection = () => {
           </div>
         ))}
         {startIndex + 3 < galleryImages.length && (
-          <button onClick={handleNext} className={styles.arrowButton}>{">"}</button>
+          <button onClick={handleNext} className={styles.arrowButton}>
+            {'>'}
+          </button>
         )}
       </div>
     </div>
