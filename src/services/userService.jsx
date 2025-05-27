@@ -1,5 +1,5 @@
-/* eslint-disable no-unused-vars */
 import api from './api'; // Sử dụng instance axios từ api.jsx
+import { uploadToCloudinary } from '../utils/cloudinaryConfig';
 
 export const userRegisterService = (userData) => {
   return api.post('/register', {
@@ -31,15 +31,6 @@ export const userSearchService = (Data) => {
   });
 };
 
-export const updateBioService = (Data, user_id) => {
-  // Backend không có endpoint /api/v1/users/{user_id}/update-bio
-  // Sử dụng /update-profile để cập nhật bio (giả sử bio nằm trong profile)
-  return api.post('/update-profile', {
-    user_id,
-    bio: Data.bio,
-  });
-};
-
 export const updateProfileService = (data, user_id) => {
   const payload = {
     user_id,
@@ -48,14 +39,36 @@ export const updateProfileService = (data, user_id) => {
   return api.post('/update-profile', payload);
 };
 
-export const updateCoverService = (Data, user_id) => {
-  const formData = new FormData();
-  formData.append('cover_photo_url', Data.coverPicture); // Backend yêu cầu cover_photo_url
-  return api.post('/update-profile', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+export const updateAvatarService = async (Data, user_id, onUploadProgress) => {
+  let avatarUrl = '';
+
+  // Nếu có ảnh, upload lên Cloudinary
+  if (Data.avatar) {
+    avatarUrl = await uploadToCloudinary(Data.avatar, onUploadProgress);
+  }
+
+  const payload = {
+    user_id,
+    avatar_url: avatarUrl || null, // Backend yêu cầu avatar_url
+  };
+
+  return api.post('/update-avatar', payload);
+};
+
+export const updateCoverService = async (Data, user_id, onUploadProgress) => {
+  let coverUrl = '';
+
+  // Nếu có ảnh, upload lên Cloudinary
+  if (Data.coverPicture) {
+    coverUrl = await uploadToCloudinary(Data.coverPicture, onUploadProgress);
+  }
+
+  const payload = {
+    user_id,
+    cover_photo_url: coverUrl || null, // Backend yêu cầu cover_photo_url
+  };
+
+  return api.post('/update-cover', payload);
 };
 
 export const userFindByIdService = (user_id) => {

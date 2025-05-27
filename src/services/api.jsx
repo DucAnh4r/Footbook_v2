@@ -6,7 +6,7 @@ export const domain = `http://localhost:8000/api`;
 
 const api = axios.create({
   baseURL: domain,
-  timeout: 100000,
+  timeout: 1000000,
 });
 
 // Biến để theo dõi trạng thái làm mới token

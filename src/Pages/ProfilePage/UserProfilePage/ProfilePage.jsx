@@ -14,7 +14,7 @@ import FriendSuggestion from '../../../Components/SuggestedFriends.jsx';
 import { useAuthCheck } from '../../../utils/checkAuth.jsx';
 import { getUserIdFromLocalStorage } from '../../../utils/authUtils.jsx';
 import { countFriendService } from '../../../services/friendService.jsx';
-import { updateCoverService, updateProfileService, userFindByIdService } from '../../../services/userService.jsx';
+import { updateAvatarService, updateCoverService, updateProfileService, userFindByIdService } from '../../../services/userService.jsx';
 import { toast } from 'react-toastify';
 
 const ProfilePage = () => {
@@ -64,17 +64,24 @@ const ProfilePage = () => {
 
       try {
         if (type === 'avatar') {
-          const formData = { profilePicture: file };
-          await updateProfileService(formData, userId);
+          const formData = { avatar: file };
+          await updateAvatarService(formData, userId, (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(`Avatar upload progress: ${percentCompleted}%`);
+          });
           toast.success('Ảnh đại diện đã được cập nhật!');
         } else if (type === 'cover') {
           const formData = { coverPicture: file };
-          await updateCoverService(formData, userId);
+          await updateCoverService(formData, userId, (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(`Cover upload progress: ${percentCompleted}%`);
+          });
           toast.success('Ảnh bìa đã được cập nhật!');
         }
         await fetchUser();
       } catch (error) {
         toast.error('Cập nhật ảnh thất bại!');
+        console.error(`Error updating ${type}:`, error);
       } finally {
         setIsLoading(false);
       }
@@ -145,7 +152,7 @@ const ProfilePage = () => {
           Nhật ký hoạt động
         </Menu.Item>
         <Menu.Item key="7" className={styles['menu-item']}>
-          Cài đặt trang cá nhân và gần thể
+          Cài đặt trang cá nhân và gắn thẻ
         </Menu.Item>
         <Menu.Item key="8" className={styles['menu-item']}>
           Khóa bảo vệ trang cá nhân
