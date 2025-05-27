@@ -77,7 +77,8 @@ const StatusInput = ( { userName, avatar, onPostCreated} ) => {
           isModalOpen={isModalVisible}
           onClose={closeModal}
           userName={userName}
-          onPostCreated={onPostCreated} // Gọi lại fetchPosts chỉ khi cần thiết
+          onPostCreated={onPostCreated}
+          userAvatar={avatar}
         />
       )}
     </div>

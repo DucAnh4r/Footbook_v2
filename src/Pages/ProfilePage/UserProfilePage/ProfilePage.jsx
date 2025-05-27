@@ -15,7 +15,7 @@ import { useAuthCheck } from '../../../utils/checkAuth.jsx';
 import { getUserIdFromLocalStorage } from '../../../utils/authUtils.jsx';
 import { countFriendService } from '../../../services/friendService.jsx';
 import { updateAvatarService, updateCoverService, updateProfileService, userFindByIdService } from '../../../services/userService.jsx';
-import { toast } from 'react-toastify';
+import { toastError, toastSuccess } from '../../../utils/toastNotifier.jsx';
 
 const ProfilePage = () => {
   useAuthCheck();
@@ -69,18 +69,18 @@ const ProfilePage = () => {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             console.log(`Avatar upload progress: ${percentCompleted}%`);
           });
-          toast.success('Ảnh đại diện đã được cập nhật!');
+          toastSuccess('Ảnh đại diện đã được cập nhật!');
         } else if (type === 'cover') {
           const formData = { coverPicture: file };
           await updateCoverService(formData, userId, (progressEvent) => {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             console.log(`Cover upload progress: ${percentCompleted}%`);
           });
-          toast.success('Ảnh bìa đã được cập nhật!');
+          toastSuccess('Ảnh bìa đã được cập nhật!');
         }
         await fetchUser();
       } catch (error) {
-        toast.error('Cập nhật ảnh thất bại!');
+        toastError('Cập nhật ảnh thất bại!');
         console.error(`Error updating ${type}:`, error);
       } finally {
         setIsLoading(false);

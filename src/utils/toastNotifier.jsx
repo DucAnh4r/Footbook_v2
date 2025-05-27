@@ -7,7 +7,8 @@ const toastConfig = {
   closeOnClick: true,
   pauseOnHover: true,
   draggable: true,
-  progressStyle: { background: '#5f2eea' },
+  zIndex: 999999,
+  progressStyle: { background: '#5f2eea'},
 };
 
 export const toastSuccess = (message) => {

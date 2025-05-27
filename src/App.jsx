@@ -18,7 +18,8 @@ function App() {
         draggable
         pauseOnHover
         theme="light"
-        progressStyle={{ background: '#5f2eea' }}
+        zIndex={999999}
+        progressStyle={{ background: '#5f2eea'}}
       />
     </React.Fragment>
   );

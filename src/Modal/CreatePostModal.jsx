@@ -31,7 +31,7 @@ const themes = [
   },
 ];
 
-const CreatePostModal = ({ isModalOpen, onClose, userName, onPostCreated }) => {
+const CreatePostModal = ({ isModalOpen, onClose, userName, onPostCreated, userAvatar }) => {
   const [postContent, setPostContent] = useState("");
   const [showUpload, setShowUpload] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(themes[0]);
@@ -120,7 +120,7 @@ const CreatePostModal = ({ isModalOpen, onClose, userName, onPostCreated }) => {
           <>
             {/* User Info */}
             <div className="user-info">
-              <Avatar size={40} icon={<UserOutlined />} />
+              <Avatar size={40} src={userAvatar} icon={<UserOutlined />} />
               <div className="user-details">
                 <div className="user-name">{userName}</div>
                 <Button
